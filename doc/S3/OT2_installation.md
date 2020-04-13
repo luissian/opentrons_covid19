@@ -70,3 +70,25 @@ Download deck_calibration.json and robot_settings.json from the Jupyter GUI to y
 
 
 11) Dry protocol. This will include pipette and labware configurationn.
+
+## When do you need to calibrate
+
+Deck calibration is when you move the pipette tip to the crosses etched on the deck.
+You need to do deck calibration:
+As part of setting the OT-2 up for the first time with one pipette.
+Once or twice per year, for maintenance.
+Or, if you're troubleshooting calibration issues.
+
+- *Pipette calibration* is prompted by the Opentrons App each time a protocol is uploaded at time of writing, but you do not need to complete pipette calibration each time a protocol is uploaded.
+    Pipette calibration only needs to be redone if:
+    - The pipette has not yet been previously calibrated
+    - The pipette has been unmounted and remounted since the last time it was used in a protocol
+    - The pipette is being used with different tips from those used in its previous run
+    - The deck has been calibrated since the last run
+If none of the above circumstances are true, you can skip to labware calibration by clicking your tipracks in the calibration screen, or skip to the run by clicking the "Run" tab of the app.
+
+Labware calibration is prompted after pipette calibration has been completed. In all cases, you must complete labware calibration if you have completed pipette calibration. However, if you skip pipette calibration, you may still need to complete labware calibration. 
+Labware calibration needs to be completed if:
+Pipette calibration has been completed
+If there is any labware on the deck being used for the first time
+If you are troubleshooting calibration issues

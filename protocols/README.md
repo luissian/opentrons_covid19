@@ -1,14 +1,25 @@
 # Protocols to run OT diagnostic stations
 
+## Station A
+This protocol replates up to 96 samples from source tubes into a 96-deepwell plate. The samples should be loaded with inactivation buffer when input into this step. Please see the note at the top of the `station_a.ot2.apiv2` script for reagent setup.
+
 ## Station B
-The current protocol (for extracting from 8 samples) is V15-StationB-8samples.py
+This protocol performs RNA extraction from replated samples. The output 96-deepwell plate from station A should be placed on the magnetic module in slot 4 in this protocol.  
+
+Reservoir 1 layout (slot 2):  
+![res1](https://opentrons-protocol-library-website.s3.amazonaws.com/custom-README-images/covid+spain/res1_layout.png)  
+
+Reservoir 2 layout (slot 5):  
+![res2](https://opentrons-protocol-library-website.s3.amazonaws.com/custom-README-images/covid+spain/res2_layout.png)
 
 ## Station C
-The current protocol is station-C-qpcr-map.py.
+This protocol plates elution output from station B to a new PCR plate, along with up to 3 probes (loaded in separate mastermix tubes).  
 
-The qPCR build map is defined in the two `MAP` constants at the top, `MASTER_MIX_MAP` and `SAMPLE_MAP`, with a tab-separated list of which wells get which master mixes and samples. The tab-separated maps can be filled by directly copying a 12x8 grid of cells from a google sheet; see
-https://docs.google.com/spreadsheets/d/1EF5goRfT6f6d0IyCboaYNDJns9UazWaFNT4N8_CPyzQ/edit?usp=sharing for an example.
+Transfer scheme if using 4x tuberacks:  
+![tubes transfer scheme](https://opentrons-protocol-library-website.s3.amazonaws.com/custom-README-images/covid+spain/S5/C_transfer_scheme.png)
 
-To run a new experiment, create a dated and named experiment in the `/experiments` directory of this repository, and copy the protocol into it. Modify the MAP variables to reflect the experiment being performed. This creates a long term record of the protocol and plate layout used during that experiment.
+Transfer scheme if using PCR strips:  
+![strips transfer scheme](https://opentrons-protocol-library-website.s3.amazonaws.com/custom-README-images/covid+spain/S5/C_strips_transfer_scheme.png)
 
-Depending on the qPCR machine you plan to use, you may also need to modify the labware used for the qPCR build plate. Modify the `QPCR_LABWARE` constant if this is the case. If you need to add a custom labware definition, place it in the `/labware` directory of this repository.
+Mastermix aluminum block map (slot 11):  
+![mastermix map](https://opentrons-protocol-library-website.s3.amazonaws.com/custom-README-images/covid+spain/S5/mastermix_map.png)

@@ -1,8 +1,11 @@
 # Introduction
+This is a collaboration repository originated with the work of [covidWarriors](https://www.covidwarriors.org/) in the implementation of [Opentrons](https://opentrons.com/) robots for the automatization of RT-PCR diagnostics of covid19.
 
-[BU-ISCIII](https://github.com/BU-ISCIII) is in charge of the setup, calibration, configuration, maintenance and protocol development for [OT-2 robots](https://opentrons.com/ot-2) in [Instituto de Salud Carlos III](https://www.isciii.es/Paginas/Inicio.aspx). These robots have been deployed to automate COVID-19 diagnostics, and once the pandemic is over they will be repurposed to suit new challenges.
+In this repo a bunch of hospitals/insitutions collaborate sharing their protocols:
+- **S2:** [BU-ISCIII](https://github.com/BU-ISCIII) is in charge of the setup, calibration, configuration, maintenance and protocol development for [OT-2 robots](https://opentrons.com/ot-2) in [Instituto de Salud Carlos III](https://www.isciii.es/Paginas/Inicio.aspx). These robots have been deployed to automate COVID-19 diagnostics, and once the pandemic is over they will be repurposed to suit new challenges.
+- **Add remaining collaborators**
 
-This repo is a fork of [opentrons'](https://github.com/Opentrons/opentrons). Here we have created a new branch to update our custom config files, protocols and experiments.
+This repo is a copy of [opentrons'](https://github.com/Opentrons/opentrons) repo for covid19. 
 
 In this repo you will find:
 

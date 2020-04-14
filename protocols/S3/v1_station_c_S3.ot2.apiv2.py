@@ -29,7 +29,9 @@ ELUTION_LABWARE must be one of the following:
 PCR_LABWARE must be one of the following:
     opentrons aluminum biorad plate
     opentrons aluminum nest plate
+    opentrons aluminum strip short
     covidwarriors aluminum biorad plate
+    covidwarriors aluminum biorad strip short
 
 MM_LABWARE must be one of the following:
     opentrons plastic block
@@ -81,7 +83,9 @@ EL_LW_DICT = {
 PCR_LW_DICT = {
     'opentrons aluminum biorad': 'opentrons_96_aluminumblock_biorad_wellplate_200ul',
     'opentrons aluminum nest': 'opentrons_96_aluminumblock_nest_wellplate_100ul',
-    'covidwarriors aluminum biorad': 'covidwarriors_aluminumblock_96_bioradwellplate_200ul'
+    'opentrons aluminum strip short': 'opentrons_aluminumblock_96_pcrstrips_100ul',
+    'covidwarriors aluminum biorad': 'covidwarriors_aluminumblock_96_bioradwellplate_200ul',
+    'covidwarriors aluminum biorad strip short': 'covidwarriors_aluminumblock_96_bioradwellplate_pcrstrips_100ul'
 }
 
 MM_LW_DICT = {
@@ -121,8 +125,8 @@ following:\nopentrons plastic 2ml tubes\nopentrons plastic 1.5ml tubes\nopentron
 
     # check pcr plate
     if PCR_LABWARE not in PCR_LW_DICT:
-        raise Exception('Invalid MM_LABWARE. Must be one of the \
-following:\nopentrons aluminum biorad\nopentrons aluminum block\ncovidwarriors aluminum biorad')
+        raise Exception('Invalid PCR_LABWARE. Must be one of the \
+following:\nopentrons aluminum biorad plate\nopentrons aluminum nest plate\nopentrons aluminum strip short\ncovidwarriors aluminum biorad plate\ncovidwarriors aluminum biorad strip short')
 
     pcr_plate = tempdeck.load_labware(
         PCR_LW_DICT[PCR_LABWARE], 'PCR plate')

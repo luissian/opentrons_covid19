@@ -9,11 +9,40 @@ metadata = {
 }
 
 """
-ElUTION_LABWARE must be one of the following:
-    large strips
-    short strips
-    1.5ml tubes
-    2ml tubes
+NUM_SAMPLES is the number of samples, must be an integer number
+
+VOLUME_MMIX is the volume of mastermix to use per sample
+
+ELUTION_LABWARE must be one of the following:
+    opentrons plastic 2ml tubes
+    opentrons plastic 1.5ml tubes
+    opentrons aluminum 2ml tubes
+    opentrons aluminum 1.5ml tubes
+    covidwarriors aluminum 2ml tubes
+    covidwarriors aluminum 1.5ml tubes
+    opentrons aluminum biorad plate
+    opentrons aluminum nest plate
+    covidwarriors aluminum biorad plate
+    opentrons aluminum strip alpha
+    opentrons aluminum strip short
+    covidwarriors aluminum biorad strip alpha
+    covidwarriors aluminum biorad strip short
+
+PCR_LABWARE must be one of the following:
+    opentrons aluminum biorad plate
+    opentrons aluminum nest plate
+    covidwarriors aluminum biorad plate
+
+MM_LABWARE must be one of the following:
+    opentrons plastic block
+    pentrons aluminum block
+    covidwarriors aluminum block
+
+PREPARE_MASTERMIX: True or False
+
+TRANSFER_MASTERMIX: True or False
+
+TRANSFER_SAMPLES: True or False
 
 MM_TYPE must be one of the following:
     MM1
@@ -35,15 +64,21 @@ EL_LW_DICT = {
     # tubes
     'opentrons plastic 2ml tubes': 'opentrons_24_tuberack_generic_2ml_screwcap',
     'opentrons plastic 1.5ml tubes': 'opentrons_24_tuberack_nest_1.5ml_screwcap',
-    'opentrons aluminum 2ml tubes': 'opentrons_24_tuberack_generic_2ml_screwcap',
-    'opentrons aluminum 1.5ml tubes': 'opentrons_24_tuberack_nest_1.5ml_screwcap',
-    'covidwarriors aluminum 2ml tubes': 'opentrons_24_tuberack_generic_2ml_screwcap',
-    'covidwarriors aluminum 1.5ml tubes': 'opentrons_24_tuberack_nest_1.5ml_screwcap',
+    'opentrons aluminum 2ml tubes': 'opentrons_24_aluminumblock_generic_2ml_screwcap',
+    'opentrons aluminum 1.5ml tubes': 'opentrons_24_aluminumblock_nest_1.5ml_screwcap',
+    'covidwarriors aluminum 2ml tubes': 'covidwarriors_aluminumblock_24_screwcap_2000ul',
+    'covidwarriors aluminum 1.5ml tubes': 'covidwarriors_aluminumblock_24_screwcap_2000ul',
     # PCR plate
-
+    'opentrons aluminum biorad plate': 'opentrons_96_aluminumblock_biorad_wellplate_200ul',
+    'opentrons aluminum nest plate': 'opentrons_96_aluminumblock_nest_wellplate_100ul',
+    'covidwarriors aluminum biorad plate': 'covidwarriors_aluminumblock_96_bioradwellplate_200ul',
     # Strips
-    'large strips': 'opentrons_96_aluminumblock_generic_pcr_strip_200ul',
-    'short strips': 'opentrons_96_aluminumblock_generic_pcr_strip_200ul',
+    #'large strips': 'opentrons_96_aluminumblock_generic_pcr_strip_200ul',
+    #'short strips': 'opentrons_96_aluminumblock_generic_pcr_strip_200ul',
+    'opentrons aluminum strip alpha': 'opentrons_aluminumblock_96_pcrstripsalpha_200ul',
+    'opentrons aluminum strip short': 'opentrons_aluminumblock_96_pcrstrips_100ul',
+    'covidwarriors aluminum biorad strip alpha': 'covidwarriors_aluminumblock_96_bioradwellplate_pcrstripsalpha_200ul',
+    'covidwarriors aluminum biorad strip short': 'covidwarriors_aluminumblock_96_bioradwellplate_pcrstrips_100ul'
 }
 
 PCR_LW_DICT = {
@@ -63,13 +98,20 @@ def run(ctx: protocol_api.ProtocolContext):
     # check source (elution) labware type
     if ELUTION_LABWARE not in EL_LW_DICT:
         raise Exception('Invalid ELUTION_LABWARE. Must be one of the \
-following:\nlarge strips\nshort strips\n1.5ml tubes\n2ml tubes')
+following:\nopentrons plastic 2ml tubes\nopentrons plastic 1.5ml tubes\nopentrons aluminum 2ml tubes\nopentrons aluminum 1.5ml tubes\ncovidwarriors aluminum 2ml tubes\ncovidwarriors aluminum 1.5ml tubes\nopentrons aluminum biorad plate\nopentrons aluminum nest plate\ncovidwarriors aluminum biorad plate\nopentrons aluminum strip alpha\nopentrons aluminum strip short\ncovidwarriors aluminum biorad strip alpha\ncovidwarriors aluminum biorad strip short')
 
-    source_racks = [
-        ctx.load_labware(EL_LW_DICT[ELUTION_LABWARE], slot,
-                         'RNA elution labware ' + str(i+1))
-        for i, slot in enumerate(['4', '1', '5', '2'])
+    if 'plate' in ELUTION_LABWARE:
+        source_racks = ctx.load_labware(
+            EL_LW_DICT[ELUTION_LABWARE], '1',
+            'RNA elution labware')
+    else:
+        source_racks = [
+            ctx.load_labware(EL_LW_DICT[ELUTION_LABWARE], slot,
+                            'RNA elution labware ' + str(i+1))
+            for i, slot in enumerate(['4', '1', '5', '2'])
     ]
+
+    # tips
     tips20 = [
         ctx.load_labware('opentrons_96_filtertiprack_20ul', slot)
         for slot in ['6', '9', '8', '7']
@@ -112,6 +154,9 @@ following:\nopentrons plastic block\nopentrons aluminum block\ncovidwarriors alu
             ]
             for tube in col
         ][:NUM_SAMPLES]
+        dests = pcr_plate.wells()[:NUM_SAMPLES]
+    elif 'plate' in ELUTION_LABWARE:
+        sources = source_racks.wells()[:NUM_SAMPLES]
         dests = pcr_plate.wells()[:NUM_SAMPLES]
     else:
         sources = [

@@ -1,4 +1,5 @@
 from opentrons import protocol_api
+from opentrons.drivers.rpi_drivers import gpio
 
 # metadata
 metadata = {
@@ -94,7 +95,19 @@ MM_LW_DICT = {
     'covidwarriors aluminum block': 'covidwarriors_aluminumblock_24_screwcap_2000ul'
 }
 
+def check_door():
+    return gpio.read_window_switches()
+
 def run(ctx: protocol_api.ProtocolContext):
+
+    #Check if door is opened
+    if check_door() == True:
+        #Set light color to red and pause
+        gpio.set_button_light(1,0,0)
+        protocol.pause(f"Please, close the door")
+    else:
+        #Set light color to green
+        gpio.set_button_light(0,1,0)
 
     # check source (elution) labware type
     if ELUTION_LABWARE not in EL_LW_DICT:

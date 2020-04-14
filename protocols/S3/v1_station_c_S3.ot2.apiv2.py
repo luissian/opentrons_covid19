@@ -11,8 +11,6 @@ metadata = {
 """
 NUM_SAMPLES is the number of samples, must be an integer number
 
-VOLUME_MMIX is the volume of mastermix to use per sample
-
 ELUTION_LABWARE must be one of the following:
     opentrons plastic 2ml tubes
     opentrons plastic 1.5ml tubes
@@ -51,7 +49,6 @@ MM_TYPE must be one of the following:
 """
 
 NUM_SAMPLES = 96
-VOLUME_MMIX = 20
 ELUTION_LABWARE = 'opentrons plastic 2ml tubes'
 PCR_LABWARE = 'opentrons aluminum biorad'
 MM_LABWARE = 'opentrons aluminum block'
@@ -195,6 +192,10 @@ following:\nopentrons plastic block\nopentrons aluminum block\ncovidwarriors alu
         mm_dict = {'MM1': mm1, 'MM2': mm2, 'MM3': mm3}
 
         # create mastermix
+        if MM_TYPE == 'mm3':
+            VOLUME_MMIX = 15
+        else:
+            VOLUME_MMIX = 20
         mm_tube = mm_rack.wells()[0]
         for tube, vol in mm_dict[MM_TYPE].items():
             mm_vol = vol*(NUM_SAMPLES+5)

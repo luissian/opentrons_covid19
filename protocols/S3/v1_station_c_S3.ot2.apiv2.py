@@ -103,8 +103,9 @@ def run(ctx: protocol_api.ProtocolContext):
     #Check if door is opened
     if check_door() == True:
         #Set light color to red and pause
-        gpio.set_button_light(1,0,0)
-        protocol.pause(f"Please, close the door")
+        while check_door() == True:
+            gpio.set_button_light(1,0,0)
+            protocol.pause(f"Please, close the door")
     else:
         #Set light color to green
         gpio.set_button_light(0,1,0)

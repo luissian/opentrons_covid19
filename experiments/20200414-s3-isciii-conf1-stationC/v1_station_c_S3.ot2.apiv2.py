@@ -48,7 +48,7 @@ MM_TYPE must be one of the following:
     MM3
 """
 
-NUM_SAMPLES = 24
+NUM_SAMPLES = 96
 ELUTION_LABWARE = 'opentrons aluminum strip short'
 PCR_LABWARE = 'opentrons aluminum nest'
 MM_LABWARE = 'opentrons aluminum block'
@@ -146,7 +146,7 @@ following:\nopentrons plastic block\nopentrons aluminum block\ncovidwarriors alu
             tube
             for i, rack in enumerate(source_racks)
             for col in [
-                rack.columns()[c] if i % 2 == 0 else rack.columns()[c+1]
+                rack.columns()[c] if i < 2 else rack.columns()[c+1]
                 for c in [0, 5, 10]
             ]
             for tube in col

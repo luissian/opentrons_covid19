@@ -145,7 +145,7 @@ following:\nopentrons plastic block\nopentrons aluminum block\ncovidwarriors alu
     p300 = ctx.load_instrument('p300_single_gen2', 'left', tip_racks=tips300)
 
     # setup up sample sources and destinations
-    if 'strips' in ELUTION_LABWARE:
+    if 'strip' in ELUTION_LABWARE:
         sources = [
             tube
             for i, rack in enumerate(source_racks)

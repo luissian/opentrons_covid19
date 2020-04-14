@@ -48,14 +48,14 @@ MM_TYPE must be one of the following:
     MM3
 """
 
-NUM_SAMPLES = 5
-ELUTION_LABWARE = 'opentrons aluminum nest plate'
-PCR_LABWARE = 'covidwarriors aluminum biorad'
-MM_LABWARE = 'covidwarriors aluminum block'
-PREPARE_MASTERMIX = True
-TRANSFER_MASTERMIX = True
+NUM_SAMPLES = 24
+ELUTION_LABWARE = 'opentrons aluminum strip short'
+PCR_LABWARE = 'opentrons aluminum nest'
+MM_LABWARE = 'opentrons aluminum block'
+PREPARE_MASTERMIX = False
+TRANSFER_MASTERMIX = False
 TRANSFER_SAMPLES = True
-MM_TYPE = 'MM2'
+MM_TYPE = 'MM3'
 
 EL_LW_DICT = {
     # tubes
@@ -141,7 +141,7 @@ following:\nopentrons plastic block\nopentrons aluminum block\ncovidwarriors alu
     p300 = ctx.load_instrument('p300_single_gen2', 'left', tip_racks=tips300)
 
     # setup up sample sources and destinations
-    if 'strips' in ELUTION_LABWARE:
+    if 'strip' in ELUTION_LABWARE:
         sources = [
             tube
             for i, rack in enumerate(source_racks)

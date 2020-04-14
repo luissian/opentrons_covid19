@@ -35,6 +35,45 @@
     -   Restart the OT from the OP app.
     -   Set the IP for the USB network in the Mac to manual IP 169.254.10.10 y mask 255.255.0.0 (this makes the connection faster as it don't need to wait for dhcp resolution).
 
+7) **Configure Robots wifi:** this will allow you to control several robots using only one computer and wireless.
+Set wifi ISCIII-IoT wifi:
+```Bash
+$ cd /var/lib/NetworkManager/system-connections
+$ vi ISCIII-IoT
+
+## Add this lines
+[connection]
+id=ISCIII-IoT
+uuid=75f43d24-f0a9-42fb-b228-4c9c631ccfed
+type=wifi
+interface-name=wlan0
+permissions=
+
+[wifi]
+cloned-mac-address=permanent
+mac-address-blacklist=
+mac-address-randomization=1
+mode=infrastructure
+ssid=ISCIII-IoT
+
+[wifi-security]
+key-mgmt=wpa-psk
+psk=EPxjsboD7QZ4I1yPS3ls
+
+[ipv4]
+address1=172.17.70.<IP>/24
+dns=8.8.8.8;8.8.4.4;
+dns-search=
+method=manual
+
+[ipv6]
+addr-gen-mode=stable-privacy
+dns-search=
+method=auto
+```
+
+Where <IP> = code of the robot in two digits format, being the first digit the letter of the robot and the second one its number, I.e. C1 is 31 and A2 is 12.
+
 7) Backup calibration files Run jupyter notebook in a browser.
 
 `http://<robotIP>:48888`
@@ -82,4 +121,9 @@
     -   The pipette is being used with different tips from those used in its previous run
     -   The deck has been calibrated since the last run If none of the above circumstances are true, you can skip to labware calibration by clicking your tipracks in the calibration screen, or skip to the run by clicking the "Run" tab of the app.
 
--   *Labware calibration* is prompted after pipette calibration has been completed. In all cases, you must complete labware calibration if you have completed pipette calibration. However, if you skip pipette calibration, you may still need to complete labware calibration. Labware calibration needs to be completed if: Pipette calibration has been completed If there is any labware on the deck being used for the first time If you are troubleshooting calibration issues
+-   *Labware calibration* is prompted after pipette calibration has been completed.
+    -   In all cases, you must complete labware calibration if you have completed pipette calibration.
+    -   However, if you skip pipette calibration, you may still need to complete labware calibration. Labware calibration needs to be completed if:
+        -   Pipette calibration has been completed
+        -   If there is any labware on the deck being used for the first time
+        -   If you are troubleshooting calibration issues

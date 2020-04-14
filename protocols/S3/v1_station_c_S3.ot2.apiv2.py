@@ -52,7 +52,7 @@ MM_TYPE must be one of the following:
 
 NUM_SAMPLES = 96
 ELUTION_LABWARE = 'opentrons plastic 2ml tubes'
-PCR_LABWARE = 'opentrons aluminum biorad'
+PCR_LABWARE = 'opentrons aluminum biorad plate'
 MM_LABWARE = 'opentrons aluminum block'
 PREPARE_MASTERMIX = True
 TRANSFER_MASTERMIX = True
@@ -81,10 +81,10 @@ EL_LW_DICT = {
 }
 
 PCR_LW_DICT = {
-    'opentrons aluminum biorad': 'opentrons_96_aluminumblock_biorad_wellplate_200ul',
-    'opentrons aluminum nest': 'opentrons_96_aluminumblock_nest_wellplate_100ul',
+    'opentrons aluminum biorad plate': 'opentrons_96_aluminumblock_biorad_wellplate_200ul',
+    'opentrons aluminum nest plate': 'opentrons_96_aluminumblock_nest_wellplate_100ul',
     'opentrons aluminum strip short': 'opentrons_aluminumblock_96_pcrstrips_100ul',
-    'covidwarriors aluminum biorad': 'covidwarriors_aluminumblock_96_bioradwellplate_200ul',
+    'covidwarriors aluminum biorad plate': 'covidwarriors_aluminumblock_96_bioradwellplate_200ul',
     'covidwarriors aluminum biorad strip short': 'covidwarriors_aluminumblock_96_bioradwellplate_pcrstrips_100ul'
 }
 

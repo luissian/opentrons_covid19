@@ -3,7 +3,7 @@ from opentrons import protocol_api
 # metadata
 metadata = {
     'protocolName': 'S3 Station C Version 1',
-    'author': 'Nick <protocols@opentrons.com>',
+    'author': 'Nick <protocols@opentrons.com>, Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
     'apiLevel': '2.1'
 }
@@ -21,12 +21,13 @@ MM_TYPE must be one of the following:
     MM3
 """
 
-NUM_SAMPLES = 20
+NUM_SAMPLES = 96
 VOLUME_MMIX = 20
 ELUTION_LABWARE = '2ml tubes'
-PREPARE_MASTERMIX = False
+MM_LABWARE = 'opentrons aluminum block'
+PREPARE_MASTERMIX = True
 TRANSFER_MASTERMIX = True
-TRANSFER_SAMPLES = False
+TRANSFER_SAMPLES = True
 MM_TYPE = 'MM3'
 
 EL_LW_DICT = {
@@ -36,6 +37,11 @@ EL_LW_DICT = {
     '1.5ml tubes': 'opentrons_24_tuberack_nest_1.5ml_screwcap'
 }
 
+MM_LW_DICT = {
+    'opentrons plastic block': 'opentrons_24_tuberack_generic_2ml_screwcap',
+    'opentrons aluminum block': 'opentrons_24_aluminumblock_generic_2ml_screwcap',
+    'covidwarriors aluminum block': 'covidwarriors_aluminumblock_24_screwcap_2000ul'
+}
 
 def run(ctx: protocol_api.ProtocolContext):
 
@@ -58,9 +64,14 @@ following:\nlarge strips\nshort strips\n1.5ml tubes\n2ml tubes')
     pcr_plate = tempdeck.load_labware(
         'biorad_96_wellplate_200ul_pcr', 'PCR plate')
     tempdeck.set_temperature(4)
+
+    # check mastermix labware type
+    if MM_LABWARE not in MM_LW_DICT:
+        raise Exception('Invalid MM_LABWARE. Must be one of the \
+following:\nopentrons plastic block\nopentrons aluminum block\ncovidwarriors aluminum block')
     mm_rack = ctx.load_labware(
-        'opentrons_24_tuberack_generic_2ml_screwcap', '11',
-        '2ml screw tube aluminum block for mastermix')
+        MM_LW_DICT[MM_LABWARE], '11',
+        MM_LABWARE)
 
     # pipette
     p20 = ctx.load_instrument('p20_single_gen2', 'right', tip_racks=tips20)

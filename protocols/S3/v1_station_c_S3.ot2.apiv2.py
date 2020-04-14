@@ -24,6 +24,7 @@ MM_TYPE must be one of the following:
 NUM_SAMPLES = 96
 VOLUME_MMIX = 20
 ELUTION_LABWARE = '2ml tubes'
+PCR_LABWARE = 'opentrons aluminum biorad'
 MM_LABWARE = 'opentrons aluminum block'
 PREPARE_MASTERMIX = True
 TRANSFER_MASTERMIX = True
@@ -35,6 +36,12 @@ EL_LW_DICT = {
     'short strips': 'opentrons_96_aluminumblock_generic_pcr_strip_200ul',
     '2ml tubes': 'opentrons_24_tuberack_generic_2ml_screwcap',
     '1.5ml tubes': 'opentrons_24_tuberack_nest_1.5ml_screwcap'
+}
+
+PCR_LW_DICT = {
+    'opentrons aluminum biorad': 'opentrons_96_aluminumblock_biorad_wellplate_200ul',
+    'opentrons aluminum nest': 'opentrons_96_aluminumblock_nest_wellplate_100ul',
+    'covidwarriors aluminum biorad': 'covidwarriors_aluminumblock_96_bioradwellplate_200ul'
 }
 
 MM_LW_DICT = {
@@ -60,15 +67,24 @@ following:\nlarge strips\nshort strips\n1.5ml tubes\n2ml tubes')
         for slot in ['6', '9', '8', '7']
     ]
     tips300 = [ctx.load_labware('opentrons_96_filtertiprack_200ul', '3')]
+
+    # tempdeck module
     tempdeck = ctx.load_module('tempdeck', '10')
-    pcr_plate = tempdeck.load_labware(
-        'biorad_96_wellplate_200ul_pcr', 'PCR plate')
     tempdeck.set_temperature(4)
+
+    # check pcr plate
+    if PCR_LABWARE not in PCR_LW_DICT:
+        raise Exception('Invalid MM_LABWARE. Must be one of the \
+following:\nopentrons aluminum biorad\nopentrons aluminum block\ncovidwarriors aluminum biorad')
+
+    pcr_plate = tempdeck.load_labware(
+        PCR_LW_DICT[PCR_LABWARE], 'PCR plate')
 
     # check mastermix labware type
     if MM_LABWARE not in MM_LW_DICT:
         raise Exception('Invalid MM_LABWARE. Must be one of the \
 following:\nopentrons plastic block\nopentrons aluminum block\ncovidwarriors aluminum block')
+
     mm_rack = ctx.load_labware(
         MM_LW_DICT[MM_LABWARE], '11',
         MM_LABWARE)

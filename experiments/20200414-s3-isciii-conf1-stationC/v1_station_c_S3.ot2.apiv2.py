@@ -50,11 +50,11 @@ MM_TYPE must be one of the following:
     MM3
 """
 
-NUM_SAMPLES = 96
+NUM_SAMPLES = 5
 VOLUME_MMIX = 20
-ELUTION_LABWARE = 'opentrons plastic 2ml tubes'
-PCR_LABWARE = 'opentrons aluminum biorad'
-MM_LABWARE = 'opentrons aluminum block'
+ELUTION_LABWARE = 'opentrons aluminum nest plate'
+PCR_LABWARE = 'covidwarriors aluminum biorad'
+MM_LABWARE = 'covidwarriors aluminum block'
 PREPARE_MASTERMIX = True
 TRANSFER_MASTERMIX = True
 TRANSFER_SAMPLES = True

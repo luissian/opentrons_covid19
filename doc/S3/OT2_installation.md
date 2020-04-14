@@ -12,8 +12,8 @@
 
 3) Make inventory. This is an example of the info you should collect. IDs mean serial numbers for the robot, pipettes and modules.
 
-| Location | Configuration | Robots | ID | static IP   | Host Name   | Macbook Air MAC | Right pipette | RP ID | Left pipette | LP ID | Module 1 type | Module 1 ID |
-|-------- | ------------- | ------ | -- | ----------- | ----------- | --------------- | ------------- | ----- | ------------ | ----- | ------------- | -----------|
+ Location | Configuration | Robots | ID | static IP   | Host Name   | Macbook Air MAC | Right pipette | RP ID | Left pipette | LP ID | Module 1 type | Module 1 ID 
+-------- | ------------- | ------ | -- | ----------- | ----------- | --------------- | ------------- | ----- | ------------ | ----- | ------------- | -----------
          | B             | S3-B1  |    | 169.254.2.1 | Hod04-mac06 |                 | pM300         |       | p1000        |       | Magnetic      |
          | B             | S3-B2  |    | 169.254.2.2 | Hos04-mac08 |                 | pM300         |       | p1000        |       | Magnetic      |
          | C             | S3-C1  |    | 169.254.3.1 | Hos04-mac07 |                 | p20           |       | p300         |       | Temperature   |

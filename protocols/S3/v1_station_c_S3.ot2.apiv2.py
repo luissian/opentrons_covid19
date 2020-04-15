@@ -153,6 +153,28 @@ def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
             for well in col[4*h_block:4*(h_block+1)]][:NUM_SAMPLES]
     return sources, dests
 
+def homogenize_mm(mm_tube, p300, times=5):
+    # homogenize mastermix tube a given number of times
+    p300.pick_up_tip()
+    #p300.mix(5, 200, mm_tube.bottom(5))
+    for i in range(times):
+        for j in range(5):
+            # depending on the number of samples, start at a different hight and move as it aspires
+            if NUM_SAMPLES <= 24:
+                disp_loc = -28-(3*j)
+            elif NUM_SAMPLES <= 48:
+                disp_loc = -22-(3*j)
+            elif NUM_SAMPLES <= 72:
+                disp_loc = -16-(3*j)
+            else:
+                disp_loc = -10-(3*j)
+            p300.aspirate(40, mm_tube.top(disp_loc))
+        # empty pipete
+        p300.dispense(200, mm_tube.top(disp_loc))
+    # clow out before dropping tip
+    p300.blow_out(mm_tube.top(-2))
+    p300.drop_tip()
+
 def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
     # setup mastermix coordinates
     """ mastermix component maps """
@@ -198,21 +220,9 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
             pip.blow_out(disp_loc)
         pip.aspirate(5, mm_tube.top(2))
         pip.drop_tip()
-    p300.pick_up_tip()
-    #p300.mix(5, 200, mm_tube.bottom(5))
-    for i in range(5):
-        for j in range(5):
-            if NUM_SAMPLES <= 24:
-                disp_loc = -28-(3*j)
-            elif NUM_SAMPLES <= 48:
-                disp_loc = -22-(3*j)
-            elif NUM_SAMPLES <= 72:
-                disp_loc = -16-(3*j)
-            else:
-                disp_loc = -10-(3*j)
-            p300.aspirate(40, mm_tube.top(disp_loc))
-        p300.dispense(200, mm_tube.top(-22))
-    p300.drop_tip()
+
+    # homogenize mastermix
+    homogenize_mm(mm_tube, p300)
 
     return mm_tube
 
@@ -303,6 +313,7 @@ following:\nopentrons plastic 2ml tubes\nopentrons plastic 1.5ml tubes\nopentron
         mm_tube = prepare_mastermix(MM_TYPE, mm_rack, p300, p20)
     else:
         mm_tube = mm_rack.wells()[0]
+        homogenize_mm(mm_tube, p300)
 
     # transfer mastermix
     if TRANSFER_MASTERMIX:

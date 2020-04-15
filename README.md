@@ -16,8 +16,8 @@ In this repo you will find:
 We're actively developing and testing these protocols, so things might be a little messy.  We're publishing our works in progress here so that other labs might benefit from them as quickly as possible.
 
 # How to prepare the robots
-- [OT-2 installation](docs/01_OT-2_installation.md)
-- [Custom labware configuration](docs/02_custom_labware.md)
+- [OT-2 installation](docs/S3/01_OT-2_installation.md)
+- [Custom labware configuration](docs/S3/02_custom_labware.md)
 
 # Reagent preparation and handling
 

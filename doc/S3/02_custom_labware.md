@@ -13,9 +13,9 @@
 -   You will download two files: 1) json labware configuration file, 2) test protocol script.
 
 -   **IMPORTANT:** This files have important fields: displayName, loadName and brand. This names have to be MEANINGFUL for your custom labware. The web form doesn't give you too much flexibility for the name so you need to change the displayName and loadName in your json and .py file. And the brand only in the json file.
-    -   loadName: Only lower case letters, numbers, periods, and underscores may be used. Ej.
-    -   DisplayName: meaningful!! No
-    -   Brand: Example: covidWarriors.
+    -   loadName: Only lower case letters, numbers, periods, and underscores may be used. Ex. opentrons_aluminumblock_96_pcrstrips_100ul
+    -   DisplayName: meaningful!! Ex. CovidWarriors AluminumBlock 96 Well BioRad Plate 8 strip alpha 200 µL
+    -   Brand: Ex.: covidWarriors.
 
 -   You will also need to change the name for the pipette using GEN2, and the tiprack accordingly to the tips you have/need for that pipette.
 

@@ -217,16 +217,16 @@ def run(ctx: protocol_api.ProtocolContext):
     # confirm door is closed
     confirm_door_is_closed()
 
-    # define pipettes
-    p20 = ctx.load_instrument('p20_single_gen2', 'right', tip_racks=tips20)
-    p300 = ctx.load_instrument('p300_single_gen2', 'left', tip_racks=tips300)
-
     # define tips
     tips20 = [
         ctx.load_labware('opentrons_96_filtertiprack_20ul', slot)
         for slot in ['6', '9', '8', '7']
     ]
     tips300 = [ctx.load_labware('opentrons_96_filtertiprack_200ul', '3')]
+
+    # define pipettes
+    p20 = ctx.load_instrument('p20_single_gen2', 'right', tip_racks=tips20)
+    p300 = ctx.load_instrument('p300_single_gen2', 'left', tip_racks=tips300)
 
     # tempdeck module
     tempdeck = ctx.load_module('tempdeck', '10')

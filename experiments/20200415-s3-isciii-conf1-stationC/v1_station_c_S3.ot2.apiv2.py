@@ -13,13 +13,13 @@ metadata = {
 
 # Parameters to adapt the protocol
 NUM_SAMPLES = 96
-MM_LABWARE = 'covidwarriors aluminum block'
+MM_LABWARE = 'opentrons aluminum block'
 PCR_LABWARE = 'opentrons aluminum nest plate'
-ELUTION_LABWARE = 'opentrons aluminum biorad plate'
+ELUTION_LABWARE = 'opentrons aluminum nest plate'
 PREPARE_MASTERMIX = True
-MM_TYPE = 'MM1'
-TRANSFER_MASTERMIX = False
-TRANSFER_SAMPLES = False
+MM_TYPE = 'MM3'
+TRANSFER_MASTERMIX = True
+TRANSFER_SAMPLES = True
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number
@@ -65,7 +65,7 @@ TRANSFER_SAMPLES: True or False
 """
 
 # Calculated variables
-if MM_TYPE == 'mm3':
+if MM_TYPE == 'MM3':
     VOLUME_MMIX = 15
 else:
     VOLUME_MMIX = 20
@@ -225,7 +225,6 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
             pip.blow_out(disp_loc)
         pip.aspirate(5, mm_tube.top(2))
         pip.drop_tip()
-    p300.pick_up_tip()
 
     # homogenize mastermix
     homogenize_mm(mm_tube, p300)
@@ -249,12 +248,13 @@ def transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20):
             # reduce fluid hight each time mm is aspired
             disp_loc = mm_tube.top(initial_hight)
             initial_hight += -6
-        pip.aspire(5, disp_loc)
+        pip.aspirate(4, disp_loc)
         pip.distribute(VOLUME_MMIX, disp_loc, [d.bottom(2) for d in set],
                    air_gap=1, disposal_volume=0, new_tip='never')
+        pip.blow_out(disp_loc)
     pip.drop_tip()
 
-def transfer_samples(ELUTION_LABWARE,sources, dests, p20):
+def transfer_samples(ELUTION_LABWARE, sources, dests, p20):
     # hight for aspiration has to be different depending if you ar useing tubes or wells
     if 'strip' in ELUTION_LABWARE or 'plate' in ELUTION_LABWARE:
         hight = 1.5
@@ -343,6 +343,6 @@ following:\nopentrons plastic 2ml tubes\nopentrons plastic 1.5ml tubes\nopentron
 
     # transfer samples to corresponding locations
     if TRANSFER_SAMPLES:
-        transfer_samples(sources, dests, p20)
+        transfer_samples(ELUTION_LABWARE, sources, dests, p20)
 
     finish_run()

@@ -13,11 +13,11 @@ metadata = {
 # Parameters to adapt the protocol
 NUM_SAMPLES = 96
 MM_LABWARE = 'covidwarriors aluminum block'
-PCR_LABWARE = 'opentrons aluminum biorad plate'
-ELUTION_LABWARE = 'opentrons aluminum nest plate'
+PCR_LABWARE = 'opentrons aluminum nest plate'
+ELUTION_LABWARE = 'opentrons aluminum biorad plate'
 PREPARE_MASTERMIX = True
 MM_TYPE = 'MM1'
-TRANSFER_MASTERMIX = True
+TRANSFER_MASTERMIX = False
 TRANSFER_SAMPLES = False
 
 """
@@ -183,16 +183,25 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
     mm_tube_vol = 0
     for tube, vol in mm_dict[MM_TYPE].items():
         mm_vol = vol*(NUM_SAMPLES+5)
-        mm_tube_vol += mm_vol
-        disp_loc = mm_tube.bottom(mm_tube_vol // 5)
+        disp_loc = mm_tube.top(-10)
         pip = p300 if mm_vol > 20 else p20
         pip.pick_up_tip()
-        pip.transfer(mm_vol, tube.bottom(0.5), disp_loc, air_gap=2, touch_tip=False, new_tip='never')
-        pip.blow_out(mm_tube.top(2))
+        #pip.transfer(mm_vol, tube.bottom(0.5), disp_loc, air_gap=2, touch_tip=True, new_tip='never')
+        air_gap_vol = 20
+        num_transfers = mm_vol//(200-air_gap_vol)
+        for i in range(num_transfers+1):
+            transfer_vol = mm_vol - (200-air_gap_vol)*i
+            pip.transfer(transfer_vol, tube.bottom(0.5), disp_loc, air_gap=air_gap_vol, new_tip='never')
+            pip.blow_out(disp_loc)
         pip.aspirate(5, mm_tube.top(2))
         pip.drop_tip()
     p300.pick_up_tip()
-    p300.mix(5, 200, mm_tube.bottom(mm_tube_vol // 5))
+    #p300.mix(5, 200, mm_tube.bottom(5))
+    for i in range(5):
+        for j in range(5):
+            disp_loc = -10-(3*i)
+            p300.aspirate(40, mm_tube.top(disp_loc))
+        p300.dispense(200, mm_tube.top(-22))
     p300.drop_tip()
 
     return mm_tube
@@ -212,7 +221,7 @@ def transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20):
 def transfer_samples(sources, dests, p20):
     for s, d in zip(sources, dests):
         p20.pick_up_tip()
-        p20.transfer(5, s.bottom(1), d.bottom(2), air_gap=2, new_tip='never')
+        p20.transfer(5, s.bottom(2), d.bottom(2), air_gap=2, new_tip='never')
         #p20.mix(1, 10, d.bottom(2))
         #p20.blow_out(d.top(-2))
         p20.aspirate(1, d.top(2))

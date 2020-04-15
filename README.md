@@ -15,7 +15,15 @@ In this repo you will find:
 
 We're actively developing and testing these protocols, so things might be a little messy.  We're publishing our works in progress here so that other labs might benefit from them as quickly as possible.
 
-# How it works
+# How to prepare the robots
+- [OT-2 installation](doc/S3/01_OT2_installation.md)
+- [Custom labware configuration](doc/S3/02_custom_labware.md)
+
+# Reagent preparation and handling
+
+Instructions for the manual part of this protocol (how to prepare reagents, how to set up labware, and so on) are hosted [on protocols.io](https://www.protocols.io/groups/opentrons-covid19-testing/publications).
+
+# Protocols
 
 We're automating a RT-qPCR based diagnostic protocol.  We split it into 3 parts, intended to be run on 3 separate robots:
 
@@ -24,10 +32,6 @@ We're automating a RT-qPCR based diagnostic protocol.  We split it into 3 parts,
 * **Station C:** qPCR setup
 
 See [the Python files](protocols) for more details.
-
-# Reagent preparation and handling
-
-Instructions for the manual part of this protocol (how to prepare reagents, how to set up labware, and so on) are hosted [on protocols.io](https://www.protocols.io/groups/opentrons-covid19-testing/publications).
 
 # Directory structure
 

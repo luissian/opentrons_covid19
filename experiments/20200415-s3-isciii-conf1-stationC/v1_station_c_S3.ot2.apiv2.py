@@ -12,13 +12,13 @@ metadata = {
 
 # Parameters to adapt the protocol
 NUM_SAMPLES = 96
-MM_LABWARE = 'opentrons aluminum block'
+MM_LABWARE = 'covidwarriors aluminum block'
 PCR_LABWARE = 'opentrons aluminum biorad plate'
-ELUTION_LABWARE = 'opentrons plastic 2ml tubes'
+ELUTION_LABWARE = 'opentrons aluminum nest plate'
 PREPARE_MASTERMIX = True
-MM_TYPE = 'MM3'
+MM_TYPE = 'MM1'
 TRANSFER_MASTERMIX = True
-TRANSFER_SAMPLES = True
+TRANSFER_SAMPLES = False
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number
@@ -125,7 +125,7 @@ def finish_run():
     #Set light color to blue
     gpio.set_button_light(0,0,1)
 
-def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
+def get_source_dest_coordinates(ELUTION_LABWARE,source_racks, pcr_plate):
     if 'strip' in ELUTION_LABWARE:
         sources = [
             tube
@@ -180,17 +180,19 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
 
     # create mastermix
     mm_tube = mm_rack.wells()[0]
+    mm_tube_vol = 0
     for tube, vol in mm_dict[MM_TYPE].items():
         mm_vol = vol*(NUM_SAMPLES+5)
-        disp_loc = mm_tube.bottom(5) if mm_vol < 50 else mm_tube.top(-5)
+        mm_tube_vol += mm_vol
+        disp_loc = mm_tube.bottom(mm_tube_vol // 5)
         pip = p300 if mm_vol > 20 else p20
         pip.pick_up_tip()
-        pip.transfer(mm_vol, tube.bottom(1), disp_loc, air_gap=2, touch_tip=True, new_tip='never')
-        pip.blow_out(mm_tube.bottom(2))
+        pip.transfer(mm_vol, tube.bottom(0.5), disp_loc, air_gap=2, touch_tip=False, new_tip='never')
+        pip.blow_out(mm_tube.top(2))
         pip.aspirate(5, mm_tube.top(2))
         pip.drop_tip()
     p300.pick_up_tip()
-    p300.mix(5, 200, mm_tube.bottom(2))
+    p300.mix(5, 200, mm_tube.bottom(mm_tube_vol // 5))
     p300.drop_tip()
 
     return mm_tube
@@ -236,7 +238,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # tempdeck module
     tempdeck = ctx.load_module('tempdeck', '10')
-    tempdeck.set_temperature(4)
+    #tempdeck.set_temperature(4)
 
     # check mastermix labware type
     if MM_LABWARE not in MM_LW_DICT:

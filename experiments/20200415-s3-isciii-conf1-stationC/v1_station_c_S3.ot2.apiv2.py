@@ -1,6 +1,7 @@
 from opentrons import protocol_api
 from opentrons.drivers.rpi_drivers import gpio
 import time
+import math
 
 # Metadata
 metadata = {
@@ -125,7 +126,7 @@ def finish_run():
     #Set light color to blue
     gpio.set_button_light(0,0,1)
 
-def get_source_dest_coordinates(ELUTION_LABWARE,source_racks, pcr_plate):
+def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
     if 'strip' in ELUTION_LABWARE:
         sources = [
             tube
@@ -180,17 +181,19 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
 
     # create mastermix
     mm_tube = mm_rack.wells()[0]
-    mm_tube_vol = 0
     for tube, vol in mm_dict[MM_TYPE].items():
         mm_vol = vol*(NUM_SAMPLES+5)
         disp_loc = mm_tube.top(-10)
         pip = p300 if mm_vol > 20 else p20
         pip.pick_up_tip()
         #pip.transfer(mm_vol, tube.bottom(0.5), disp_loc, air_gap=2, touch_tip=True, new_tip='never')
-        air_gap_vol = 20
-        num_transfers = mm_vol//(200-air_gap_vol)
-        for i in range(num_transfers+1):
-            transfer_vol = mm_vol - (200-air_gap_vol)*i
+        air_gap_vol = 5
+        num_transfers = math.ceil(mm_vol/(200-air_gap_vol))
+        for i in range(num_transfers):
+            if i == 0:
+                transfer_vol = mm_vol % (200-air_gap_vol)
+            else:
+                transfer_vol = (200-air_gap_vol)
             pip.transfer(transfer_vol, tube.bottom(0.5), disp_loc, air_gap=air_gap_vol, new_tip='never')
             pip.blow_out(disp_loc)
         pip.aspirate(5, mm_tube.top(2))
@@ -199,7 +202,14 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
     #p300.mix(5, 200, mm_tube.bottom(5))
     for i in range(5):
         for j in range(5):
-            disp_loc = -10-(3*i)
+            if NUM_SAMPLES <= 24:
+                disp_loc = -28-(3*j)
+            elif NUM_SAMPLES <= 48:
+                disp_loc = -22-(3*j)
+            elif NUM_SAMPLES <= 72:
+                disp_loc = -16-(3*j)
+            else:
+                disp_loc = -10-(3*j)
             p300.aspirate(40, mm_tube.top(disp_loc))
         p300.dispense(200, mm_tube.top(-22))
     p300.drop_tip()
@@ -221,7 +231,7 @@ def transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20):
 def transfer_samples(sources, dests, p20):
     for s, d in zip(sources, dests):
         p20.pick_up_tip()
-        p20.transfer(5, s.bottom(2), d.bottom(2), air_gap=2, new_tip='never')
+        p20.transfer(5, s.bottom(1), d.bottom(2), air_gap=2, new_tip='never')
         #p20.mix(1, 10, d.bottom(2))
         #p20.blow_out(d.top(-2))
         p20.aspirate(1, d.top(2))

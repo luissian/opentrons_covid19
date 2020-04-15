@@ -1,6 +1,7 @@
 from opentrons import protocol_api
 from opentrons.drivers.rpi_drivers import gpio
 import time
+import math
 
 # Metadata
 metadata = {
@@ -182,15 +183,35 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
     mm_tube = mm_rack.wells()[0]
     for tube, vol in mm_dict[MM_TYPE].items():
         mm_vol = vol*(NUM_SAMPLES+5)
-        disp_loc = mm_tube.bottom(5) if mm_vol < 50 else mm_tube.top(-5)
+        disp_loc = mm_tube.top(-10)
         pip = p300 if mm_vol > 20 else p20
         pip.pick_up_tip()
-        pip.transfer(mm_vol, tube.bottom(1), disp_loc, air_gap=2, touch_tip=True, new_tip='never')
-        pip.blow_out(mm_tube.bottom(2))
+        #pip.transfer(mm_vol, tube.bottom(0.5), disp_loc, air_gap=2, touch_tip=True, new_tip='never')
+        air_gap_vol = 5
+        num_transfers = math.ceil(mm_vol/(200-air_gap_vol))
+        for i in range(num_transfers):
+            if i == 0:
+                transfer_vol = mm_vol % (200-air_gap_vol)
+            else:
+                transfer_vol = (200-air_gap_vol)
+            pip.transfer(transfer_vol, tube.bottom(0.5), disp_loc, air_gap=air_gap_vol, new_tip='never')
+            pip.blow_out(disp_loc)
         pip.aspirate(5, mm_tube.top(2))
         pip.drop_tip()
     p300.pick_up_tip()
-    p300.mix(5, 200, mm_tube.bottom(2))
+    #p300.mix(5, 200, mm_tube.bottom(5))
+    for i in range(5):
+        for j in range(5):
+            if NUM_SAMPLES <= 24:
+                disp_loc = -28-(3*j)
+            elif NUM_SAMPLES <= 48:
+                disp_loc = -22-(3*j)
+            elif NUM_SAMPLES <= 72:
+                disp_loc = -16-(3*j)
+            else:
+                disp_loc = -10-(3*j)
+            p300.aspirate(40, mm_tube.top(disp_loc))
+        p300.dispense(200, mm_tube.top(-22))
     p300.drop_tip()
 
     return mm_tube

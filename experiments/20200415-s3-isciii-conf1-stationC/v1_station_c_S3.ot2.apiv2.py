@@ -185,7 +185,7 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
         disp_loc = mm_tube.bottom(5) if mm_vol < 50 else mm_tube.top(-5)
         pip = p300 if mm_vol > 20 else p20
         pip.pick_up_tip()
-        pip.transfer(mm_vol, tube.bottom(1), disp_loc, air_gap=2, new_tip='never')
+        pip.transfer(mm_vol, tube.bottom(1), disp_loc, air_gap=2, touch_tip=True, new_tip='never')
         pip.blow_out(mm_tube.top(2))
         pip.aspirate(5, mm_tube.top(2))
         pip.drop_tip()

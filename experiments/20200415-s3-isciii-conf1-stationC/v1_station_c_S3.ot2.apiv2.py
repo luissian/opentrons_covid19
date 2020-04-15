@@ -180,17 +180,19 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
 
     # create mastermix
     mm_tube = mm_rack.wells()[0]
+    mm_tube_vol = 0
     for tube, vol in mm_dict[MM_TYPE].items():
         mm_vol = vol*(NUM_SAMPLES+5)
-        disp_loc = mm_tube.bottom(5) if mm_vol < 50 else mm_tube.top(-5)
+        mm_tube_vol += mm_vol
+        disp_loc = mm_tube.bottom(mm_tube_vol // 5)
         pip = p300 if mm_vol > 20 else p20
         pip.pick_up_tip()
-        pip.transfer(mm_vol, tube.bottom(1), disp_loc, air_gap=2, touch_tip=True, new_tip='never')
+        pip.transfer(mm_vol, tube.bottom(0.5), disp_loc, air_gap=2, touch_tip=False, new_tip='never')
         pip.blow_out(mm_tube.top(2))
         pip.aspirate(5, mm_tube.top(2))
         pip.drop_tip()
     p300.pick_up_tip()
-    p300.mix(5, 200, mm_tube.bottom(2))
+    p300.mix(5, 200, mm_tube.bottom(mm_tube_vol // 5))
     p300.drop_tip()
 
     return mm_tube
@@ -220,7 +222,7 @@ def transfer_samples(sources, dests, p20):
 def run(ctx: protocol_api.ProtocolContext):
 
     # confirm door is closed
-    if not robot.is_simulating():
+    if not ctx.is_simulating():
         confirm_door_is_closed(ctx)
 
     # define tips

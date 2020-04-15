@@ -220,7 +220,7 @@ def transfer_samples(sources, dests, p20):
 def run(ctx: protocol_api.ProtocolContext):
 
     # confirm door is closed
-    if not robot.is_simulating():
+    if not ctx.is_simulating():
         confirm_door_is_closed(ctx)
 
     # define tips

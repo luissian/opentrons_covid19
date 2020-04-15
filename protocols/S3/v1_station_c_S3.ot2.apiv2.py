@@ -1,5 +1,6 @@
 from opentrons import protocol_api
 from opentrons.drivers.rpi_drivers import gpio
+import time
 
 # Metadata
 metadata = {
@@ -108,17 +109,21 @@ EL_LW_DICT = {
 def check_door():
     return gpio.read_window_switches()
 
-def confirm_door_is_closed():
+def confirm_door_is_closed(ctx):
     #Check if door is opened
-    if check_door() == True:
+    if check_door() == False:
         #Set light color to red and pause
-        while check_door() == True:
-            gpio.set_button_light(1,0,0)
-            protocol.pause(f"Please, close the door")
-            time.sleep(3)
+        gpio.set_button_light(1,0,0)
+        ctx.pause(f"Please, close the door")
+        time.sleep(3)
+        confirm_door_is_closed(ctx)
     else:
         #Set light color to green
         gpio.set_button_light(0,1,0)
+
+def finish_run():
+    #Set light color to blue
+    gpio.set_button_light(0,0,1)
 
 def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
     if 'strip' in ELUTION_LABWARE:
@@ -180,8 +185,8 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
         disp_loc = mm_tube.bottom(5) if mm_vol < 50 else mm_tube.top(-5)
         pip = p300 if mm_vol > 20 else p20
         pip.pick_up_tip()
-        pip.transfer(mm_vol, tube.bottom(2), disp_loc, air_gap=1, new_tip='never')
-        pip.blow_out(mm_tube.bottom(5))
+        pip.transfer(mm_vol, tube.bottom(1), disp_loc, air_gap=2, new_tip='never')
+        pip.blow_out(mm_tube.bottom(2))
         pip.aspirate(5, mm_tube.top(2))
         pip.drop_tip()
     p300.pick_up_tip()
@@ -215,7 +220,7 @@ def transfer_samples(sources, dests, p20):
 def run(ctx: protocol_api.ProtocolContext):
 
     # confirm door is closed
-    confirm_door_is_closed()
+    confirm_door_is_closed(ctx)
 
     # define tips
     tips20 = [
@@ -284,3 +289,5 @@ following:\nopentrons plastic 2ml tubes\nopentrons plastic 1.5ml tubes\nopentron
     # transfer samples to corresponding locations
     if TRANSFER_SAMPLES:
         transfer_samples(sources, dests, p20)
+
+    finish_run()

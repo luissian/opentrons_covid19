@@ -120,7 +120,7 @@ def confirm_door_is_closed():
         #Set light color to green
         gpio.set_button_light(0,1,0)
 
-def get_source_dest_coordinates(ELUTION_LABWARE):
+def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
     if 'strip' in ELUTION_LABWARE:
         sources = [
             tube
@@ -147,7 +147,7 @@ def get_source_dest_coordinates(ELUTION_LABWARE):
             for well in col[4*h_block:4*(h_block+1)]][:NUM_SAMPLES]
     return sources, dests
 
-def prepare_mastermix(MM_TYPE):
+def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
     # setup mastermix coordinates
     """ mastermix component maps """
     mm1 = {
@@ -190,7 +190,7 @@ def prepare_mastermix(MM_TYPE):
 
     return mm_tube
 
-def transfer_mastermix(mm_tube, dests, VOLUME_MMIX):
+def transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20):
     max_trans_per_asp = 8  #230//(VOLUME_MMIX+5)
     split_ind = [ind for ind in range(0, NUM_SAMPLES, max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
@@ -202,7 +202,7 @@ def transfer_mastermix(mm_tube, dests, VOLUME_MMIX):
                    air_gap=1, disposal_volume=0, new_tip='never')
     pip.drop_tip()
 
-def transfer_samples(sources, dests):
+def transfer_samples(sources, dests, p20):
     for s, d in zip(sources, dests):
         p20.pick_up_tip()
         p20.transfer(5, s.bottom(1), d.bottom(2), air_gap=2, new_tip='never')
@@ -269,18 +269,18 @@ following:\nopentrons plastic 2ml tubes\nopentrons plastic 1.5ml tubes\nopentron
     ]
 
     # setup sample sources and destinations
-    sources, dests = get_source_dest_coordinates(ELUTION_LABWARE)
+    sources, dests = get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate)
 
     # prepare mastermix
     if PREPARE_MASTERMIX:
-        mm_tube = prepare_mastermix(MM_TYPE)
+        mm_tube = prepare_mastermix(MM_TYPE, mm_rack, p300, p20)
     else:
         mm_tube = mm_rack.wells()[0]
 
     # transfer mastermix
     if TRANSFER_MASTERMIX:
-        transfer_mastermix(mm_tube, dests, VOLUME_MMIX)
+        transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20)
 
     # transfer samples to corresponding locations
     if TRANSFER_SAMPLES:
-        transfer_samples(sources, dests)
+        transfer_samples(sources, dests, p20)

@@ -115,6 +115,7 @@ def confirm_door_is_closed():
         while check_door() == True:
             gpio.set_button_light(1,0,0)
             protocol.pause(f"Please, close the door")
+            time.sleep(3)
     else:
         #Set light color to green
         gpio.set_button_light(0,1,0)

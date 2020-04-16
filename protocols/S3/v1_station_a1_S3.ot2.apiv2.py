@@ -6,9 +6,9 @@ import math
 # Metadata
 metadata = {
     'protocolName': 'S3 Station C Version 1',
-    'author': 'Nick <protocols@opentrons.com>, Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
+    'author': 'Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
-    'apiLevel': '2.1'
+    'apiLevel': '2.2'
 }
 
 # Parameters to adapt the protocol
@@ -92,7 +92,6 @@ def save_tip_info(file_path):
         with open(file_path, 'w') as outfile:
             json.dump(data, outfile)
 
-
 def pick_up(pip):
     nonlocal tip_log
     if tip_log['count'][pip] == tip_log['max'][pip]:
@@ -103,9 +102,9 @@ resuming.')
     tip_log['count'][pip] += 1
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
 
-def transfer_buffer(bf_tube, dests, num_samples, VOLUME_BUFFER, p1000):
+def transfer_buffer(bf_tube, dests, VOLUME_BUFFER, p1000):
     max_trans_per_asp = 3  #230//(VOLUME_MMIX+5)
-    split_ind = [ind for ind in range(0, num_samples, max_trans_per_asp)]
+    split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
     pip.pick_up()
@@ -118,21 +117,6 @@ def transfer_buffer(bf_tube, dests, num_samples, VOLUME_BUFFER, p1000):
         pip.blow_out(bf_tube.top(-20))
     pip.drop_tip()
 
-def transfer_samples(ELUTION_LABWARE, sources, dests, p20):
-    # height for aspiration has to be different depending if you ar useing tubes or wells
-    if 'strip' in ELUTION_LABWARE or 'plate' in ELUTION_LABWARE:
-        height = 1.5
-    else:
-        height = 1
-    # transfer
-    for s, d in zip(sources, dests):
-        p20.pick_up_tip()
-        p20.transfer(7, s.bottom(height), d.bottom(2), air_gap=2, new_tip='never')
-        #p20.mix(1, 10, d.bottom(2))
-        #p20.blow_out(d.top(-2))
-        p20.aspirate(1, d.top(-2))
-        p20.drop_tip()
-
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):
 
@@ -141,80 +125,53 @@ def run(ctx: protocol_api.ProtocolContext):
         confirm_door_is_closed(ctx)
 
     # define tips
-    tips20 = [
-        ctx.load_labware('opentrons_96_filtertiprack_20ul', slot)
-        for slot in ['6', '9', '8', '7']
+    tips1000 = [
+        ctx.load_labware('opentrons_96_filtertiprack_1000ul', slot)
+        for slot in ['3', '6']
     ]
     tips300 = [ctx.load_labware('opentrons_96_filtertiprack_200ul', '3')]
 
     # define pipettes
-    p20 = ctx.load_instrument('p20_single_gen2', 'right', tip_racks=tips20)
-    p300 = ctx.load_instrument('p300_single_gen2', 'left', tip_racks=tips300)
+    p1000 = ctx.load_instrument('p20_single_gen2', 'left', tip_racks=tips1000)
+    p300 = ctx.load_instrument('p300_single_gen2', 'right', tip_racks=tips300)
 
-    # tempdeck module
-    tempdeck = ctx.load_module('tempdeck', '10')
-    tempdeck.set_temperature(4)
-
-    # check mastermix labware type
-    if MM_LABWARE not in MM_LW_DICT:
-        raise Exception('Invalid MM_LABWARE. Must be one of the \
-following:\nopentrons plastic block\nopentrons aluminum block\ncovidwarriors aluminum block')
+    # check buffer labware type
+    if BUFFER_LABWARE not in BUFFER_LW_DICT:
+        raise Exception('Invalid BF_LABWARE. Must be one of the \
+following:\nopentrons plastic 50ml tubes')
 
     # load mastermix labware
-    mm_rack = ctx.load_labware(
-        MM_LW_DICT[MM_LABWARE], '11',
-        MM_LABWARE)
+    buffer_rack = ctx.load_labware(
+        BUFFER_LW_DICT[BUFFER_LABWARE], '10',
+        BUFFER_LABWARE)
 
     # check mastermix tube labware type
-    if MMTUBE_LABWARE not in MMTUBE_LW_DICT:
-        raise Exception('Invalid MMTUBE_LABWARE. Must be one of the \
-    following:\no2ml tubes')
-
-    # This one is not loaded, it contains the raius of each tube to calculate volume height
-
-    # check pcr plate
-    if PCR_LABWARE not in PCR_LW_DICT:
-        raise Exception('Invalid PCR_LABWARE. Must be one of the \
-following:\nopentrons aluminum biorad plate\nopentrons aluminum nest plate\nopentrons aluminum strip short\ncovidwarriors aluminum biorad plate\ncovidwarriors aluminum biorad strip short')
-
-    # load pcr plate
-    pcr_plate = tempdeck.load_labware(
-        PCR_LW_DICT[PCR_LABWARE], 'PCR plate')
-
-    # check source (elution) labware type
-    if ELUTION_LABWARE not in EL_LW_DICT:
-        raise Exception('Invalid ELUTION_LABWARE. Must be one of the \
-following:\nopentrons plastic 2ml tubes\nopentrons plastic 1.5ml tubes\nopentrons aluminum 2ml tubes\nopentrons aluminum 1.5ml tubes\ncovidwarriors aluminum 2ml tubes\ncovidwarriors aluminum 1.5ml tubes\nopentrons aluminum biorad plate\nopentrons aluminum nest plate\ncovidwarriors aluminum biorad plate\nopentrons aluminum strip alpha\nopentrons aluminum strip short\ncovidwarriors aluminum biorad strip alpha\ncovidwarriors aluminum biorad strip short')
+    if DESTINATION_LABWARE not in DESTINATION_LW_DICT:
+        raise Exception('Invalid DESTINATION_LABWARE. Must be one of the \
+    following:\nopentrons plastic 2ml tubes')
 
     # load elution labware
-    if 'plate' in ELUTION_LABWARE:
-        source_racks = ctx.load_labware(
-            EL_LW_DICT[ELUTION_LABWARE], '1',
-            'RNA elution labware')
-    else:
-        source_racks = [
-            ctx.load_labware(EL_LW_DICT[ELUTION_LABWARE], slot,
-                            'RNA elution labware ' + str(i+1))
+    dest_racks = [
+            ctx.load_labware(DESTINATION_LW_DICT[DESTINATION_LABWARE], slot,
+                            'Destination tubes labware ' + str(i+1))
             for i, slot in enumerate(['4', '1', '5', '2'])
     ]
 
     # setup sample sources and destinations
-    sources, dests = get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate)
+    bf_tubes = buffer_rack.wells()[:4]
+    number_racks = math.ceil(NUM_SAMPLES/len(dest_racks[0].wells()))
 
-    # prepare mastermix
-    if PREPARE_MASTERMIX:
-        mm_tube = prepare_mastermix(MM_TYPE, mm_rack, p300, p20)
-    else:
-        mm_tube = mm_rack.wells()[0]
-        if TRANSFER_MASTERMIX:
-            homogenize_mm(mm_tube, p300)
+    # dest_sets is a list of lists. Each list is the destination well for each rack
+    dest_sets = [
+        [tube
+         for rack in dest_racks
+         for tube in rack.wells()
+        ][:NUM_SAMPLES][i*len(dest_racks[0].wells()):(i+1)*len(dest_racks[0].wells())]
+        for i in range(number_racks)
+        ]
 
-    # transfer mastermix
-    if TRANSFER_MASTERMIX:
-        transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20)
-
-    # transfer samples to corresponding locations
-    if TRANSFER_SAMPLES:
-        transfer_samples(ELUTION_LABWARE, sources, dests, p20)
+    # transfer buffer to tubes
+    for bf_tube,dests in zip(bf_tubes,dests):
+        transfer_buffer(bf_tube, dests,VOLUME_BUFFER, p1000)
 
     finish_run()

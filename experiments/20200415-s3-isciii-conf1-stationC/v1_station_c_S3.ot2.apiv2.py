@@ -16,8 +16,8 @@ NUM_SAMPLES = 96
 MM_LABWARE = 'opentrons aluminum block'
 PCR_LABWARE = 'opentrons aluminum nest plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
-PREPARE_MASTERMIX = True
-MM_TYPE = 'MM3'
+PREPARE_MASTERMIX = False
+MM_TYPE = 'MM1'
 TRANSFER_MASTERMIX = True
 TRANSFER_SAMPLES = True
 
@@ -153,22 +153,37 @@ def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
             for well in col[4*h_block:4*(h_block+1)]][:NUM_SAMPLES]
     return sources, dests
 
-def get_mm_hight():
+def get_mm_hight(VOLUME_MMIX):
     # depending on the number of samples, start at a different hight
-    if NUM_SAMPLES <= 24:
-        disp_loc = -28
-    elif NUM_SAMPLES <= 48:
-        disp_loc = -22
-    elif NUM_SAMPLES <= 72:
-        disp_loc = -16
+    if VOLUME_MMIX == 20:
+        if NUM_SAMPLES <= 24:
+            disp_loc = -30
+        elif NUM_SAMPLES <= 48:
+            disp_loc = -24
+        elif NUM_SAMPLES <= 72:
+            disp_loc = -18
+        else:
+            disp_loc = -12
+        return disp_loc
     else:
-        disp_loc = -10
-    return disp_loc
+        if NUM_SAMPLES <= 24:
+            disp_loc = -38
+        elif NUM_SAMPLES <= 48:
+            disp_loc = -32
+        elif NUM_SAMPLES <= 72:
+            disp_loc = -26
+        else:
+            disp_loc = -20
+        return disp_loc
 
 def homogenize_mm(mm_tube, p300, times=5):
     # homogenize mastermix tube a given number of times
     p300.pick_up_tip()
-    disp_loc = get_mm_hight()
+    initial_hight = get_mm_hight(VOLUME_MMIX)
+    if initial_hight < -30:
+        disp_loc = -28
+    else:
+        disp_loc = initial_hight
     #p300.mix(5, 200, mm_tube.bottom(5))
     for i in range(times):
         for j in range(5):
@@ -239,7 +254,7 @@ def transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20):
     pip = p300 if VOLUME_MMIX >= 20 else p20
     pip.pick_up_tip()
     # get initial fluid hight to avoid overflowing mm when aspiring
-    initial_hight = get_mm_hight()
+    initial_hight = get_mm_hight(VOLUME_MMIX)
     for set in dest_sets:
         # check hight and if it is low enought, aim for the bottom
         if initial_hight < -30:

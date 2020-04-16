@@ -153,44 +153,29 @@ def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
             for well in col[4*h_block:4*(h_block+1)]][:NUM_SAMPLES]
     return sources, dests
 
-def get_mm_hight(VOLUME_MMIX):
-    # depending on the number of samples, start at a different hight
-    if VOLUME_MMIX == 20:
-        if NUM_SAMPLES <= 24:
-            disp_loc = -30
-        elif NUM_SAMPLES <= 48:
-            disp_loc = -24
-        elif NUM_SAMPLES <= 72:
-            disp_loc = -18
-        else:
-            disp_loc = -12
-        return disp_loc
+def get_mm_hight(volume):
+    # depending on the volume in tube, get mm fluid hight
+    hight = volume // 50.24
+    if hight < 5:
+        return 1
     else:
-        if NUM_SAMPLES <= 24:
-            disp_loc = -38
-        elif NUM_SAMPLES <= 48:
-            disp_loc = -32
-        elif NUM_SAMPLES <= 72:
-            disp_loc = -26
-        else:
-            disp_loc = -20
-        return disp_loc
+        return hight - 5
 
 def homogenize_mm(mm_tube, p300, times=5):
     # homogenize mastermix tube a given number of times
     p300.pick_up_tip()
-    initial_hight = get_mm_hight(VOLUME_MMIX)
-    if initial_hight < -30:
-        disp_loc = -28
-    else:
-        disp_loc = initial_hight
+    volume_hight = get_mm_hight(VOLUME_MMIX)
     #p300.mix(5, 200, mm_tube.bottom(5))
     for i in range(times):
         for j in range(5):
             # depending on the number of samples, start at a different hight and move as it aspires
-            p300.aspirate(40, mm_tube.top(disp_loc-(3*j)))
+            aspirate_hight = volume_hight-(3*j)
+            if hight < 5:
+                p300.aspirate(40, mm_tube.bottom(1))
+            else:
+                p300.aspirate(40, mm_tube.bottom(aspirate_hight))
         # empty pipete
-        p300.dispense(200, mm_tube.top(disp_loc))
+        p300.dispense(200, mm_tube.bottom(volume_hight))
     # clow out before dropping tip
     p300.blow_out(mm_tube.top(-2))
     p300.drop_tip()
@@ -254,15 +239,17 @@ def transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20):
     pip = p300 if VOLUME_MMIX >= 20 else p20
     pip.pick_up_tip()
     # get initial fluid hight to avoid overflowing mm when aspiring
-    initial_hight = get_mm_hight(VOLUME_MMIX)
+    mm_volume = VOLUME_MMIX * NUM_SAMPLES
+    volume_hight = get_mm_hight(mm_volume)
     for set in dest_sets:
         # check hight and if it is low enought, aim for the bottom
-        if initial_hight < -30:
-            disp_loc = mm_tube.bottom(2)
+        if volume_hight < 5:
+            disp_loc = mm_tube.bottom(1)
         else:
-            # reduce fluid hight each time mm is aspired
-            disp_loc = mm_tube.top(initial_hight)
-            initial_hight += -6
+            disp_loc = mm_tube.bottom(volume_hight)
+            # reclaculate volume hight
+            mm_volume -= VOLUME_MMIX * max_trans_per_asp
+            volume_hight = get_mm_hight(mm_volume)
         pip.aspirate(4, disp_loc)
         pip.distribute(VOLUME_MMIX, disp_loc, [d.bottom(2) for d in set],
                    air_gap=1, disposal_volume=0, new_tip='never')

@@ -1,6 +1,7 @@
 from opentrons import protocol_api
 from opentrons.drivers.rpi_drivers import gpio
 import time
+import math
 
 # Metadata
 metadata = {
@@ -12,13 +13,13 @@ metadata = {
 
 # Parameters to adapt the protocol
 NUM_SAMPLES = 96
-MM_LABWARE = 'covidwarriors aluminum block'
+MM_LABWARE = 'opentrons aluminum block'
 PCR_LABWARE = 'opentrons aluminum nest plate'
-ELUTION_LABWARE = 'opentrons aluminum biorad plate'
-PREPARE_MASTERMIX = True
+ELUTION_LABWARE = 'opentrons aluminum nest plate'
+PREPARE_MASTERMIX = False
 MM_TYPE = 'MM1'
-TRANSFER_MASTERMIX = False
-TRANSFER_SAMPLES = False
+TRANSFER_MASTERMIX = True
+TRANSFER_SAMPLES = True
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number
@@ -64,7 +65,7 @@ TRANSFER_SAMPLES: True or False
 """
 
 # Calculated variables
-if MM_TYPE == 'mm3':
+if MM_TYPE == 'MM3':
     VOLUME_MMIX = 15
 else:
     VOLUME_MMIX = 20
@@ -125,7 +126,7 @@ def finish_run():
     #Set light color to blue
     gpio.set_button_light(0,0,1)
 
-def get_source_dest_coordinates(ELUTION_LABWARE,source_racks, pcr_plate):
+def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
     if 'strip' in ELUTION_LABWARE:
         sources = [
             tube
@@ -151,6 +152,48 @@ def get_source_dest_coordinates(ELUTION_LABWARE,source_racks, pcr_plate):
             for col in pcr_plate.columns()[6*v_block:6*(v_block+1)]
             for well in col[4*h_block:4*(h_block+1)]][:NUM_SAMPLES]
     return sources, dests
+
+def get_mm_hight(VOLUME_MMIX):
+    # depending on the number of samples, start at a different hight
+    if VOLUME_MMIX == 20:
+        if NUM_SAMPLES <= 24:
+            disp_loc = -30
+        elif NUM_SAMPLES <= 48:
+            disp_loc = -24
+        elif NUM_SAMPLES <= 72:
+            disp_loc = -18
+        else:
+            disp_loc = -12
+        return disp_loc
+    else:
+        if NUM_SAMPLES <= 24:
+            disp_loc = -38
+        elif NUM_SAMPLES <= 48:
+            disp_loc = -32
+        elif NUM_SAMPLES <= 72:
+            disp_loc = -26
+        else:
+            disp_loc = -20
+        return disp_loc
+
+def homogenize_mm(mm_tube, p300, times=5):
+    # homogenize mastermix tube a given number of times
+    p300.pick_up_tip()
+    initial_hight = get_mm_hight(VOLUME_MMIX)
+    if initial_hight < -30:
+        disp_loc = -28
+    else:
+        disp_loc = initial_hight
+    #p300.mix(5, 200, mm_tube.bottom(5))
+    for i in range(times):
+        for j in range(5):
+            # depending on the number of samples, start at a different hight and move as it aspires
+            p300.aspirate(40, mm_tube.top(disp_loc-(3*j)))
+        # empty pipete
+        p300.dispense(200, mm_tube.top(disp_loc))
+    # clow out before dropping tip
+    p300.blow_out(mm_tube.top(-2))
+    p300.drop_tip()
 
 def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
     # setup mastermix coordinates
@@ -180,29 +223,26 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
 
     # create mastermix
     mm_tube = mm_rack.wells()[0]
-    mm_tube_vol = 0
     for tube, vol in mm_dict[MM_TYPE].items():
         mm_vol = vol*(NUM_SAMPLES+5)
         disp_loc = mm_tube.top(-10)
         pip = p300 if mm_vol > 20 else p20
         pip.pick_up_tip()
         #pip.transfer(mm_vol, tube.bottom(0.5), disp_loc, air_gap=2, touch_tip=True, new_tip='never')
-        air_gap_vol = 20
-        num_transfers = mm_vol//(200-air_gap_vol)
-        for i in range(num_transfers+1):
-            transfer_vol = mm_vol - (200-air_gap_vol)*i
+        air_gap_vol = 5
+        num_transfers = math.ceil(mm_vol/(200-air_gap_vol))
+        for i in range(num_transfers):
+            if i == 0:
+                transfer_vol = mm_vol % (200-air_gap_vol)
+            else:
+                transfer_vol = (200-air_gap_vol)
             pip.transfer(transfer_vol, tube.bottom(0.5), disp_loc, air_gap=air_gap_vol, new_tip='never')
             pip.blow_out(disp_loc)
         pip.aspirate(5, mm_tube.top(2))
         pip.drop_tip()
-    p300.pick_up_tip()
-    #p300.mix(5, 200, mm_tube.bottom(5))
-    for i in range(5):
-        for j in range(5):
-            disp_loc = -10-(3*i)
-            p300.aspirate(40, mm_tube.top(disp_loc))
-        p300.dispense(200, mm_tube.top(-22))
-    p300.drop_tip()
+
+    # homogenize mastermix
+    homogenize_mm(mm_tube, p300)
 
     return mm_tube
 
@@ -213,18 +253,35 @@ def transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20):
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
     pip = p300 if VOLUME_MMIX >= 20 else p20
     pip.pick_up_tip()
+    # get initial fluid hight to avoid overflowing mm when aspiring
+    initial_hight = get_mm_hight(VOLUME_MMIX)
     for set in dest_sets:
-        pip.distribute(VOLUME_MMIX, mm_tube, [d.bottom(2) for d in set],
+        # check hight and if it is low enought, aim for the bottom
+        if initial_hight < -30:
+            disp_loc = mm_tube.bottom(2)
+        else:
+            # reduce fluid hight each time mm is aspired
+            disp_loc = mm_tube.top(initial_hight)
+            initial_hight += -6
+        pip.aspirate(4, disp_loc)
+        pip.distribute(VOLUME_MMIX, disp_loc, [d.bottom(2) for d in set],
                    air_gap=1, disposal_volume=0, new_tip='never')
+        pip.blow_out(disp_loc)
     pip.drop_tip()
 
-def transfer_samples(sources, dests, p20):
+def transfer_samples(ELUTION_LABWARE, sources, dests, p20):
+    # hight for aspiration has to be different depending if you ar useing tubes or wells
+    if 'strip' in ELUTION_LABWARE or 'plate' in ELUTION_LABWARE:
+        hight = 1.5
+    else:
+        hight = 1
+    # transfer
     for s, d in zip(sources, dests):
         p20.pick_up_tip()
-        p20.transfer(5, s.bottom(2), d.bottom(2), air_gap=2, new_tip='never')
+        p20.transfer(7, s.bottom(hight), d.bottom(2), air_gap=2, new_tip='never')
         #p20.mix(1, 10, d.bottom(2))
         #p20.blow_out(d.top(-2))
-        p20.aspirate(1, d.top(2))
+        p20.aspirate(1, d.top(-2))
         p20.drop_tip()
 
 # RUN PROTOCOL
@@ -293,6 +350,7 @@ following:\nopentrons plastic 2ml tubes\nopentrons plastic 1.5ml tubes\nopentron
         mm_tube = prepare_mastermix(MM_TYPE, mm_rack, p300, p20)
     else:
         mm_tube = mm_rack.wells()[0]
+        homogenize_mm(mm_tube, p300)
 
     # transfer mastermix
     if TRANSFER_MASTERMIX:
@@ -300,6 +358,6 @@ following:\nopentrons plastic 2ml tubes\nopentrons plastic 1.5ml tubes\nopentron
 
     # transfer samples to corresponding locations
     if TRANSFER_SAMPLES:
-        transfer_samples(sources, dests, p20)
+        transfer_samples(ELUTION_LABWARE, sources, dests, p20)
 
     finish_run()

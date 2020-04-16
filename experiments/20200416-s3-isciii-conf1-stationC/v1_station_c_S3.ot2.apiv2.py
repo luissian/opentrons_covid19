@@ -17,9 +17,9 @@ MM_LABWARE = 'opentrons aluminum block'
 MMTUBE_LABWARE = '2ml tubes'
 PCR_LABWARE = 'opentrons aluminum nest plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
-PREPARE_MASTERMIX = True
+PREPARE_MASTERMIX = False
 MM_TYPE = 'MM1'
-TRANSFER_MASTERMIX = True
+TRANSFER_MASTERMIX = False
 TRANSFER_SAMPLES = True
 
 """
@@ -301,7 +301,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # tempdeck module
     tempdeck = ctx.load_module('tempdeck', '10')
-    tempdeck.set_temperature(4)
+    #tempdeck.set_temperature(4)
 
     # check mastermix labware type
     if MM_LABWARE not in MM_LW_DICT:

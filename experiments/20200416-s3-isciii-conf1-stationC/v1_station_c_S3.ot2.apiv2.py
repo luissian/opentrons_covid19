@@ -164,7 +164,7 @@ def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
 def get_mm_hight(volume):
     # depending on the volume in tube, get mm fluid hight
     hight = volume // (3.14 * 3.14 * MMTUBE_LW_DICT[MMTUBE_LABWARE])
-    hight -= 10
+    hight -= 15
     if hight < 5:
         return 1
     else:
@@ -173,15 +173,16 @@ def get_mm_hight(volume):
 def homogenize_mm(mm_tube, p300, times=5):
     # homogenize mastermix tube a given number of times
     p300.pick_up_tip()
-    volume_hight = get_mm_hight(VOLUME_MMIX)
+    volume = VOLUME_MMIX * NUM_SAMPLES
+    volume_hight = get_mm_hight(volume)
     #p300.mix(5, 200, mm_tube.bottom(5))
     for i in range(times):
         for j in range(5):
             # depending on the number of samples, start at a different hight and move as it aspires
-            aspirate_hight = volume_hight-(3*j)
-            if aspirate_hight < 5:
+            if volume_hight < 12:
                 p300.aspirate(40, mm_tube.bottom(1))
             else:
+                aspirate_hight = volume_hight-(3*j)
                 p300.aspirate(40, mm_tube.bottom(aspirate_hight))
         # empty pipete
         p300.dispense(200, mm_tube.bottom(volume_hight))

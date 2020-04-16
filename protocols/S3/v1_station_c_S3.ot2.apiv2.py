@@ -14,6 +14,7 @@ metadata = {
 # Parameters to adapt the protocol
 NUM_SAMPLES = 96
 MM_LABWARE = 'opentrons aluminum block'
+MMTUBE_LABWARE = '2ml tubes'
 PCR_LABWARE = 'opentrons aluminum nest plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 PREPARE_MASTERMIX = True
@@ -28,6 +29,9 @@ MM_LABWARE must be one of the following:
     opentrons plastic block
     pentrons aluminum block
     covidwarriors aluminum block
+
+MMTUBE_LABWARE must be one of the following:
+    2ml tubes
 
 PCR_LABWARE must be one of the following:
     opentrons aluminum biorad plate
@@ -61,7 +65,6 @@ MM_TYPE must be one of the following:
 TRANSFER_MASTERMIX: True or False
 
 TRANSFER_SAMPLES: True or False
-
 """
 
 # Calculated variables
@@ -104,6 +107,11 @@ EL_LW_DICT = {
     'opentrons aluminum strip short': 'opentrons_aluminumblock_96_pcrstrips_100ul',
     'covidwarriors aluminum biorad strip alpha': 'covidwarriors_aluminumblock_96_bioradwellplate_pcrstripsalpha_200ul',
     'covidwarriors aluminum biorad strip short': 'covidwarriors_aluminumblock_96_bioradwellplate_pcrstrips_100ul'
+}
+
+MMTUBE_LW_DICT = {
+    # Radius of each possible tube
+    '2ml tubes': 8
 }
 
 # Function definitions
@@ -155,7 +163,7 @@ def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
 
 def get_mm_hight(volume):
     # depending on the volume in tube, get mm fluid hight
-    hight = volume // 50.24
+    hight = volume // (3.14 * 3.14 * MMTUBE_LW_DICT[MMTUBE_LABWARE])
     if hight < 5:
         return 1
     else:
@@ -302,6 +310,13 @@ following:\nopentrons plastic block\nopentrons aluminum block\ncovidwarriors alu
     mm_rack = ctx.load_labware(
         MM_LW_DICT[MM_LABWARE], '11',
         MM_LABWARE)
+
+    # check mastermix tube labware type
+    if MMTUBE_LABWARE not in MMTUBE_LW_DICT:
+        raise Exception('Invalid MMTUBE_LABWARE. Must be one of the \
+    following:\no2ml tubes')
+
+    # This one is not loaded, it contains the raius of each tube to calculate volume hight
 
     # check pcr plate
     if PCR_LABWARE not in PCR_LW_DICT:

@@ -92,7 +92,7 @@ def save_tip_info(file_path):
         with open(file_path, 'w') as outfile:
             json.dump(data, outfile)
 
-def pick_up(pip):
+def pick_up(pip,tip_log):
     if tip_log['count'][pip] == tip_log['max'][pip]:
         ctx.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
 resuming.')
@@ -101,12 +101,12 @@ resuming.')
     tip_log['count'][pip] += 1
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
 
-def transfer_buffer(bf_tube, dests, VOLUME_BUFFER, p1000):
+def transfer_buffer(bf_tube, dests, VOLUME_BUFFER, p1000,tip_log):
     max_trans_per_asp = 3  #230//(VOLUME_MMIX+5)
     split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
-    pip.pick_up()
+    pip.pick_up(tip_log)
     # get initial fluid height to avoid overflowing mm when aspiring
     for set in dest_sets:
         # check height and if it is low enought, aim for the bottom
@@ -135,7 +135,7 @@ def run(ctx: protocol_api.ProtocolContext):
     p300 = ctx.load_instrument('p300_single_gen2', 'right', tip_racks=tips300)
 
     ## retrieve tip_log
-    global tip_log = retrieve_tip_info(file_path = '/data/A/tip_log.json')
+    tip_log = retrieve_tip_info(file_path = '/data/A/tip_log.json')
 
     # check buffer labware type
     if BUFFER_LABWARE not in BUFFER_LW_DICT:

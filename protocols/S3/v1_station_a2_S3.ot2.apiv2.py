@@ -14,7 +14,7 @@ NUM_SAMPLES = 96
 SAMPLE_VOLUME = 300
 TIP_TRACK = False
 
-def retrieve_tip_info(file_path){
+def retrieve_tip_info(file_path):
     tip_log = {}
 
     if tip_log and not ctx.is_simulating():
@@ -33,14 +33,14 @@ def retrieve_tip_info(file_path){
     tip_log['max'] = {p1000: len(tip_log['tips'][p1000])}
 
     return tip_log
-}
 
-def save_tip_info(file_path){
+
+def save_tip_info(file_path):
     if not ctx.is_simulating():
         data = {'tips1000': tip_log['count'][p1000]}
         with open(file_path, 'w') as outfile:
             json.dump(data, outfile)
-}
+
 
 def pick_up(pip):
     nonlocal tip_log

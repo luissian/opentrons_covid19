@@ -13,103 +13,34 @@ metadata = {
 
 # Parameters to adapt the protocol
 NUM_SAMPLES = 96
-MM_LABWARE = 'opentrons aluminum block'
-MMTUBE_LABWARE = '2ml tubes'
-PCR_LABWARE = 'opentrons aluminum nest plate'
-ELUTION_LABWARE = 'opentrons aluminum nest plate'
-PREPARE_MASTERMIX = True
-MM_TYPE = 'MM1'
-TRANSFER_MASTERMIX = True
-TRANSFER_SAMPLES = True
+BUFFER_LABWARE = 'opentrons plastic 50 ml tubes'
+DESTINATION_LABWARE = 'opentrons plastic 2ml tubes'
+DEST_TUBE = '2ml tubes'
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number
 
-MM_LABWARE must be one of the following:
-    opentrons plastic block
-    pentrons aluminum block
-    covidwarriors aluminum block
+BUFFER_LABWARE must be one of the following:
+    opentrons plastic 50 ml tubes
 
-MMTUBE_LABWARE must be one of the following:
-    2ml tubes
-
-PCR_LABWARE must be one of the following:
-    opentrons aluminum biorad plate
-    opentrons aluminum nest plate
-    opentrons aluminum strip short
-    covidwarriors aluminum biorad plate
-    covidwarriors aluminum biorad strip short
-
-ELUTION_LABWARE must be one of the following:
+DESTINATION_LABWARE must be one of the following:
     opentrons plastic 2ml tubes
-    opentrons plastic 1.5ml tubes
-    opentrons aluminum 2ml tubes
-    opentrons aluminum 1.5ml tubes
-    covidwarriors aluminum 2ml tubes
-    covidwarriors aluminum 1.5ml tubes
-    opentrons aluminum biorad plate
-    opentrons aluminum nest plate
-    covidwarriors aluminum biorad plate
-    opentrons aluminum strip alpha
-    opentrons aluminum strip short
-    covidwarriors aluminum biorad strip alpha
-    covidwarriors aluminum biorad strip short
 
-PREPARE_MASTERMIX: True or False
-
-MM_TYPE must be one of the following:
-    MM1
-    MM2
-    MM3
-
-TRANSFER_MASTERMIX: True or False
-
-TRANSFER_SAMPLES: True or False
+DEST_TUBE
+    2m tubes
 """
 
-# Calculated variables
-if MM_TYPE == 'MM3':
-    VOLUME_MMIX = 15
-else:
-    VOLUME_MMIX = 20
 
 # Constants
-MM_LW_DICT = {
-    'opentrons plastic block': 'opentrons_24_tuberack_generic_2ml_screwcap',
-    'opentrons aluminum block': 'opentrons_24_aluminumblock_generic_2ml_screwcap',
-    'covidwarriors aluminum block': 'covidwarriors_aluminumblock_24_screwcap_2000ul'
+BUFFER_LW_DICT = {
+    'opentrons plastic 50 ml tubes': 'opentrons_6_tuberack_falcon_50ml_conical'
 }
 
-PCR_LW_DICT = {
-    'opentrons aluminum biorad plate': 'opentrons_96_aluminumblock_biorad_wellplate_200ul',
-    'opentrons aluminum nest plate': 'opentrons_96_aluminumblock_nest_wellplate_100ul',
-    'opentrons aluminum strip short': 'opentrons_aluminumblock_96_pcrstrips_100ul',
-    'covidwarriors aluminum biorad plate': 'covidwarriors_aluminumblock_96_bioradwellplate_200ul',
-    'covidwarriors aluminum biorad strip short': 'covidwarriors_aluminumblock_96_bioradwellplate_pcrstrips_100ul'
-}
-
-EL_LW_DICT = {
-    # tubes
+DESTINATION_LW_DICT = {
     'opentrons plastic 2ml tubes': 'opentrons_24_tuberack_generic_2ml_screwcap',
-    'opentrons plastic 1.5ml tubes': 'opentrons_24_tuberack_nest_1.5ml_screwcap',
-    'opentrons aluminum 2ml tubes': 'opentrons_24_aluminumblock_generic_2ml_screwcap',
-    'opentrons aluminum 1.5ml tubes': 'opentrons_24_aluminumblock_nest_1.5ml_screwcap',
-    'covidwarriors aluminum 2ml tubes': 'covidwarriors_aluminumblock_24_screwcap_2000ul',
-    'covidwarriors aluminum 1.5ml tubes': 'covidwarriors_aluminumblock_24_screwcap_2000ul',
-    # PCR plate
-    'opentrons aluminum biorad plate': 'opentrons_96_aluminumblock_biorad_wellplate_200ul',
-    'opentrons aluminum nest plate': 'opentrons_96_aluminumblock_nest_wellplate_100ul',
-    'covidwarriors aluminum biorad plate': 'covidwarriors_aluminumblock_96_bioradwellplate_200ul',
-    # Strips
-    #'large strips': 'opentrons_96_aluminumblock_generic_pcr_strip_200ul',
-    #'short strips': 'opentrons_96_aluminumblock_generic_pcr_strip_200ul',
-    'opentrons aluminum strip alpha': 'opentrons_aluminumblock_96_pcrstripsalpha_200ul',
-    'opentrons aluminum strip short': 'opentrons_aluminumblock_96_pcrstrips_100ul',
-    'covidwarriors aluminum biorad strip alpha': 'covidwarriors_aluminumblock_96_bioradwellplate_pcrstripsalpha_200ul',
-    'covidwarriors aluminum biorad strip short': 'covidwarriors_aluminumblock_96_bioradwellplate_pcrstrips_100ul'
 }
 
-MMTUBE_LW_DICT = {
+DESTUBE_LW_DICT = {
     # Radius of each possible tube
     '2ml tubes': 4
 }
@@ -134,120 +65,46 @@ def finish_run():
     #Set light color to blue
     gpio.set_button_light(0,0,1)
 
-def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
-    if 'strip' in ELUTION_LABWARE:
-        sources = [
-            tube
-            for i, rack in enumerate(source_racks)
-            for col in [
-                rack.columns()[c] if i < 2 else rack.columns()[c+1]
-                for c in [0, 5, 10]
-            ]
-            for tube in col
-        ][:NUM_SAMPLES]
-        dests = pcr_plate.wells()[:NUM_SAMPLES]
-    elif 'plate' in ELUTION_LABWARE:
-        sources = source_racks.wells()[:NUM_SAMPLES]
-        dests = pcr_plate.wells()[:NUM_SAMPLES]
+
+def retrieve_tip_info(file_path):
+    tip_log = {}
+
+    if tip_log and not ctx.is_simulating():
+        if os.path.isfile(file_path):
+            with open(file_path) as json_file:
+                data = json.load(json_file)
+                if 'tips1000' in data:
+                    tip_log['count'] = {p1000: data['tips1000']}
+                else:
+                    tip_log['count'] = {p1000: 0}
     else:
-        sources = [
-            tube
-            for rack in source_racks for tube in rack.wells()][:NUM_SAMPLES]
-        dests = [
-            well
-            for v_block in range(2)
-            for h_block in range(2)
-            for col in pcr_plate.columns()[6*v_block:6*(v_block+1)]
-            for well in col[4*h_block:4*(h_block+1)]][:NUM_SAMPLES]
-    return sources, dests
+        tip_log['count'] = {p1000: 0}
 
-def get_mm_height(volume):
-    # depending on the volume in tube, get mm fluid height
-    height = volume // (3.14 * (MMTUBE_LW_DICT[MMTUBE_LABWARE] ** 2))
-    height -= 18
-    if height < 5:
-        return 1
-    else:
-        return height
+    tip_log['tips'] = {
+        p1000: [tip for rack in tipracks1000 for tip in rack.wells()]}
+    tip_log['max'] = {p1000: len(tip_log['tips'][p1000])}
 
-def homogenize_mm(mm_tube, p300, times=5):
-    # homogenize mastermix tube a given number of times
-    p300.pick_up_tip()
-    volume = VOLUME_MMIX * NUM_SAMPLES
-    volume_height = get_mm_height(volume)
-    #p300.mix(5, 200, mm_tube.bottom(5))
-    for i in range(times):
-        for j in range(5):
-            # depending on the number of samples, start at a different height and move as it aspires
-            if volume_height < 12:
-                p300.aspirate(40, mm_tube.bottom(1))
-            else:
-                aspirate_height = volume_height-(3*j)
-                p300.aspirate(40, mm_tube.bottom(aspirate_height))
-        # empty pipete
-        p300.dispense(200, mm_tube.bottom(volume_height))
-    # clow out before dropping tip
-    p300.blow_out(mm_tube.top(-2))
-    p300.drop_tip()
+    return tip_log
 
-def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
-    # setup mastermix coordinates
-    """ mastermix component maps """
-    mm1 = {
-        tube: vol
-        for tube, vol in zip(
-            [well for col in mm_rack.columns()[2:5] for well in col][:10],
-            [2.85, 12.5, 0.4, 1, 1, 0.25, 0.25, 0.5, 0.25, 1]
-        )
-    }
-    mm2 = {
-        tube: vol
-        for tube, vol in zip(
-            [mm_rack.wells_by_name()[well] for well in ['A3', 'C5', 'D5']],
-            [10, 4, 1]
-        )
-    }
-    mm3 = {
-        tube: vol
-        for tube, vol in zip(
-            [mm_rack.wells_by_name()[well] for well in ['A6', 'B6']],
-            [13, 2]
-        )
-    }
-    mm_dict = {'MM1': mm1, 'MM2': mm2, 'MM3': mm3}
+def save_tip_info(file_path):
+    if not ctx.is_simulating():
+        data = {'tips1000': tip_log['count'][p1000]}
+        with open(file_path, 'w') as outfile:
+            json.dump(data, outfile)
 
-    # create mastermix
-    mm_tube = mm_rack.wells()[0]
-    for tube, vol in mm_dict[MM_TYPE].items():
-        mm_vol = vol*(NUM_SAMPLES+5)
-        disp_loc = mm_tube.top(-10)
-        pip = p300 if mm_vol > 20 else p20
-        pip.pick_up_tip()
-        #pip.transfer(mm_vol, tube.bottom(0.5), disp_loc, air_gap=2, touch_tip=True, new_tip='never')
-        air_gap_vol = 5
-        num_transfers = math.ceil(mm_vol/(200-air_gap_vol))
-        for i in range(num_transfers):
-            if i == 0:
-                transfer_vol = mm_vol % (200-air_gap_vol)
-            else:
-                transfer_vol = (200-air_gap_vol)
-            pip.transfer(transfer_vol, tube.bottom(0.5), disp_loc, air_gap=air_gap_vol, new_tip='never')
-            pip.blow_out(disp_loc)
-        pip.aspirate(5, mm_tube.top(2))
-        pip.drop_tip()
 
-    # homogenize mastermix
-    homogenize_mm(mm_tube, p300)
+def pick_up(pip):
+    nonlocal tip_log
+    if tip_log['count'][pip] == tip_log['max'][pip]:
+        ctx.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
+resuming.')
+        pip.reset_tipracks()
+        tip_log['count'][pip] = 0
+    tip_log['count'][pip] += 1
+    pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
 
-    return mm_tube
-
-def transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20):
-    max_trans_per_asp = 8  #230//(VOLUME_MMIX+5)
-    split_ind = [ind for ind in range(0, NUM_SAMPLES, max_trans_per_asp)]
-    dest_sets = [dests[split_ind[i]:split_ind[i+1]]
-             for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
-    pip = p300 if VOLUME_MMIX >= 20 else p20
-    pip.pick_up_tip()
+def transfer_buffer(mm_tube, dests, VOLUME_BUFFER, p1000):
+    pip.pick_up()
     # get initial fluid height to avoid overflowing mm when aspiring
     mm_volume = VOLUME_MMIX * NUM_SAMPLES
     volume_height = get_mm_height(mm_volume)

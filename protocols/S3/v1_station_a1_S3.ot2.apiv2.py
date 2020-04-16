@@ -93,7 +93,6 @@ def save_tip_info(file_path):
             json.dump(data, outfile)
 
 def pick_up(pip):
-    nonlocal tip_log
     if tip_log['count'][pip] == tip_log['max'][pip]:
         ctx.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
 resuming.')
@@ -136,7 +135,7 @@ def run(ctx: protocol_api.ProtocolContext):
     p300 = ctx.load_instrument('p300_single_gen2', 'right', tip_racks=tips300)
 
     ## retrieve tip_log
-    tip_log = retrieve_tip_info(file_path = '/data/A/tip_log.json')
+    global tip_log = retrieve_tip_info(file_path = '/data/A/tip_log.json')
 
     # check buffer labware type
     if BUFFER_LABWARE not in BUFFER_LW_DICT:

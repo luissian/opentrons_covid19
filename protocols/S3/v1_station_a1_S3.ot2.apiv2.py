@@ -128,7 +128,7 @@ def run(ctx: protocol_api.ProtocolContext):
         ctx.load_labware('opentrons_96_filtertiprack_1000ul', slot)
         for slot in ['3', '6']
     ]
-    tips300 = [ctx.load_labware('opentrons_96_filtertiprack_200ul', '3')]
+    tips300 = [ctx.load_labware('opentrons_96_filtertiprack_200ul', '9')]
 
     # define pipettes
     p1000 = ctx.load_instrument('p20_single_gen2', 'left', tip_racks=tips1000)

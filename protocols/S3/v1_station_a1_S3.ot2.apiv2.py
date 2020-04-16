@@ -135,6 +135,9 @@ def run(ctx: protocol_api.ProtocolContext):
     p1000 = ctx.load_instrument('p20_single_gen2', 'left', tip_racks=tips1000)
     p300 = ctx.load_instrument('p300_single_gen2', 'right', tip_racks=tips300)
 
+    ## retrieve tip_log
+    tip_log = retrieve_tip_info(file_path = '/data/A/tip_log.json')
+
     # check buffer labware type
     if BUFFER_LABWARE not in BUFFER_LW_DICT:
         raise Exception('Invalid BF_LABWARE. Must be one of the \
@@ -173,5 +176,8 @@ following:\nopentrons plastic 50ml tubes')
     # transfer buffer to tubes
     for bf_tube,dests in zip(bf_tubes,dests):
         transfer_buffer(bf_tube, dests,VOLUME_BUFFER, p1000)
+
+    # track final used tip
+    save_tip_info(file_path = '/data/A/tip_log.json')
 
     finish_run()

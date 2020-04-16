@@ -163,7 +163,7 @@ def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
 
 def get_mm_height(volume):
     # depending on the volume in tube, get mm fluid height
-    height = volume // (3.14 * 3.14 * MMTUBE_LW_DICT[MMTUBE_LABWARE])
+    height = volume // (3.14 * (MMTUBE_LW_DICT[MMTUBE_LABWARE] ** 2))
     height -= 18
     if height < 5:
         return 1

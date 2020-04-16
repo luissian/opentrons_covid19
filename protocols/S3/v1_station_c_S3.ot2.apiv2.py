@@ -111,14 +111,14 @@ EL_LW_DICT = {
 
 MMTUBE_LW_DICT = {
     # Radius of each possible tube
-    '2ml tubes': 8
+    '2ml tubes': 4
 }
 
 # Function definitions
 def check_door():
     return gpio.read_window_switches()
 
-def confirm_door_is_closed(ctx):
+def confirm_door_is_closed(robot=ctx):
     #Check if door is opened
     if check_door() == False:
         #Set light color to red and pause
@@ -134,7 +134,7 @@ def finish_run():
     #Set light color to blue
     gpio.set_button_light(0,0,1)
 
-def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
+def get_source_dest_coordinates(ELUTION_LABWARE=ELUTION_LABWARE, source_racks=source_racks, pcr_plate=pcr_plate):
     if 'strip' in ELUTION_LABWARE:
         sources = [
             tube
@@ -161,7 +161,7 @@ def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
             for well in col[4*h_block:4*(h_block+1)]][:NUM_SAMPLES]
     return sources, dests
 
-def get_mm_hight(volume):
+def get_mm_hight(volume=volume):
     # depending on the volume in tube, get mm fluid hight
     hight = volume // (3.14 * 3.14 * MMTUBE_LW_DICT[MMTUBE_LABWARE])
     if hight < 5:
@@ -169,7 +169,7 @@ def get_mm_hight(volume):
     else:
         return hight - 5
 
-def homogenize_mm(mm_tube, p300, times=5):
+def homogenize_mm(mm_tube=mm_tube, p300=p300, times=5):
     # homogenize mastermix tube a given number of times
     p300.pick_up_tip()
     volume_hight = get_mm_hight(VOLUME_MMIX)
@@ -188,7 +188,7 @@ def homogenize_mm(mm_tube, p300, times=5):
     p300.blow_out(mm_tube.top(-2))
     p300.drop_tip()
 
-def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
+def prepare_mastermix(MM_TYPE=MM_TYPE, mm_rack=mm_rack, p300=p300, p20=p20):
     # setup mastermix coordinates
     """ mastermix component maps """
     mm1 = {
@@ -239,7 +239,7 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
 
     return mm_tube
 
-def transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20):
+def transfer_mastermix(mm_tube=mm_tube, dests=dests, VOLUME_MMIX=VOLUME_MMIX, p300=p300, p20=p20):
     max_trans_per_asp = 8  #230//(VOLUME_MMIX+5)
     split_ind = [ind for ind in range(0, NUM_SAMPLES, max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
@@ -264,7 +264,7 @@ def transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20):
         pip.blow_out(disp_loc)
     pip.drop_tip()
 
-def transfer_samples(ELUTION_LABWARE, sources, dests, p20):
+def transfer_samples(ELUTION_LABWARE=ELUTION_LABWARE, sources=sources, dests=dests, p20=p20):
     # hight for aspiration has to be different depending if you ar useing tubes or wells
     if 'strip' in ELUTION_LABWARE or 'plate' in ELUTION_LABWARE:
         hight = 1.5

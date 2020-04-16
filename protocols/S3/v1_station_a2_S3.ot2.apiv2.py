@@ -11,7 +11,7 @@ metadata = {
 }
 
 NUM_SAMPLES = 96
-SAMPLE_VOLUME = 400
+SAMPLE_VOLUME = 300
 TIP_TRACK = False
 
 

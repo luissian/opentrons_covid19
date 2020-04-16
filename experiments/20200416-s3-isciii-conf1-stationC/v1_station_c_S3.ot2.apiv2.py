@@ -19,8 +19,8 @@ PCR_LABWARE = 'opentrons aluminum nest plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 PREPARE_MASTERMIX = False
 MM_TYPE = 'MM1'
-TRANSFER_MASTERMIX = True
-TRANSFER_SAMPLES = False
+TRANSFER_MASTERMIX = False
+TRANSFER_SAMPLES = True
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number
@@ -161,31 +161,31 @@ def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
             for well in col[4*h_block:4*(h_block+1)]][:NUM_SAMPLES]
     return sources, dests
 
-def get_mm_hight(volume):
-    # depending on the volume in tube, get mm fluid hight
-    hight = volume // (3.14 * 3.14 * MMTUBE_LW_DICT[MMTUBE_LABWARE])
-    hight -= 15
-    if hight < 5:
+def get_mm_height(volume):
+    # depending on the volume in tube, get mm fluid height
+    height = volume // (3.14 * 3.14 * MMTUBE_LW_DICT[MMTUBE_LABWARE])
+    height -= 18
+    if height < 5:
         return 1
     else:
-        return hight
+        return height
 
 def homogenize_mm(mm_tube, p300, times=5):
     # homogenize mastermix tube a given number of times
     p300.pick_up_tip()
     volume = VOLUME_MMIX * NUM_SAMPLES
-    volume_hight = get_mm_hight(volume)
+    volume_height = get_mm_height(volume)
     #p300.mix(5, 200, mm_tube.bottom(5))
     for i in range(times):
         for j in range(5):
-            # depending on the number of samples, start at a different hight and move as it aspires
-            if volume_hight < 12:
+            # depending on the number of samples, start at a different height and move as it aspires
+            if volume_height < 12:
                 p300.aspirate(40, mm_tube.bottom(1))
             else:
-                aspirate_hight = volume_hight-(3*j)
-                p300.aspirate(40, mm_tube.bottom(aspirate_hight))
+                aspirate_height = volume_height-(3*j)
+                p300.aspirate(40, mm_tube.bottom(aspirate_height))
         # empty pipete
-        p300.dispense(200, mm_tube.bottom(volume_hight))
+        p300.dispense(200, mm_tube.bottom(volume_height))
     # clow out before dropping tip
     p300.blow_out(mm_tube.top(-2))
     p300.drop_tip()
@@ -248,18 +248,18 @@ def transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20):
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
     pip = p300 if VOLUME_MMIX >= 20 else p20
     pip.pick_up_tip()
-    # get initial fluid hight to avoid overflowing mm when aspiring
+    # get initial fluid height to avoid overflowing mm when aspiring
     mm_volume = VOLUME_MMIX * NUM_SAMPLES
-    volume_hight = get_mm_hight(mm_volume)
+    volume_height = get_mm_height(mm_volume)
     for set in dest_sets:
-        # check hight and if it is low enought, aim for the bottom
-        if volume_hight < 5:
+        # check height and if it is low enought, aim for the bottom
+        if volume_height < 5:
             disp_loc = mm_tube.bottom(1)
         else:
-            disp_loc = mm_tube.bottom(volume_hight)
-            # reclaculate volume hight
+            # reclaculate volume height
             mm_volume -= VOLUME_MMIX * max_trans_per_asp
-            volume_hight = get_mm_hight(mm_volume)
+            volume_height = get_mm_height(mm_volume)
+            disp_loc = mm_tube.bottom(volume_height)
         pip.aspirate(4, disp_loc)
         pip.distribute(VOLUME_MMIX, disp_loc, [d.bottom(2) for d in set],
                    air_gap=1, disposal_volume=0, new_tip='never')
@@ -267,15 +267,15 @@ def transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20):
     pip.drop_tip()
 
 def transfer_samples(ELUTION_LABWARE, sources, dests, p20):
-    # hight for aspiration has to be different depending if you ar useing tubes or wells
+    # height for aspiration has to be different depending if you ar useing tubes or wells
     if 'strip' in ELUTION_LABWARE or 'plate' in ELUTION_LABWARE:
-        hight = 1.5
+        height = 1.5
     else:
-        hight = 1
+        height = 1
     # transfer
     for s, d in zip(sources, dests):
         p20.pick_up_tip()
-        p20.transfer(7, s.bottom(hight), d.bottom(2), air_gap=2, new_tip='never')
+        p20.transfer(7, s.bottom(height), d.bottom(2), air_gap=2, new_tip='never')
         #p20.mix(1, 10, d.bottom(2))
         #p20.blow_out(d.top(-2))
         p20.aspirate(1, d.top(-2))
@@ -318,7 +318,7 @@ following:\nopentrons plastic block\nopentrons aluminum block\ncovidwarriors alu
         raise Exception('Invalid MMTUBE_LABWARE. Must be one of the \
     following:\no2ml tubes')
 
-    # This one is not loaded, it contains the raius of each tube to calculate volume hight
+    # This one is not loaded, it contains the raius of each tube to calculate volume height
 
     # check pcr plate
     if PCR_LABWARE not in PCR_LW_DICT:

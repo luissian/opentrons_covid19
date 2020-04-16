@@ -352,7 +352,8 @@ following:\nopentrons plastic 2ml tubes\nopentrons plastic 1.5ml tubes\nopentron
         mm_tube = prepare_mastermix(MM_TYPE, mm_rack, p300, p20)
     else:
         mm_tube = mm_rack.wells()[0]
-        homogenize_mm(mm_tube, p300)
+        if TRANSFER_MASTERMIX:
+            homogenize_mm(mm_tube, p300)
 
     # transfer mastermix
     if TRANSFER_MASTERMIX:

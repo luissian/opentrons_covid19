@@ -20,7 +20,7 @@ ELUTION_LABWARE = 'opentrons aluminum nest plate'
 PREPARE_MASTERMIX = False
 MM_TYPE = 'MM1'
 TRANSFER_MASTERMIX = True
-TRANSFER_SAMPLES = True
+TRANSFER_SAMPLES = False
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number
@@ -164,10 +164,11 @@ def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
 def get_mm_hight(volume):
     # depending on the volume in tube, get mm fluid hight
     hight = volume // (3.14 * 3.14 * MMTUBE_LW_DICT[MMTUBE_LABWARE])
+    hight -= 10
     if hight < 5:
         return 1
     else:
-        return hight - 5
+        return hight
 
 def homogenize_mm(mm_tube, p300, times=5):
     # homogenize mastermix tube a given number of times
@@ -299,7 +300,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # tempdeck module
     tempdeck = ctx.load_module('tempdeck', '10')
-    tempdeck.set_temperature(4)
+    #tempdeck.set_temperature(4)
 
     # check mastermix labware type
     if MM_LABWARE not in MM_LW_DICT:
@@ -352,7 +353,8 @@ following:\nopentrons plastic 2ml tubes\nopentrons plastic 1.5ml tubes\nopentron
         mm_tube = prepare_mastermix(MM_TYPE, mm_rack, p300, p20)
     else:
         mm_tube = mm_rack.wells()[0]
-        homogenize_mm(mm_tube, p300)
+        if TRANSFER_MASTERMIX:
+            homogenize_mm(mm_tube, p300)
 
     # transfer mastermix
     if TRANSFER_MASTERMIX:

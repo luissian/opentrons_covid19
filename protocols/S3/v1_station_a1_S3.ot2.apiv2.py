@@ -103,24 +103,19 @@ resuming.')
     tip_log['count'][pip] += 1
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
 
-def transfer_buffer(mm_tube, dests, VOLUME_BUFFER, p1000):
+def transfer_buffer(bf_tube, dests, num_samples, VOLUME_BUFFER, p1000):
+    max_trans_per_asp = 3  #230//(VOLUME_MMIX+5)
+    split_ind = [ind for ind in range(0, num_samples, max_trans_per_asp)]
+    dest_sets = [dests[split_ind[i]:split_ind[i+1]]
+             for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
     pip.pick_up()
     # get initial fluid height to avoid overflowing mm when aspiring
-    mm_volume = VOLUME_MMIX * NUM_SAMPLES
-    volume_height = get_mm_height(mm_volume)
     for set in dest_sets:
         # check height and if it is low enought, aim for the bottom
-        if volume_height < 5:
-            disp_loc = mm_tube.bottom(1)
-        else:
-            # reclaculate volume height
-            mm_volume -= VOLUME_MMIX * max_trans_per_asp
-            volume_height = get_mm_height(mm_volume)
-            disp_loc = mm_tube.bottom(volume_height)
-        pip.aspirate(4, disp_loc)
-        pip.distribute(VOLUME_MMIX, disp_loc, [d.bottom(2) for d in set],
+        pip.aspirate(4, bf_tube.bottom(2))
+        pip.distribute(VOLUME_BUFFER, bf_tube.bottom(2), [d.bottom(2) for d in set],
                    air_gap=1, disposal_volume=0, new_tip='never')
-        pip.blow_out(disp_loc)
+        pip.blow_out(bf_tube.top(-20))
     pip.drop_tip()
 
 def transfer_samples(ELUTION_LABWARE, sources, dests, p20):

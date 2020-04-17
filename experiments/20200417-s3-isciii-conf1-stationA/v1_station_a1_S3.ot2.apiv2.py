@@ -3,6 +3,7 @@ from opentrons.drivers.rpi_drivers import gpio
 import time
 import math
 import json
+import os
 
 # Metadata
 metadata = {
@@ -83,6 +84,8 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
                     tip_log['count'] = {pip: 0}
         else:
             tip_log['count'] = {pip: 0}
+    else:
+        tip_log['count'] = {pip: 0}
 
     tip_log['tips'] = {
         pip: [tip for rack in tipracks for tip in rack.wells()]}
@@ -99,6 +102,7 @@ def save_tip_info(pip, file_path = '/data/A/tip_log.json'):
 def pick_up(pip,tiprack):
     ## retrieve tip_log
     global tip_log
+    tip_log = {}
     tip_log = retrieve_tip_info(pip,tiprack)
     if tip_log['count'][pip] == tip_log['max'][pip]:
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \

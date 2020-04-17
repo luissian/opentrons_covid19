@@ -121,6 +121,7 @@ def transfer_buffer(bf_tube, dests, VOLUME_BUFFER, pip,tiprack):
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):
+    global robot
     robot = ctx
     # confirm door is close
     if not ctx.is_simulating():

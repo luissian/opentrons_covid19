@@ -12,7 +12,7 @@ metadata = {
 }
 
 # Parameters to adapt the protocol
-NUM_SAMPLES = 10
+NUM_SAMPLES = 48
 BUFFER_LABWARE = 'opentrons plastic 50 ml tubes'
 DESTINATION_LABWARE = 'opentrons plastic 2ml tubes'
 DEST_TUBE = '2ml tubes'

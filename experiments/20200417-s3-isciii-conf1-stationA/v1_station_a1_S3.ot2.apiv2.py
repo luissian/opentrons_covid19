@@ -65,7 +65,7 @@ def confirm_door_is_closed():
         confirm_door_is_closed()
     else:
         #Set light color to green
-        gpio.set_button_light(0,1,0)
+        gpio.set_button_light(0,1,1)
 
 def finish_run():
     #Set light color to blue
@@ -73,8 +73,7 @@ def finish_run():
 
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
-    tip_log = {}
-    if tip_log and not robot.is_simulating():
+    if not robot.is_simulating():
         if os.path.isfile(file_path):
             with open(file_path) as json_file:
                 data = json.load(json_file)
@@ -82,8 +81,8 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
                     tip_log['count'] = {pip: data['tips1000']}
                 else:
                     tip_log['count'] = {pip: 0}
-    else:
-        tip_log['count'] = {pip: 0}
+        else:
+            tip_log['count'] = {pip: 0}
 
     tip_log['tips'] = {
         pip: [tip for rack in tipracks for tip in rack.wells()]}

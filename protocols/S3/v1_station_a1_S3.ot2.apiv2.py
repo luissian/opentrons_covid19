@@ -108,7 +108,7 @@ def transfer_buffer(bf_tube, dests, VOLUME_BUFFER, pip,tiprack):
     split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
-    pip.pick_up(pip,tiprack)
+    pick_up(pip,tiprack)
     # get initial fluid height to avoid overflowing mm when aspiring
     for set in dest_sets:
         # check height and if it is low enought, aim for the bottom

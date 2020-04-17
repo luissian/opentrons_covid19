@@ -12,7 +12,7 @@ metadata = {
 }
 
 # Parameters to adapt the protocol
-NUM_SAMPLES = 10
+NUM_SAMPLES = 48
 BUFFER_LABWARE = 'opentrons plastic 50 ml tubes'
 DESTINATION_LABWARE = 'opentrons plastic 2ml tubes'
 DEST_TUBE = '2ml tubes'
@@ -20,6 +20,7 @@ VOLUME_BUFFER = 300
 
 ## global vars
 robot = None
+tip_log = {}
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number
@@ -97,6 +98,7 @@ def save_tip_info(file_path = '/data/A/tip_log.json'):
 
 def pick_up(pip,tiprack):
     ## retrieve tip_log
+    global tip_log
     tip_log = retrieve_tip_info(pip,tiprack)
     if tip_log['count'][pip] == tip_log['max'][pip]:
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \

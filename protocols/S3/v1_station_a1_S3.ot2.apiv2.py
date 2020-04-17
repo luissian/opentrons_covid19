@@ -116,6 +116,9 @@ def transfer_buffer(bf_tube, dests, VOLUME_BUFFER, pip,tiprack):
         pip.blow_out(bf_tube.top(-20))
     pip.drop_tip()
 
+## global vars
+ctx = None
+
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):
     global ctx

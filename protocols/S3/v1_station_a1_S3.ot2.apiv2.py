@@ -19,7 +19,7 @@ DEST_TUBE = '2ml tubes'
 VOLUME_BUFFER = 300
 
 ## global vars
-global robot
+robot = None
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number

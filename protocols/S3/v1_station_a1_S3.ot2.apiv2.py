@@ -19,7 +19,7 @@ DEST_TUBE = '2ml tubes'
 VOLUME_BUFFER = 300
 
 ## global vars
-ctx = None
+robot = None
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number
@@ -121,8 +121,8 @@ def transfer_buffer(bf_tube, dests, VOLUME_BUFFER, pip,tiprack):
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):
-    global ctx
-    #robot = ctx
+    global robot
+    robot = ctx
     # confirm door is close
     if not ctx.is_simulating():
         confirm_door_is_closed()

@@ -118,7 +118,7 @@ def transfer_buffer(bf_tube, dests, VOLUME_BUFFER, pip,tiprack):
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):
-
+    global ctx
     # confirm door is closed
     if not ctx.is_simulating():
         confirm_door_is_closed(ctx)

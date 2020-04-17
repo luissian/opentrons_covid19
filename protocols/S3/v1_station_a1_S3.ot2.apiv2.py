@@ -16,6 +16,7 @@ NUM_SAMPLES = 96
 BUFFER_LABWARE = 'opentrons plastic 50 ml tubes'
 DESTINATION_LABWARE = 'opentrons plastic 2ml tubes'
 DEST_TUBE = '2ml tubes'
+VOLUME_BUFFER = 300
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number

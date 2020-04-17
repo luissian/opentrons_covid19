@@ -18,6 +18,9 @@ DESTINATION_LABWARE = 'opentrons plastic 2ml tubes'
 DEST_TUBE = '2ml tubes'
 VOLUME_BUFFER = 300
 
+## global vars
+global robot
+
 """
 NUM_SAMPLES is the number of samples, must be an integer number
 
@@ -115,9 +118,6 @@ def transfer_buffer(bf_tube, dests, VOLUME_BUFFER, pip,tiprack):
                    air_gap=1, disposal_volume=0, new_tip='never')
         pip.blow_out(bf_tube.top(-20))
     pip.drop_tip()
-
-## global vars
-global robot
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):

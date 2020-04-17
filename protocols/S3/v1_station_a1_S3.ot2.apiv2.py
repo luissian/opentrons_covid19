@@ -66,22 +66,22 @@ def finish_run():
     gpio.set_button_light(0,0,1)
 
 
-def retrieve_tip_info(file_path = '/data/A/tip_log.json'):
+def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
     tip_log = {}
     if tip_log and not ctx.is_simulating():
         if os.path.isfile(file_path):
             with open(file_path) as json_file:
                 data = json.load(json_file)
                 if 'tips1000' in data:
-                    tip_log['count'] = {p1000: data['tips1000']}
+                    tip_log['count'] = {pip: data['tips1000']}
                 else:
-                    tip_log['count'] = {p1000: 0}
+                    tip_log['count'] = {pip: 0}
     else:
-        tip_log['count'] = {p1000: 0}
+        tip_log['count'] = {pip: 0}
 
     tip_log['tips'] = {
-        p1000: [tip for rack in tipracks1000 for tip in rack.wells()]}
-    tip_log['max'] = {p1000: len(tip_log['tips'][p1000])}
+        pip: [tip for rack in tipracks for tip in rack.wells()]}
+    tip_log['max'] = {pip: len(tip_log['tips'][pip])}
 
     return tip_log
 
@@ -91,9 +91,9 @@ def save_tip_info(file_path = '/data/A/tip_log.json'):
         with open(file_path, 'w') as outfile:
             json.dump(data, outfile)
 
-def pick_up(pip,tip_log):
+def pick_up(pip,tiprack):
     ## retrieve tip_log
-    tip_log = retrieve_tip_info()
+    tip_log = retrieve_tip_info(pip,tiprack)
     if tip_log['count'][pip] == tip_log['max'][pip]:
         ctx.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
 resuming.')
@@ -102,12 +102,12 @@ resuming.')
     tip_log['count'][pip] += 1
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
 
-def transfer_buffer(bf_tube, dests, VOLUME_BUFFER, p1000,tip_log):
+def transfer_buffer(bf_tube, dests, VOLUME_BUFFER, pip,tiprack):
     max_trans_per_asp = 3  #230//(VOLUME_MMIX+5)
     split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
-    pip.pick_up(tip_log)
+    pip.pick_up(pip,tiprack)
     # get initial fluid height to avoid overflowing mm when aspiring
     for set in dest_sets:
         # check height and if it is low enought, aim for the bottom
@@ -173,9 +173,9 @@ following:\nopentrons plastic 50ml tubes')
 
     # transfer buffer to tubes
     for bf_tube,dests in zip(bf_tubes,dests):
-        transfer_buffer(bf_tube, dests,VOLUME_BUFFER, p1000)
+        transfer_buffer(bf_tube, dests,VOLUME_BUFFER, p1000, tips1000)
 
     # track final used tip
-    save_tip_info(file_path = '/data/A/tip_log.json')
+    save_tip_info()
 
     finish_run()

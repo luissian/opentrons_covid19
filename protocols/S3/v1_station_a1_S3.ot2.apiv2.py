@@ -117,11 +117,12 @@ def transfer_buffer(bf_tube, dests, VOLUME_BUFFER, pip,tiprack):
     pip.drop_tip()
 
 ## global vars
-global ctx = None
+global robot
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):
-    # confirm door is closed
+    robot = ctx
+    # confirm door is close
     if not ctx.is_simulating():
         confirm_door_is_closed(ctx)
 

@@ -66,9 +66,8 @@ def finish_run():
     gpio.set_button_light(0,0,1)
 
 
-def retrieve_tip_info(file_path):
+def retrieve_tip_info(file_path = '/data/A/tip_log.json'):
     tip_log = {}
-
     if tip_log and not ctx.is_simulating():
         if os.path.isfile(file_path):
             with open(file_path) as json_file:
@@ -86,13 +85,15 @@ def retrieve_tip_info(file_path):
 
     return tip_log
 
-def save_tip_info(file_path):
+def save_tip_info(file_path = '/data/A/tip_log.json'):
     if not ctx.is_simulating():
         data = {'tips1000': tip_log['count'][p1000]}
         with open(file_path, 'w') as outfile:
             json.dump(data, outfile)
 
 def pick_up(pip,tip_log):
+    ## retrieve tip_log
+    tip_log = retrieve_tip_info()
     if tip_log['count'][pip] == tip_log['max'][pip]:
         ctx.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
 resuming.')
@@ -134,8 +135,6 @@ def run(ctx: protocol_api.ProtocolContext):
     p1000 = ctx.load_instrument('p20_single_gen2', 'left', tip_racks=tips1000)
     p300 = ctx.load_instrument('p300_single_gen2', 'right', tip_racks=tips300)
 
-    ## retrieve tip_log
-    tip_log = retrieve_tip_info(file_path = '/data/A/tip_log.json')
 
     # check buffer labware type
     if BUFFER_LABWARE not in BUFFER_LW_DICT:

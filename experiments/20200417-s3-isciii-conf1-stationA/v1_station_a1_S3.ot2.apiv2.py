@@ -90,9 +90,9 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
 
     return tip_log
 
-def save_tip_info(file_path = '/data/A/tip_log.json'):
+def save_tip_info(pip, file_path = '/data/A/tip_log.json'):
     if not robot.is_simulating():
-        data = {'tips1000': tip_log['count'][p1000]}
+        data = {'tips1000': tip_log['count'][pip]}
         with open(file_path, 'w') as outfile:
             json.dump(data, outfile)
 
@@ -181,6 +181,6 @@ following:\nopentrons plastic 50ml tubes')
         transfer_buffer(bf_tube, dests,VOLUME_BUFFER, p1000, tips1000)
 
     # track final used tip
-    save_tip_info()
+    save_tip_info(p1000)
 
     finish_run()

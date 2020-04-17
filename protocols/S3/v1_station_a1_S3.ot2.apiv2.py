@@ -104,14 +104,14 @@ resuming.')
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
 
 def transfer_buffer(bf_tube, dests, VOLUME_BUFFER, pip,tiprack):
-    max_trans_per_asp = 3  #230//(VOLUME_MMIX+5)
+    max_trans_per_asp = 3  # 1000/VOLUME_BUFFER = 3
     split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
     pick_up(pip,tiprack)
     for set in dest_sets:
-        pip.aspirate(4, bf_tube.bottom(2))
-        pip.distribute(VOLUME_BUFFER, bf_tube.bottom(2), [d.bottom(2) for d in set],
+        pip.aspirate(50, bf_tube.bottom(2))
+        pip.distribute(VOLUME_BUFFER, bf_tube.bottom(2), [d.bottom(10) for d in set],
                    air_gap=1, disposal_volume=0, new_tip='never')
         pip.blow_out(bf_tube.top(-20))
     pip.drop_tip()
@@ -131,7 +131,7 @@ def run(ctx: protocol_api.ProtocolContext):
     tips300 = [ctx.load_labware('opentrons_96_filtertiprack_200ul', '9')]
 
     # define pipettes
-    p1000 = ctx.load_instrument('p20_single_gen2', 'left', tip_racks=tips1000)
+    p1000 = ctx.load_instrument('p1000_single_gen2', 'left', tip_racks=tips1000)
     p300 = ctx.load_instrument('p300_single_gen2', 'right', tip_racks=tips300)
 
 

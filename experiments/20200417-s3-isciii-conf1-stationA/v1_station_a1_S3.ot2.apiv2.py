@@ -2,6 +2,7 @@ from opentrons import protocol_api
 from opentrons.drivers.rpi_drivers import gpio
 import time
 import math
+import json
 
 # Metadata
 metadata = {
@@ -12,7 +13,7 @@ metadata = {
 }
 
 # Parameters to adapt the protocol
-NUM_SAMPLES = 48
+NUM_SAMPLES = 3
 BUFFER_LABWARE = 'opentrons plastic 50 ml tubes'
 DESTINATION_LABWARE = 'opentrons plastic 2ml tubes'
 DEST_TUBE = '2ml tubes'
@@ -117,7 +118,7 @@ def transfer_buffer(bf_tube, dests, VOLUME_BUFFER, pip,tiprack):
     for set in dest_sets:
         pip.aspirate(50, bf_tube.bottom(2))
         pip.distribute(VOLUME_BUFFER, bf_tube.bottom(2), [d.bottom(10) for d in set],
-                   air_gap=1, disposal_volume=0, new_tip='never')
+                   air_gap=10, disposal_volume=0, new_tip='never')
         pip.blow_out(bf_tube.top(-20))
     pip.drop_tip()
 

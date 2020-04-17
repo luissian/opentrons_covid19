@@ -172,7 +172,7 @@ following:\nopentrons plastic 50ml tubes')
         ]
 
     # transfer buffer to tubes
-    for bf_tube,dests in zip(bf_tubes,dests):
+    for bf_tube,dests in zip(bf_tubes,dest_sets):
         transfer_buffer(bf_tube, dests,VOLUME_BUFFER, p1000, tips1000)
 
     # track final used tip

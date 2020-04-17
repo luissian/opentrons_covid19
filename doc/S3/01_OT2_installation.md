@@ -114,8 +114,10 @@ Where <IP> = code of the robot in two digits format, being the first digit the l
 ## Extra calibration steps
 
 Some settings and pipete behaivours can only be set on the opentrons application and not the protocol script, so make sure they are activated in the Opentrons app of the computer you are using before launching a protocol. Examples of these are:
+
     -   By default P1000 pipete shakes several times when picking up a new tip. It is suppose to be for shaking off adjacent tips that may attach to the pipete.
-    -   In order to attach or use an 8-channel pipette gen 2, you have to enable Developer Tools inside the app ("More" -> "Enable Developer Tools"). Then Developer Tools wile appear an you can enable multi-channel pipetes gen2 can be enabled by its option ("More" -> "__DEV__ Enable Multi GEN 2"). Now you can select multi-channel piptes gen 2 when attaching a new pipette.
+    
+    -   In order to attach or use an 8-channel pipette gen 2, you have to enable Developer Tools inside the app ("More" -> "Enable Developer Tools"). Then Developer Tools wile appear an you can enable multi-channel pipetes gen2 can be enabled by its option ("More" -> "\_\_DEV\_\_ Enable Multi GEN 2"). Now you can select multi-channel piptes gen 2 when attaching a new pipette.
 
 ## When do you need to calibrate
 

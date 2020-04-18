@@ -12,6 +12,9 @@ metadata = {
 }
 
 # Parameters to adapt the protocol
+# Warning writing any Parameters below this line.
+# It will be deleted if opentronsWeb is used.
+
 NUM_SAMPLES = 96
 MM_LABWARE = 'opentrons aluminum block'
 MMTUBE_LABWARE = '2ml tubes'
@@ -21,6 +24,8 @@ PREPARE_MASTERMIX = True
 MM_TYPE = 'MM1'
 TRANSFER_MASTERMIX = True
 TRANSFER_SAMPLES = True
+
+# End Parameters to adapt the protocol
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number

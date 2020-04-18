@@ -24,9 +24,13 @@ REAGENT SETUP:
     - water: channel 12
 
 """
+# Parameters to adapt the protocol
+# Warning writing any Parameters below this line.
+# It will be deleted if opentronsWeb is used.
 
 NUM_SAMPLES = 30
 
+# End Parameters to adapt the protocol
 
 def run(ctx: protocol_api.ProtocolContext):
 

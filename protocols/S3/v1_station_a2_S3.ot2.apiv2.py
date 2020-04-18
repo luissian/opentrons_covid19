@@ -15,9 +15,14 @@ metadata = {
 
 
 # Parameters to adapt the protocol
+# Warning writing any Parameters below this line.
+# It will be deleted if opentronsWeb is used.
+
 NUM_SAMPLES = 96
 ELUTION_LABWARE = 'opentrons plastic 2ml tubes'
 PLATE_LABWARE = 'high generic well plate'
+
+# End Parameters to adapt the protocol
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number

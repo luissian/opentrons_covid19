@@ -310,8 +310,8 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # check mastermix labware type
     if MM_LABWARE not in MM_LW_DICT:
-        raise Exception('Invalid MM_LABWARE. Must be one of the \
-following:\nopentrons plastic block\nopentrons aluminum block\ncovidwarriors aluminum block')
+        raise Exception('Invalid MM_LABWARE. Must be one of the following:\n' + '\n'.join(list(MM_LW_DICT.keys())))
+        
 
     # load mastermix labware
     mm_rack = ctx.load_labware(
@@ -320,25 +320,24 @@ following:\nopentrons plastic block\nopentrons aluminum block\ncovidwarriors alu
 
     # check mastermix tube labware type
     if MMTUBE_LABWARE not in MMTUBE_LW_DICT:
-        raise Exception('Invalid MMTUBE_LABWARE. Must be one of the \
-    following:\no2ml tubes')
+        raise Exception('Invalid MMTUBE_LABWARE. Must be one of the following:\n' + '\n'.join(list(MMTUBE_LW_DICT.keys()))) 
 
     # This one is not loaded, it contains the raius of each tube to calculate volume height
 
     # check pcr plate
     if PCR_LABWARE not in PCR_LW_DICT:
-        raise Exception('Invalid PCR_LABWARE. Must be one of the \
-following:\nopentrons aluminum biorad plate\nopentrons aluminum nest plate\nopentrons aluminum strip short\ncovidwarriors aluminum biorad plate\ncovidwarriors aluminum biorad strip short')
-
+        raise Exception('Invalid PCR_LABWARE. Must be one of the following:\n' + '\n'.join(list(PCR_LW_DICT.keys()))) 
+        
+        
     # load pcr plate
     pcr_plate = tempdeck.load_labware(
         PCR_LW_DICT[PCR_LABWARE], 'PCR plate')
 
     # check source (elution) labware type
     if ELUTION_LABWARE not in EL_LW_DICT:
-        raise Exception('Invalid ELUTION_LABWARE. Must be one of the \
-following:\nopentrons plastic 2ml tubes\nopentrons plastic 1.5ml tubes\nopentrons aluminum 2ml tubes\nopentrons aluminum 1.5ml tubes\ncovidwarriors aluminum 2ml tubes\ncovidwarriors aluminum 1.5ml tubes\nopentrons aluminum biorad plate\nopentrons aluminum nest plate\ncovidwarriors aluminum biorad plate\nopentrons aluminum strip alpha\nopentrons aluminum strip short\ncovidwarriors aluminum biorad strip alpha\ncovidwarriors aluminum biorad strip short')
-
+        raise Exception('Invalid ELUTION_LABWARE. Must be one of the following:\n' + '\n'.join(list(EL_LW_DICT.keys())))
+        
+        
     # load elution labware
     if 'plate' in ELUTION_LABWARE:
         source_racks = ctx.load_labware(

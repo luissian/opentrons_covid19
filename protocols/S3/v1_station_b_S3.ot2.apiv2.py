@@ -111,8 +111,10 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
                     else:
                         tip_log['count'][pip] = 0
             else:
+                tip_log['count'] = {}
                 tip_log['count'][pip] = 0
         else:
+            tip_log['count'] = {}
             tip_log['count'][pip] = 0
 
         tip_log['tips'][pip] = [tip for rack in tipracks for tip in rack.wells()]

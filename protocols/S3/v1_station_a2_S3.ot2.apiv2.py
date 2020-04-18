@@ -131,7 +131,7 @@ def transfer_samples(ELUTION_LABWARE, sources, dests, pip):
         pip.pick_up_tip()
         pip.transfer(400, s.bottom(height), d.bottom(15), air_gap=2, new_tip='never')
         pip.blow_out(d.top(-2))
-        pip.aspirate(5, d.top(-2))
+        pip.aspirate(50, d.top(-2))
         pip.drop_tip()
 
 # RUN PROTOCOL

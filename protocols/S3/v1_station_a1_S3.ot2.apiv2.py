@@ -2,6 +2,8 @@ from opentrons import protocol_api
 from opentrons.drivers.rpi_drivers import gpio
 import time
 import math
+import json
+import os
 
 # Metadata
 metadata = {
@@ -20,6 +22,7 @@ VOLUME_BUFFER = 300
 
 ## global vars
 robot = None
+tip_log = {}
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number
@@ -63,7 +66,7 @@ def confirm_door_is_closed():
         confirm_door_is_closed()
     else:
         #Set light color to green
-        gpio.set_button_light(0,1,0)
+        gpio.set_button_light(0,1,1)
 
 def finish_run():
     #Set light color to blue
@@ -71,8 +74,7 @@ def finish_run():
 
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
-    tip_log = {}
-    if tip_log and not robot.is_simulating():
+    if not robot.is_simulating():
         if os.path.isfile(file_path):
             with open(file_path) as json_file:
                 data = json.load(json_file)
@@ -80,6 +82,8 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
                     tip_log['count'] = {pip: data['tips1000']}
                 else:
                     tip_log['count'] = {pip: 0}
+        else:
+            tip_log['count'] = {pip: 0}
     else:
         tip_log['count'] = {pip: 0}
 
@@ -89,14 +93,16 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
 
     return tip_log
 
-def save_tip_info(file_path = '/data/A/tip_log.json'):
+def save_tip_info(pip, file_path = '/data/A/tip_log.json'):
     if not robot.is_simulating():
-        data = {'tips1000': tip_log['count'][p1000]}
+        data = {'tips1000': tip_log['count'][pip]}
         with open(file_path, 'w') as outfile:
             json.dump(data, outfile)
 
 def pick_up(pip,tiprack):
     ## retrieve tip_log
+    global tip_log
+    tip_log = {}
     tip_log = retrieve_tip_info(pip,tiprack)
     if tip_log['count'][pip] == tip_log['max'][pip]:
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
@@ -115,7 +121,7 @@ def transfer_buffer(bf_tube, dests, VOLUME_BUFFER, pip,tiprack):
     for set in dest_sets:
         pip.aspirate(50, bf_tube.bottom(2))
         pip.distribute(VOLUME_BUFFER, bf_tube.bottom(2), [d.bottom(10) for d in set],
-                   air_gap=1, disposal_volume=0, new_tip='never')
+                   air_gap=10, disposal_volume=0, new_tip='never')
         pip.blow_out(bf_tube.top(-20))
     pip.drop_tip()
 
@@ -179,6 +185,6 @@ following:\nopentrons plastic 50ml tubes')
         transfer_buffer(bf_tube, dests,VOLUME_BUFFER, p1000, tips1000)
 
     # track final used tip
-    save_tip_info()
+    save_tip_info(p1000)
 
     finish_run()

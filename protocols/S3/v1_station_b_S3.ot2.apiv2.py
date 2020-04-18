@@ -95,7 +95,7 @@ def finish_run():
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
     ## TODO if tip_log already have data, append instead of statement.
-    if not tip_info:
+    if not tip_log:
         if not robot.is_simulating():
             if os.path.isfile(file_path):
                 with open(file_path) as json_file:
@@ -127,7 +127,7 @@ def save_tip_info(pip, file_path = '/data/A/tip_log.json'):
 def pick_up(pip,tiprack):
     ## retrieve tip_log
     global tip_log
-    if not tip_info:
+    if not tip_log:
         tip_log = {}
     tip_log = retrieve_tip_info(pip,tiprack)
     if tip_log['count'][pip] == tip_log['max'][pip]:

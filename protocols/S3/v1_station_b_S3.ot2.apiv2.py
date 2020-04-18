@@ -1,13 +1,14 @@
-import math
 from opentrons.types import Point
+from opentrons.drivers.rpi_drivers import gpio
 from opentrons import protocol_api
 import os
 import json
+import math
 
 # metadata
 metadata = {
     'protocolName': 'S3 Station B Version 2',
-    'author': 'Nick <protocols@opentrons.com>',
+    'author': 'Nick <protocols@opentrons.com> Sara <smonzon@isciii.es> Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
     'apiLevel': '2.0'
 }
@@ -25,9 +26,111 @@ REAGENT SETUP:
     - empty reservoir for liquid waste (supernatant removals)
 """
 
+# Parameters to adapt the protocol
 NUM_SAMPLES = 96
+REAGENT_LABWARE = 'nest 12 reservoir plate'
+MAGPLATE_LABWARE = 'nest deep well plate'
+WASTE_LABWARE = 'nest 1 reservoir plate'
+ELUTION_LABWARE = 'opentrons aluminum biorad plate'
 TIP_TRACK = False
 
+## global vars
+robot = None
+tip_log = {}
+
+"""
+NUM_SAMPLES is the number of samples, must be an integer number
+
+REAGENT_LABWARE must be one of the following:
+    nest 12 reservoir plate
+
+MAGPLATE_LABWARE must be one of the following:
+    nest deep well plate
+
+WASTE labware
+    nest 1 reservoir plate
+ELUTION_LABWARE
+    opentrons aluminum biorad plate
+"""
+
+
+# Constants
+REAGENT_LW_DICT = {
+    'nest 12 reservoir plate': 'nest_12_reservoir_15ml'
+}
+
+MAGPLATE_LW_DICT = {
+    'nest deep well plate': 'usascientific_96_wellplate_2.4ml_deep'
+}
+
+WASTE_LW_DICT = {
+    # Radius of each possible tube
+    'nest 1 reservoir plate': 'nest_1_reservoir_195ml'
+}
+
+ELUTION_LW_DICT = {
+    'opentrons aluminum biorad plate': 'opentrons_96_aluminumblock_nest_wellplate_100ul'
+}
+
+# Function definitions
+def check_door():
+    return gpio.read_window_switches()
+
+def confirm_door_is_closed():
+    #Check if door is opened
+    if check_door() == False:
+        #Set light color to red and pause
+        gpio.set_button_light(1,0,0)
+        robot.pause(f"Please, close the door")
+        time.sleep(3)
+        confirm_door_is_closed()
+    else:
+        #Set light color to green
+        gpio.set_button_light(0,1,1)
+
+def finish_run():
+    #Set light color to blue
+    gpio.set_button_light(0,0,1)
+
+
+def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
+    if not robot.is_simulating():
+        if os.path.isfile(file_path):
+            with open(file_path) as json_file:
+                data = json.load(json_file)
+                if 'tips1000' in data:
+                    tip_log['count'] = {pip: data['tips1000']}
+                else:
+                    tip_log['count'] = {pip: 0}
+        else:
+            tip_log['count'] = {pip: 0}
+    else:
+        tip_log['count'] = {pip: 0}
+
+    tip_log['tips'] = {
+        pip: [tip for rack in tipracks for tip in rack.wells()]}
+    tip_log['max'] = {pip: len(tip_log['tips'][pip])}
+
+    return tip_log
+
+def save_tip_info(pip, file_path = '/data/A/tip_log.json'):
+    if not robot.is_simulating():
+        data = {'tips1000': tip_log['count'][pip]}
+        with open(file_path, 'w') as outfile:
+            json.dump(data, outfile)
+
+def pick_up(pip,tiprack):
+    ## retrieve tip_log
+    global tip_log
+    tip_log = {}
+    tip_log = retrieve_tip_info(pip,tiprack)
+    if tip_log['count'][pip] == tip_log['max'][pip]:
+        robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
+resuming.')
+        pip.reset_tipracks()
+        tip_log['count'][pip] = 0
+    tip_log['count'][pip] += 1
+    pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
 
 def run(ctx: protocol_api.ProtocolContext):
 

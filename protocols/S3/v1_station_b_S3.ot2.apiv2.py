@@ -95,6 +95,7 @@ def finish_run():
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
     ## TODO if tip_log already have data, append instead of statement.
+    global tip_log
     if not tip_log:
         if not robot.is_simulating():
             if os.path.isfile(file_path):

@@ -95,26 +95,26 @@ def finish_run():
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
     ## TODO if tip_log already have data, append instead of statement.
-    if not robot.is_simulating():
-        if os.path.isfile(file_path):
-            with open(file_path) as json_file:
-                data = json.load(json_file)
-                if 'tips1000' in data:
-                    tip_log['count'] = {pip: data['tips1000']}
-                else:
-                    tip_log['count'] = {pip: 0}
-                if 'tips300' in data:
-                    tip_log['count'][pip] = data['tips300']
-                else:
-                    tip_log['count'][pip] = 0
+    if not tip_info:
+        if not robot.is_simulating():
+            if os.path.isfile(file_path):
+                with open(file_path) as json_file:
+                    data = json.load(json_file)
+                    if 'tips1000' in data:
+                        tip_log['count'][pip] = data['tips1000']
+                    else:
+                        tip_log['count'][pip] = 0
+                    if 'tips300' in data:
+                        tip_log['count'][pip] = data['tips300']
+                    else:
+                        tip_log['count'][pip] = 0
+            else:
+                tip_log['count'][pip] = 0
         else:
-            tip_log['count'] = {pip: 0}
-    else:
-        tip_log['count'] = {pip: 0}
+            tip_log['count'][pip] = 0
 
-    tip_log['tips'] = {
-        pip: [tip for rack in tipracks for tip in rack.wells()]}
-    tip_log['max'] = {pip: len(tip_log['tips'][pip])}
+        tip_log['tips'][pip] = [tip for rack in tipracks for tip in rack.wells()]
+        tip_log['max'][pip] = len(tip_log['tips'][pip])
 
     return tip_log
 
@@ -127,7 +127,8 @@ def save_tip_info(pip, file_path = '/data/A/tip_log.json'):
 def pick_up(pip,tiprack):
     ## retrieve tip_log
     global tip_log
-    tip_log = {}
+    if not tip_info:
+        tip_log = {}
     tip_log = retrieve_tip_info(pip,tiprack)
     if tip_log['count'][pip] == tip_log['max'][pip]:
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
@@ -140,9 +141,11 @@ resuming.')
 def run(ctx: protocol_api.ProtocolContext):
     global robot
     robot = ctx
+
     # confirm door is close
     if not ctx.is_simulating():
         confirm_door_is_closed()
+
     # load labware and modules
     tempdeck = ctx.load_module('tempdeck', '1')
     elution_plate = tempdeck.load_labware(
@@ -192,7 +195,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # mix beads and add to buffer
     bead_dests = bead_buffer[:math.ceil(num_cols/4)]
-    pick_up(m300)
+    pick_up(m300,tips300)
     m300.mix(5, 200, beads)
     m300.transfer(200, beads, bead_dests, new_tip='never', air_gap=20)
 
@@ -204,7 +207,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     for i, m in enumerate(mag_samples_m):
         if not m300.hw_pipette['has_tip']:
-            pick_up(m300)
+            pick_up(m300,tips300)
         m300.transfer(400, bead_buffer[i//4], m, new_tip='never', air_gap=20)
         m300.mix(5, 200, m)
         m300.blow_out(m.top(-2))
@@ -219,7 +222,7 @@ def run(ctx: protocol_api.ProtocolContext):
     for i, m in enumerate(mag_samples_s):
         side = -1 if (i % 8) % 2 == 0 else 1
         loc = m.bottom(0.5).move(Point(x=side*2))
-        pick_up(p1000)
+        pick_up(p1000,tips1000)
         p1000.move_to(m.center())
         p1000.transfer(900, loc, waste, air_gap=100, new_tip='never')
         p1000.blow_out(waste)
@@ -234,7 +237,7 @@ def run(ctx: protocol_api.ProtocolContext):
             side = 1 if i % 2 == 0 else -1
             disp_loc = m.bottom(0.5).move(Point(x=side*2))
             asp_loc = m.bottom(0.5).move(Point(x=-1*side*2))
-            pick_up(m300)
+            pick_up(m300,tips300)
             m300.transfer(
                 200, wash_chan, m.center(), new_tip='never', air_gap=20)
             m300.mix(5, 175, disp_loc)
@@ -256,7 +259,7 @@ def run(ctx: protocol_api.ProtocolContext):
         side = 1 if i % 2 == 0 else -1
         disp_loc = m.bottom(0.5).move(Point(x=side*2))
         asp_loc = m.bottom(0.5).move(Point(x=-1*side*2))
-        pick_up(m300)
+        pick_up(m300,tips300)
         m300.transfer(
             50, elution_buffer, m.center(), new_tip='never', air_gap=20)
         m300.mix(5, 40, disp_loc)
@@ -272,5 +275,6 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # track final used tip
     save_tip_info(p1000)
+    save_tip_info(m300)
 
     finish_run()

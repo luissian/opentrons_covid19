@@ -98,6 +98,9 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
     global tip_log
     if not tip_log:
         tip_log = {}
+        tip_log['count'] = {}
+        tip_log['tips'] = {}
+        tip_log['max'] = {}
         if not robot.is_simulating():
             if os.path.isfile(file_path):
                 with open(file_path) as json_file:
@@ -111,10 +114,8 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
                     else:
                         tip_log['count'][pip] = 0
             else:
-                tip_log['count'] = {}
                 tip_log['count'][pip] = 0
         else:
-            tip_log['count'] = {}
             tip_log['count'][pip] = 0
 
         tip_log['tips'][pip] = [tip for rack in tipracks for tip in rack.wells()]

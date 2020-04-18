@@ -94,6 +94,7 @@ def finish_run():
 
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
+    ## TODO if tip_log already have data, append instead of statement.
     if not robot.is_simulating():
         if os.path.isfile(file_path):
             with open(file_path) as json_file:
@@ -102,6 +103,10 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
                     tip_log['count'] = {pip: data['tips1000']}
                 else:
                     tip_log['count'] = {pip: 0}
+                if 'tips300' in data:
+                    tip_log['count'][pip] = data['tips300']
+                else:
+                    tip_log['count'][pip] = 0
         else:
             tip_log['count'] = {pip: 0}
     else:
@@ -133,7 +138,11 @@ resuming.')
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
 
 def run(ctx: protocol_api.ProtocolContext):
-
+    global robot
+    robot = ctx
+    # confirm door is close
+    if not ctx.is_simulating():
+        confirm_door_is_closed()
     # load labware and modules
     tempdeck = ctx.load_module('tempdeck', '1')
     elution_plate = tempdeck.load_labware(
@@ -180,45 +189,6 @@ def run(ctx: protocol_api.ProtocolContext):
     p1000.flow_rate.aspirate = 100
     p1000.flow_rate.dispense = 1000
     p1000.flow_rate.blow_out = 1000
-
-    tip_log = {'count': {}}
-    folder_path = '/data/B'
-    tip_file_path = folder_path + '/tip_log.json'
-    if TIP_TRACK and not ctx.is_simulating():
-        if os.path.isfile(tip_file_path):
-            with open(tip_file_path) as json_file:
-                data = json.load(json_file)
-                if 'tips1000' in data:
-                    tip_log['count'][p1000] = data['tips1000']
-                else:
-                    tip_log['count'][p1000] = 0
-                if 'tips300' in data:
-                    tip_log['count'][m300] = data['tips300']
-                else:
-                    tip_log['count'][m300] = 0
-        else:
-            tip_log['count'][m300] = 0
-    else:
-        tip_log['count'] = {p1000: 0, m300: 0}
-
-    tip_log['tips'] = {
-        p1000: [tip for rack in tips1000 for tip in rack.wells()],
-        m300: [tip for rack in tips300 for tip in rack.rows()[0]]
-    }
-    tip_log['max'] = {
-        pip: len(tip_log['tips'][pip])
-        for pip in [p1000, m300]
-    }
-
-    def pick_up(pip):
-        nonlocal tip_log
-        if tip_log['count'][pip] == tip_log['max'][pip]:
-            ctx.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
-resuming.')
-            pip.reset_tipracks()
-            tip_log['count'][pip] = 0
-        pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
-        tip_log['count'][pip] += 1
 
     # mix beads and add to buffer
     bead_dests = bead_buffer[:math.ceil(num_cols/4)]
@@ -301,12 +271,6 @@ resuming.')
         m300.drop_tip()
 
     # track final used tip
-    if not ctx.is_simulating():
-        if not os.path.isdir(folder_path):
-            os.mkdir(folder_path)
-        data = {
-            'tips1000': tip_log['count'][p1000],
-            'tips300': tip_log['count'][m300]
-        }
-        with open(tip_file_path, 'w') as outfile:
-            json.dump(data, outfile)
+    save_tip_info(p1000)
+
+    finish_run()

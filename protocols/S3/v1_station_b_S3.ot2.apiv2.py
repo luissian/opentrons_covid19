@@ -144,8 +144,8 @@ def pick_up(pip,tiprack):
 resuming.')
         pip.reset_tipracks()
         tip_log['count'][pip] = 0
-    tip_log['count'][pip] += 1
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
+    tip_log['count'][pip] += 1
 
 def run(ctx: protocol_api.ProtocolContext):
     global robot

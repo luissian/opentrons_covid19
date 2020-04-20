@@ -151,8 +151,8 @@ def run(ctx: protocol_api.ProtocolContext):
         confirm_door_is_closed()
 
     # load labware and modules
-    tempdeck = ctx.load_module('tempdeck', '1')
-    elution_plate = tempdeck.load_labware(
+    #tempdeck = ctx.load_module('tempdeck', '1')
+    elution_plate = ctx.load_labware(
         'opentrons_96_aluminumblock_nest_wellplate_100ul',
         'cooled elution plate')
     magdeck = ctx.load_module('magdeck', '10')
@@ -172,7 +172,7 @@ def run(ctx: protocol_api.ProtocolContext):
     tips1000 = [
         ctx.load_labware('opentrons_96_filtertiprack_1000ul', slot,
                          '1000µl filter tiprack')
-        for slot in ['4', '8']
+        for slot in ['8', '4']
     ]
 
     # reagents and samples

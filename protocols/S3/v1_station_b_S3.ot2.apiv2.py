@@ -4,6 +4,7 @@ from opentrons import protocol_api
 import os
 import json
 import math
+import time
 
 # metadata
 metadata = {
@@ -27,12 +28,12 @@ REAGENT SETUP:
 """
 
 # Parameters to adapt the protocol
-NUM_SAMPLES = 96
+NUM_SAMPLES = 48
 REAGENT_LABWARE = 'nest 12 reservoir plate'
 MAGPLATE_LABWARE = 'nest deep well plate'
 WASTE_LABWARE = 'nest 1 reservoir plate'
 ELUTION_LABWARE = 'opentrons aluminum biorad plate'
-TIP_TRACK = False
+TIP_TRACK = True
 
 ## global vars
 robot = None
@@ -153,7 +154,7 @@ def run(ctx: protocol_api.ProtocolContext):
     # load labware and modules
     #tempdeck = ctx.load_module('tempdeck', '1')
     elution_plate = ctx.load_labware(
-        'opentrons_96_aluminumblock_nest_wellplate_100ul',
+        'opentrons_96_aluminumblock_nest_wellplate_100ul', '1',
         'cooled elution plate')
     magdeck = ctx.load_module('magdeck', '10')
     magdeck.disengage()
@@ -187,8 +188,8 @@ def run(ctx: protocol_api.ProtocolContext):
     wash_sets = [reagent_res.wells()[i:i+2] for i in [5, 7, 9]]
 
     # pipettes
-    m300 = ctx.load_instrument('p300_multi_gen2', 'left', tip_racks=tips300)
-    p1000 = ctx.load_instrument('p1000_single_gen2', 'right',
+    m300 = ctx.load_instrument('p300_multi_gen2', 'right', tip_racks=tips300)
+    p1000 = ctx.load_instrument('p1000_single_gen2', 'left',
                                 tip_racks=tips1000)
     m300.flow_rate.aspirate = 150
     m300.flow_rate.dispense = 300

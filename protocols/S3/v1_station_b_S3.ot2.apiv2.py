@@ -97,7 +97,7 @@ def finish_run():
     gpio.set_button_light(0,0,1)
 
 
-def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
+def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
     ## TODO if tip_log already have data, append instead of statement.
     global tip_log
     if not tip_log or pip not in tip_log['count']:
@@ -118,12 +118,15 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
         else:
             tip_log['count'][pip] = 0
 
-        tip_log['tips'][pip] = [tip for rack in tipracks for tip in rack.wells()]
-        tip_log['max'][pip] = len(tip_log['tips'][pip])
+        if pip in '':
+            tip_log['tips'][pip] = [tip for rack in tipracks for tip in rack.wells()]
+            tip_log['max'][pip] = len(tip_log['tips'][pip])
+        else:
+
 
     return tip_log
 
-def save_tip_info(pip, file_path = '/data/A/tip_log.json'):
+def save_tip_info(pip, file_path = '/data/B/tip_log.json'):
     if not robot.is_simulating():
         data = {'tips1000': tip_log['count'][pip]}
         with open(file_path, 'w') as outfile:
@@ -152,17 +155,43 @@ def run(ctx: protocol_api.ProtocolContext):
         confirm_door_is_closed()
 
     # load labware and modules
+    ## ELUTION LABWARE
     #tempdeck = ctx.load_module('tempdeck', '1')
+    if ELUTION_LABWARE not in ELUTION_LW_DICT:
+        raise Exception('Invalid ELUTION_LABWARE. Must be one of the \
+    following:\nopentrons aluminum biorad plate')
+
     elution_plate = ctx.load_labware(
-        'opentrons_96_aluminumblock_nest_wellplate_100ul', '1',
-        'cooled elution plate')
+        ELUTION_LW_DICT[ELUTION_LABWARE], '1',
+        'elution plate')
+
+    ## MAGNETIC PLATE LABWARE
     magdeck = ctx.load_module('magdeck', '10')
     magdeck.disengage()
-    magplate = magdeck.load_labware('usascientific_96_wellplate_2.4ml_deep')
+
+    if MAGPLATE_LABWARE not in MAGPLATE_LW_DICT:
+        raise Exception('Invalid MAGPLATE_LABWARE. Must be one of the \
+    following:\nnest deep well plate')
+
+    magplate = magdeck.load_labware(MAGPLATE_LW_DICT[MAGPLATE_LABWARE])
+
+    ## WASTE LABWARE
+    if WASTE_LABWARE not in WASTE_LW_DICT:
+        raise Exception('Invalid WASTE_LABWARE. Must be one of the \
+    following:\nnest 1 reservoir plate')
+
     waste = ctx.load_labware(
-        'nest_1_reservoir_195ml', '11', 'waste reservoir').wells()[0].top()
+        WASTE_LW_DICT[WASTE_LABWARE], '11', 'waste reservoir').wells()[0].top()
+
+    ## REAGENT RESERVOIR
+    if REAGENT_LABWARE not in REAGENT_LW_DICT:
+        raise Exception('Invalid REAGENT_LABWARE. Must be one of the \
+    following:\nnest 12 reservoir plate')
+
     reagent_res = ctx.load_labware(
-        'nest_12_reservoir_15ml', '7', 'reagent reservoir')
+        REAGENT_LW_DICT[REAGENT_LABWARE], '7', 'reagent reservoir')
+
+    ## TIPS
     # using standard tip definition despite actually using filter tips
     # so that the tips can accommodate ~220µl per transfer for efficiency
     tips300 = [
@@ -213,8 +242,8 @@ def run(ctx: protocol_api.ProtocolContext):
     for i, m in enumerate(mag_samples_m):
         if not m300.hw_pipette['has_tip']:
             pick_up(m300,tips300)
-        m300.transfer(400, bead_buffer[i//4], m, new_tip='never', air_gap=20)
-        m300.mix(5, 200, m)
+        m300.transfer(400, bead_buffer[i//4], m.bottom(5), new_tip='never', air_gap=20)
+        m300.mix(5, 200, m.bottom(5))
         m300.blow_out(m.top(-2))
         m300.drop_tip()
 
@@ -226,7 +255,7 @@ def run(ctx: protocol_api.ProtocolContext):
     # remove supernatant with P1000
     for i, m in enumerate(mag_samples_s):
         side = -1 if (i % 8) % 2 == 0 else 1
-        loc = m.bottom(0.5).move(Point(x=side*2))
+        loc = m.bottom(5).move(Point(x=side*2))
         pick_up(p1000,tips1000)
         p1000.move_to(m.center())
         p1000.transfer(900, loc, waste, air_gap=100, new_tip='never')
@@ -240,8 +269,8 @@ def run(ctx: protocol_api.ProtocolContext):
             magdeck.disengage()
             wash_chan = wash_set[i//6]
             side = 1 if i % 2 == 0 else -1
-            disp_loc = m.bottom(0.5).move(Point(x=side*2))
-            asp_loc = m.bottom(0.5).move(Point(x=-1*side*2))
+            disp_loc = m.bottom(5).move(Point(x=side*2))
+            asp_loc = m.bottom(5).move(Point(x=-1*side*2))
             pick_up(m300,tips300)
             m300.transfer(
                 200, wash_chan, m.center(), new_tip='never', air_gap=20)
@@ -262,8 +291,8 @@ def run(ctx: protocol_api.ProtocolContext):
         # tranfser and mix elution buffer with beads
         magdeck.disengage()
         side = 1 if i % 2 == 0 else -1
-        disp_loc = m.bottom(0.5).move(Point(x=side*2))
-        asp_loc = m.bottom(0.5).move(Point(x=-1*side*2))
+        disp_loc = m.bottom(5).move(Point(x=side*2))
+        asp_loc = m.bottom(5).move(Point(x=-1*side*2))
         pick_up(m300,tips300)
         m300.transfer(
             50, elution_buffer, m.center(), new_tip='never', air_gap=20)

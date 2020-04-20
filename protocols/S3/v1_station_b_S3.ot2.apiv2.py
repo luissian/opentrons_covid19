@@ -118,11 +118,12 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
         else:
             tip_log['count'][pip] = 0
 
-        if pip in '':
-            tip_log['tips'][pip] = [tip for rack in tipracks for tip in rack.wells()]
-            tip_log['max'][pip] = len(tip_log['tips'][pip])
+        if "8-Channel" in str(pip):
+            tip_log['tips'][pip] =  [tip for rack in tipracks for tip in rack.rows()[0]]
         else:
+            tip_log['tips'][pip] = [tip for rack in tipracks for tip in rack.wells()]
 
+        tip_log['max'][pip] = len(tip_log['tips'][pip])
 
     return tip_log
 

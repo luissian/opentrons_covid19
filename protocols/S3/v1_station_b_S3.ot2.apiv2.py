@@ -159,10 +159,10 @@ def dispense_beads(sources,dests,pip,tiprack):
     for i, m in enumerate(dests):
         if not pip.hw_pipette['has_tip']:
             pick_up(pip,tiprack)
-        pip.transfer(200, dests[i//3], m.bottom(20), new_tip='never', air_gap=20)
+        pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=5)
         pip.drop_tip()
         pick_up(m300,tips300)
-        pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=20)
+        pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=5)
         pip.mix(5, 200, m.bottom(20))
         pip.blow_out(m.top(-2))
         pip.drop_tip()
@@ -188,7 +188,7 @@ def wash(wash_sets,dests,pip,tipracks):
             asp_loc = m.bottom(5).move(Point(x=-1*side*2))
             pick_up(m300,tips300)
             m300.transfer(
-                200, wash_chan, m.center(), new_tip='never', air_gap=20)
+                200, wash_chan, m.center(), new_tip='never', air_gap=5)
             m300.mix(5, 175, disp_loc)
             m300.move_to(m.top(-20))
 
@@ -198,7 +198,7 @@ def wash(wash_sets,dests,pip,tipracks):
             ctx.delay(seconds=10, msg='Incubating on magnet for 20 seconds.')
 
             # remove supernatant
-            m300.transfer(200, asp_loc, waste, new_tip='never', air_gap=20)
+            m300.transfer(200, asp_loc, waste, new_tip='never', air_gap=5)
             m300.drop_tip()
 
 def elute_samples(sources,dests,buffer,pip,tipracks):
@@ -208,7 +208,7 @@ def elute_samples(sources,dests,buffer,pip,tipracks):
         disp_loc = m.bottom(5).move(Point(x=side*2))
         pick_up(pip,tipracks)
         pip.transfer(
-            50, buffer, m.center(), new_tip='never', air_gap=20)
+            40, buffer, m.center(), new_tip='never', air_gap=7)
         pip.mix(5, 40, disp_loc)
         pip.drop_tip()
 
@@ -224,7 +224,7 @@ def elute_samples(sources,dests,buffer,pip,tipracks):
         asp_loc = m.bottom(5).move(Point(x=-1*side*2))
         pick_up(pip,tipracks)
         # transfer elution to new plate
-        pip.transfer(50, asp_loc, e, new_tip='never', air_gap=20)
+        pip.transfer(40, asp_loc, e, new_tip='never', air_gap=7)
         pip.blow_out(e.top(-2))
         pip.drop_tip()
 

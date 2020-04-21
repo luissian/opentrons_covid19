@@ -136,11 +136,12 @@ def transfer_buffer(bf_tube, dests, volume, pip,tiprack):
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
     pick_up(pip,tiprack)
+    pip.mix(3, 800, bf_tube.bottom(2))
     for set in dest_sets:
         pip.aspirate(50, bf_tube.bottom(2))
-        pip.distribute(volume, bf_tube.bottom(2), [d.bottom(10) for d in set],
-                   air_gap=10, disposal_volume=0, new_tip='never')
-        pip.blow_out(bf_tube.top(-20))
+        pip.distribute(VOLUME_BUFFER, bf_tube.bottom(2), [d.bottom(10) for d in set],
+                   air_gap=3, disposal_volume=0, new_tip='never')
+        pip.dispense(50,bf_tube.top(-20))
     pip.drop_tip()
 
 # RUN PROTOCOL

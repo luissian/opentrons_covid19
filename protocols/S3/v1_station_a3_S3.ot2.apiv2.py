@@ -18,6 +18,7 @@ metadata = {
 NUM_SAMPLES = 96
 BEADS_LABWARE = 'opentrons plastic 50 ml tubes'
 PLATE_LABWARE = 'opentrons deep generic well plate'
+VOLUME_BEADS = 400
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number
@@ -114,46 +115,18 @@ resuming.')
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
     tip_log['count'][pip] += 1
 
-def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
-    if 'strip' in ELUTION_LABWARE:
-        sources = [
-            tube
-            for i, rack in enumerate(source_racks)
-            for col in [
-                rack.columns()[c] if i < 2 else rack.columns()[c+1]
-                for c in [0, 5, 10]
-            ]
-            for tube in col
-        ][:NUM_SAMPLES]
-        dests = pcr_plate.wells()[:NUM_SAMPLES]
-    elif 'plate' in ELUTION_LABWARE:
-        sources = source_racks.wells()[:NUM_SAMPLES]
-        dests = pcr_plate.wells()[:NUM_SAMPLES]
-    else:
-        sources = [
-            tube
-            for rack in source_racks for tube in rack.wells()][:NUM_SAMPLES]
-        dests = [
-            well
-            for v_block in range(2)
-            for h_block in range(2)
-            for col in pcr_plate.columns()[6*v_block:6*(v_block+1)]
-            for well in col[4*h_block:4*(h_block+1)]][:NUM_SAMPLES]
-    return sources, dests
-
-def transfer_samples(ELUTION_LABWARE, sources, dests, pip, tiprack):
-    # height for aspiration has to be different depending if you ar useing tubes or wells
-    if 'strip' in ELUTION_LABWARE or 'plate' in ELUTION_LABWARE:
-        height = 1.5
-    else:
-        height = 2
-    # transfer
-    for s, d in zip(sources, dests):
-        pick_up(pip,tiprack)
-        pip.transfer(400, s.bottom(height), d.bottom(15), air_gap=2, new_tip='never')
-        pip.blow_out(d.top(-2))
-        pip.aspirate(50, d.top(-2))
-        pip.drop_tip()
+def transfer_buffer(beads_tube, dests, VOLUME_BUFFER, pip,tiprack):
+    max_trans_per_asp = 3  # 1000/VOLUME_BUFFER = 3
+    split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
+    dest_sets = [dests[split_ind[i]:split_ind[i+1]]
+             for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
+    pick_up(pip,tiprack)
+    for set in dest_sets:
+        pip.aspirate(50, bf_tube.bottom(2))
+        pip.distribute(VOLUME_BUFFER, bf_tube.bottom(2), [d.bottom(10) for d in set],
+                   air_gap=10, disposal_volume=0, new_tip='never')
+        pip.blow_out(bf_tube.top(-20))
+    pip.drop_tip()
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):

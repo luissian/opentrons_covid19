@@ -18,6 +18,7 @@ metadata = {
 NUM_SAMPLES = 96
 LYSATE_LABWARE = 'opentrons plastic 2ml tubes'
 PLATE_LABWARE = 'opentrons deep generic well plate'
+VOLUME_LYSATE = 400
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number
@@ -147,16 +148,16 @@ def get_source_dest_coordinates(LYSATE_LABWARE, source_racks, pcr_plate):
             for well in col[4*h_block:4*(h_block+1)]][:NUM_SAMPLES]
     return sources, dests
 
-def transfer_samples(LYSATE_LABWARE, sources, dests, pip, tiprack):
+def transfer_samples(labware, volume , sources, dests, pip, tiprack):
     # height for aspiration has to be different depending if you ar useing tubes or wells
-    if 'strip' in LYSATE_LABWARE or 'plate' in LYSATE_LABWARE:
+    if 'strip' in labware or 'plate' in labware:
         height = 1.5
     else:
         height = 2
     # transfer
     for s, d in zip(sources, dests):
         pick_up(pip,tiprack)
-        pip.transfer(400, s.bottom(height), d.bottom(15), air_gap=2, new_tip='never')
+        pip.transfer(volume, s.bottom(height), d.bottom(15), air_gap=2, new_tip='never')
         pip.blow_out(d.top(-2))
         pip.aspirate(50, d.top(-2))
         pip.drop_tip()
@@ -204,7 +205,7 @@ following:\nhigh generic well plate')
     sources, dests = get_source_dest_coordinates(LYSATE_LABWARE, source_racks, wells_plate)
 
     # transfer
-    transfer_samples(LYSATE_LABWARE, sources, dests, p1000, tips1000)
+    transfer_samples(LYSATE_LABWARE,VOLUME_LYSATE, sources, dests, p1000, tips1000)
 
     # track final used tip
     save_tip_info(p1000)

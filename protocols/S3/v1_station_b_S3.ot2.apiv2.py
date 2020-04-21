@@ -177,7 +177,7 @@ def remove_supernatant(sources,waste,pip,tiprack):
         pip.blow_out(waste)
         pip.drop_tip()
 
-def wash(wash_sets,dests,magdeck,pip,tiprack):
+def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
     for wash_set in wash_sets:
         for i, m in enumerate(dests):
             # transfer and mix wash with beads
@@ -327,7 +327,7 @@ def run(ctx: protocol_api.ProtocolContext):
     remove_supernatant(mag_samples_s,waste,p1000,tips1000)
 
     # 3x washes
-    wash(wash_sets,mag_samples_m,magdeck,m300,tips300)
+    wash(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)
 
     # Airdrying
     ctx.delay(minutes=5, msg='Airdrying for 5 minutes.')

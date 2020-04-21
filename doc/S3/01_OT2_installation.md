@@ -58,7 +58,7 @@ ssid=ISCIII-IoT
 
 [wifi-security]
 key-mgmt=wpa-psk
-psk=EPxjsboD7QZ4I1yPS3ls
+psk=<ssidpass>
 
 [ipv4]
 address1=172.17.70.<IP>/24

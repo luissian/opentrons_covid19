@@ -20,6 +20,14 @@ LYSATE_LABWARE = 'opentrons plastic 2ml tubes'
 PLATE_LABWARE = 'opentrons deep generic well plate'
 VOLUME_LYSATE = 400
 
+## global vars
+robot = None
+tip_log = {}
+tip_log['count'] = {}
+tip_log['tips'] = {}
+tip_log['max'] = {}
+
+
 """
 NUM_SAMPLES is the number of samples, must be an integer number
 

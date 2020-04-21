@@ -195,7 +195,7 @@ def wash(wash_sets,dests,magdeck,pip,tiprack):
             magdeck.engage()
             #ctx.delay(seconds=60, msg='Incubating on magnet for 60 seconds.')
             # FOR TESTING
-            ctx.delay(seconds=10, msg='Incubating on magnet for 20 seconds.')
+            robot.delay(seconds=10, msg='Incubating on magnet for 20 seconds.')
 
             # remove supernatant
             pip.transfer(200, asp_loc, waste, new_tip='never', air_gap=5)
@@ -213,9 +213,9 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
         pip.drop_tip()
 
     ## Incubation steps
-    ctx.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
+    robot.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
     magdeck.engage()
-    ctx.delay(seconds=60, msg='Incubating on magnet for 60 seconds.')
+    robot.delay(seconds=60, msg='Incubating on magnet for 60 seconds.')
 
     ## Dispense elutes in pcr plate.
     for i, (m, e) in enumerate(zip(sources, dests)):

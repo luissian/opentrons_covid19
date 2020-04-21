@@ -17,24 +17,28 @@ metadata = {
 # Parameters to adapt the protocol
 NUM_SAMPLES = 96
 BEADS_LABWARE = 'opentrons plastic 50 ml tubes'
-PLATE_LABWARE = 'high generic well plate'
+PLATE_LABWARE = 'opentrons deep generic well plate'
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number
 
-ELUTION_LABWARE must be one of the following:
-    opentrons plastic 2ml tubes
+BEADS_LABWARE must be one of the following:
+    opentrons plastic 50 ml tubes
 
 PLATE_LABWARE must be one of the following:
-    high generic well plate
+    opentrons deep generic well plate
+    nest deep generic well plate
+    vwr deep generic well plate
 """
 
-EL_LW_DICT = {
-    'opentrons plastic 2ml tubes': 'opentrons_24_tuberack_generic_2ml_screwcap'
+BD_LW_DICT = {
+    'opentrons plastic 50 ml tubes': 'opentrons_6_tuberack_falcon_50ml_conical'
 }
 
 PL_LW_DICT = {
-    'high generic well plate': 'usascientific_96_wellplate_2.4ml_deep'
+    'opentrons deep generic well plate': 'usascientific_96_wellplate_2.4ml_deep',
+    'nest deep generic well plate': 'usascientific_96_wellplate_2.4ml_deep',
+    'vwr deep generic well plate': 'usascientific_96_wellplate_2.4ml_deep'
 }
 
 # Function definitions

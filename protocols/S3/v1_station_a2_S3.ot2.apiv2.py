@@ -16,8 +16,8 @@ metadata = {
 
 # Parameters to adapt the protocol
 NUM_SAMPLES = 96
-LYSATE_LABWARE = 'opentrons plastic 50 ml tubes'
-PLATE_LABWARE = 'high generic well plate'
+LYSATE_LABWARE = 'opentrons plastic 2ml tubes'
+PLATE_LABWARE = 'opentrons deep generic well plate'
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number
@@ -26,16 +26,26 @@ LYSATE_LABWARE must be one of the following:
     opentrons plastic 2ml tubes
 
 PLATE_LABWARE must be one of the following:
-    high generic well plate
+    opentrons deep generic well plate
+    nest deep generic well plate
+    vwr deep generic well plate
 """
 
-EL_LW_DICT = {
+LY_LW_DICT = {
     'opentrons plastic 2ml tubes': 'opentrons_24_tuberack_generic_2ml_screwcap'
 }
 
 PL_LW_DICT = {
-    'high generic well plate': 'usascientific_96_wellplate_2.4ml_deep'
+    'opentrons deep generic well plate': 'usascientific_96_wellplate_2.4ml_deep',
+    'nest deep generic well plate': 'usascientific_96_wellplate_2.4ml_deep',
+    'vwr deep generic well plate': 'usascientific_96_wellplate_2.4ml_deep'
 }
+
+LYSTUBE_LW_DICT = {
+    # Radius of each possible tube
+    '2ml tubes': 4
+}
+
 
 # Function definitions
 def check_door():
@@ -167,17 +177,17 @@ def run(ctx: protocol_api.ProtocolContext):
         'p1000_single_gen2', 'left', tip_racks=tips1000)
 
     # check source (LYSATE) labware type
-    if LYSATE_LABWARE not in EL_LW_DICT:
+    if LYSATE_LABWARE not in LY_LW_DICT:
         raise Exception('Invalid LYSATE_LABWARE. Must be one of the \
 following:\nopentrons plastic 2ml tubes')
     # load LYSATE labware
     if 'plate' in LYSATE_LABWARE:
         source_racks = ctx.load_labware(
-            EL_LW_DICT[LYSATE_LABWARE], '1',
+            LY_LW_DICT[LYSATE_LABWARE], '1',
             'RNA LYSATE labware')
     else:
         source_racks = [
-            ctx.load_labware(EL_LW_DICT[LYSATE_LABWARE], slot,
+            ctx.load_labware(LY_LW_DICT[LYSATE_LABWARE], slot,
                             'sample LYSATE labware ' + str(i+1))
             for i, slot in enumerate(['4', '1', '5', '2'])
     ]

@@ -30,7 +30,7 @@ REAGENT SETUP:
 # Parameters to adapt the protocol
 NUM_SAMPLES = 48
 REAGENT_LABWARE = 'nest 12 reservoir plate'
-MAGPLATE_LABWARE = 'nest deep well plate'
+MAGPLATE_LABWARE = 'nest deep generic well plate'
 WASTE_LABWARE = 'nest 1 reservoir plate'
 ELUTION_LABWARE = 'opentrons aluminum biorad plate'
 TIP_TRACK = True
@@ -50,10 +50,13 @@ REAGENT_LABWARE must be one of the following:
     nest 12 reservoir plate
 
 MAGPLATE_LABWARE must be one of the following:
-    nest deep well plate
+    opentrons deep generic well plate
+    nest deep generic well plate
+    vwr deep generic well plate
 
 WASTE labware
     nest 1 reservoir plate
+
 ELUTION_LABWARE
     opentrons aluminum biorad plate
 """
@@ -65,7 +68,9 @@ REAGENT_LW_DICT = {
 }
 
 MAGPLATE_LW_DICT = {
-    'nest deep well plate': 'usascientific_96_wellplate_2.4ml_deep'
+    'opentrons deep generic well plate': 'usascientific_96_wellplate_2.4ml_deep',
+    'nest deep generic well plate': 'usascientific_96_wellplate_2.4ml_deep',
+    'vwr deep generic well plate': 'usascientific_96_wellplate_2.4ml_deep'
 }
 
 WASTE_LW_DICT = {

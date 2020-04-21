@@ -33,6 +33,7 @@ NUM_SAMPLES is the number of samples, must be an integer number
 
 BUFFER_LABWARE must be one of the following:
     opentrons plastic 50 ml tubes
+    opentrons plastic 30ml tubes
 
 DESTINATION_LABWARE must be one of the following:
     opentrons plastic 2ml tubes
@@ -44,7 +45,8 @@ DEST_TUBE
 
 # Constants
 BUFFER_LW_DICT = {
-    'opentrons plastic 50 ml tubes': 'opentrons_6_tuberack_falcon_50ml_conical'
+    'opentrons plastic 50 ml tubes': 'opentrons_6_tuberack_falcon_50ml_conical',
+    'opentrons plastic 30ml tubes': 'opentrons_6_tuberack_generic_30ml_conical'
 }
 
 DESTINATION_LW_DICT = {

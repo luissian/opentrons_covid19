@@ -90,7 +90,7 @@ def confirm_door_is_closed():
         confirm_door_is_closed()
     else:
         #Set light color to green
-        gpio.set_button_light(0,1,1)
+        gpio.set_button_light(0,1,0)
 
 def finish_run():
     #Set light color to blue
@@ -198,12 +198,12 @@ def run(ctx: protocol_api.ProtocolContext):
     tips300 = [
         ctx.load_labware(
             'opentrons_96_tiprack_300ul', slot, '200µl filter tiprack')
-        for slot in ['2', '3', '5', '6', '9']
+        for slot in ['2', '3', '5', '6', '9','4']
     ]
     tips1000 = [
         ctx.load_labware('opentrons_96_filtertiprack_1000ul', slot,
                          '1000µl filter tiprack')
-        for slot in ['8', '4']
+        for slot in ['8']
     ]
 
     # reagents and samples
@@ -232,26 +232,30 @@ def run(ctx: protocol_api.ProtocolContext):
     bead_dests = bead_buffer[:math.ceil(num_cols/4)]
     pick_up(m300,tips300)
     m300.mix(5, 200, beads)
-    m300.transfer(200, beads, bead_dests, new_tip='never', air_gap=20)
+    m300.transfer(200, beads.bottom(10), [bd.bottom(10) for bd in bead_dests], new_tip='never', air_gap=20)
 
     # premix, transfer, and mix magnetic beads with sample
     for d in bead_dests:
         for _ in range(5):
-            m300.aspirate(200, d.bottom(3))
+            m300.aspirate(200, d.bottom(20))
             m300.dispense(200, d.bottom(20))
+
 
     for i, m in enumerate(mag_samples_m):
         if not m300.hw_pipette['has_tip']:
             pick_up(m300,tips300)
-        m300.transfer(400, bead_buffer[i//4], m.bottom(5), new_tip='never', air_gap=20)
-        m300.mix(5, 200, m.bottom(5))
+        m300.transfer(400, bead_buffer[i//4], m.bottom(20), new_tip='never', air_gap=20)
+        #m300.drop_tip()
+        #pick_up(m300,tips300)
+        #m300.transfer(200, bead_buffer[i//4], m.bottom(5), new_tip='never', air_gap=20)
+        m300.mix(5, 200, m.bottom(20))
         m300.blow_out(m.top(-2))
         m300.drop_tip()
 
     # incubate off and on magnet
-    ctx.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
+    ctx.delay(minutes=1, msg='Incubating off magnet for 5 minutes.')
     magdeck.engage()
-    ctx.delay(minutes=5, msg='Incubating on magnet for 5 minutes.')
+    ctx.delay(minutes=1, msg='Incubating on magnet for 5 minutes.')
 
     # remove supernatant with P1000
     for i, m in enumerate(mag_samples_s):

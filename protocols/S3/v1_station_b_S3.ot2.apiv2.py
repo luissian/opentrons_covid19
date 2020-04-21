@@ -161,7 +161,7 @@ def dispense_beads(sources,dests,pip,tiprack):
             pick_up(pip,tiprack)
         pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=5)
         pip.drop_tip()
-        pick_up(m300,tips300)
+        pick_up(pip,tiprack)
         pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=5)
         pip.mix(5, 200, m.bottom(20))
         pip.blow_out(m.top(-2))
@@ -172,10 +172,10 @@ def remove_supernatant(sources,waste,pip,tiprack):
         side = -1 if (i % 8) % 2 == 0 else 1
         loc = m.bottom(5).move(Point(x=side*2))
         pick_up(pip,tiprack)
-        p1000.move_to(m.center())
-        p1000.transfer(800, loc, waste, air_gap=100, new_tip='never')
-        p1000.blow_out(waste)
-        p1000.drop_tip()
+        pip.move_to(m.center())
+        pip.transfer(800, loc, waste, air_gap=100, new_tip='never')
+        pip.blow_out(waste)
+        pip.drop_tip()
 
 def wash(wash_sets,dests,pip,tipracks):
     for wash_set in wash_sets:
@@ -186,11 +186,11 @@ def wash(wash_sets,dests,pip,tipracks):
             side = 1 if i % 2 == 0 else -1
             disp_loc = m.bottom(5).move(Point(x=side*2))
             asp_loc = m.bottom(5).move(Point(x=-1*side*2))
-            pick_up(m300,tips300)
-            m300.transfer(
+            pick_up(pip,tiprack)
+            pip.transfer(
                 200, wash_chan, m.center(), new_tip='never', air_gap=5)
-            m300.mix(5, 175, disp_loc)
-            m300.move_to(m.top(-20))
+            pip.mix(5, 175, disp_loc)
+            pip.move_to(m.top(-20))
 
             magdeck.engage()
             #ctx.delay(seconds=60, msg='Incubating on magnet for 60 seconds.')
@@ -198,8 +198,8 @@ def wash(wash_sets,dests,pip,tipracks):
             ctx.delay(seconds=10, msg='Incubating on magnet for 20 seconds.')
 
             # remove supernatant
-            m300.transfer(200, asp_loc, waste, new_tip='never', air_gap=5)
-            m300.drop_tip()
+            pip.transfer(200, asp_loc, waste, new_tip='never', air_gap=5)
+            pip.drop_tip()
 
 def elute_samples(sources,dests,buffer,pip,tipracks):
     ## dispense buffer

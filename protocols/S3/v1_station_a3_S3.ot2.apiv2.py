@@ -151,14 +151,14 @@ def transfer_beads(beads_tube, dests, volume, pip,tiprack):
 def run(ctx: protocol_api.ProtocolContext):
     global robot
     robot = ctx
-    
+
     # confirm door is closed
     if not ctx.is_simulating():
         confirm_door_is_closed(ctx)
 
     tips1000 = [ctx.load_labware('opentrons_96_filtertiprack_1000ul',
                                      slot, '1000µl tiprack')
-                    for slot in ['3', '6', '9', '8', '7']]
+                    for slot in ['3', '6', '9', '8']]
 
     # load pipette
     p1000 = ctx.load_instrument(

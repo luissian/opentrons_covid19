@@ -324,7 +324,7 @@ def run(ctx: protocol_api.ProtocolContext):
     ctx.delay(minutes=1, msg='Incubating on magnet for 5 minutes.')
 
     # remove supernatant with P1000
-    remove_supernatant(mag_samples_s,waste,p1000,tips1000):
+    remove_supernatant(mag_samples_s,waste,p1000,tips1000)
 
     # 3x washes
     wash(wash_sets,dests,m300,tips300)

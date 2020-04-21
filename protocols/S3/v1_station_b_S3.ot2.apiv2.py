@@ -34,6 +34,7 @@ MAGPLATE_LABWARE = 'nest deep well plate'
 WASTE_LABWARE = 'nest 1 reservoir plate'
 ELUTION_LABWARE = 'opentrons aluminum biorad plate'
 TIP_TRACK = True
+DISPENSE_BEADS = True
 
 ## global vars
 robot = None
@@ -98,7 +99,6 @@ def finish_run():
 
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
-    ## TODO if tip_log already have data, append instead of statement.
     global tip_log
     if not tip_log or pip not in tip_log['count']:
         if not robot.is_simulating():
@@ -146,6 +146,26 @@ resuming.')
         tip_log['count'][pip] = 0
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
     tip_log['count'][pip] += 1
+
+def dispense_beads(sources,dests,pip,tiprack):
+    ## Mix beads prior to dispensing.
+    pick_up(pip,tiprack)
+    for s in sources:
+        for _ in range(5):
+            pip.aspirate(200, s.bottom(20))
+            pip.dispense(200, s.bottom(20))
+
+    ## Dispense beads to deep well plate.
+    for i, m in enumerate(dests):
+        if not pip.hw_pipette['has_tip']:
+            pick_up(pip,tiprack)
+        pip.transfer(200, dests[i//3], m.bottom(20), new_tip='never', air_gap=20)
+        pip.drop_tip()
+        pick_up(m300,tips300)
+        pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=20)
+        pip.mix(5, 200, m.bottom(20))
+        pip.blow_out(m.top(-2))
+        pip.drop_tip()
 
 def run(ctx: protocol_api.ProtocolContext):
     global robot
@@ -213,8 +233,8 @@ def run(ctx: protocol_api.ProtocolContext):
     elution_samples_m = elution_plate.rows()[0][:num_cols]
 
     elution_buffer = reagent_res.wells()[0]
-    beads = reagent_res.wells()[1]
-    bead_buffer = reagent_res.wells()[2:5]
+    #beads = reagent_res.wells()[1]
+    bead_buffer = reagent_res.wells()[1:5]
     wash_sets = [reagent_res.wells()[i:i+2] for i in [5, 7, 9]]
 
     # pipettes
@@ -228,29 +248,10 @@ def run(ctx: protocol_api.ProtocolContext):
     p1000.flow_rate.dispense = 1000
     p1000.flow_rate.blow_out = 1000
 
-    # mix beads and add to buffer
-    bead_dests = bead_buffer[:math.ceil(num_cols/4)]
-    pick_up(m300,tips300)
-    m300.mix(5, 200, beads)
-    m300.transfer(200, beads.bottom(10), [bd.bottom(10) for bd in bead_dests], new_tip='never', air_gap=20)
-
     # premix, transfer, and mix magnetic beads with sample
-    for d in bead_dests:
-        for _ in range(5):
-            m300.aspirate(200, d.bottom(20))
-            m300.dispense(200, d.bottom(20))
-
-
-    for i, m in enumerate(mag_samples_m):
-        if not m300.hw_pipette['has_tip']:
-            pick_up(m300,tips300)
-        m300.transfer(400, bead_buffer[i//4], m.bottom(20), new_tip='never', air_gap=20)
-        #m300.drop_tip()
-        #pick_up(m300,tips300)
-        #m300.transfer(200, bead_buffer[i//4], m.bottom(5), new_tip='never', air_gap=20)
-        m300.mix(5, 200, m.bottom(20))
-        m300.blow_out(m.top(-2))
-        m300.drop_tip()
+    ## bead dests depending on number of samples
+    bead_dests = bead_buffer[:math.ceil(num_cols/4)]
+    dispense_beads(bead_dests,mag_samples_m,m300,tips300)
 
     # incubate off and on magnet
     ctx.delay(minutes=1, msg='Incubating off magnet for 5 minutes.')

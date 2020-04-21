@@ -129,7 +129,11 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
 
 def save_tip_info(pip, file_path = '/data/B/tip_log.json'):
     if not robot.is_simulating():
-        data = {'tips1000': tip_log['count'][pip]}
+        if "P1000" in str(pip):
+            data = {'tips1000': tip_log['count'][pip]}
+        elif "P300" in str(pip):
+            data = {'tips300': tip_log['count'][pip]}
+
         with open(file_path, 'w') as outfile:
             json.dump(data, outfile)
 

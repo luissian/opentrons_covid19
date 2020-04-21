@@ -327,7 +327,7 @@ def run(ctx: protocol_api.ProtocolContext):
     remove_supernatant(mag_samples_s,waste,p1000,tips1000)
 
     # 3x washes
-    wash(wash_sets,dests,m300,tips300)
+    wash(wash_sets,mag_samples_m,m300,tips300)
 
     # Airdrying
     ctx.delay(minutes=5, msg='Airdrying for 5 minutes.')

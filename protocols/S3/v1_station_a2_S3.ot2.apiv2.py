@@ -57,41 +57,58 @@ def finish_run():
     #Set light color to blue
     gpio.set_button_light(0,0,1)
 
-# def retrieve_tip_info(file_path):
-#     tip_log = {}
-#
-#     if tip_log and not ctx.is_simulating():
-#         if os.path.isfile(file_path):
-#             with open(file_path) as json_file:
-#                 data = json.load(json_file)
-#                 if 'tips1000' in data:
-#                     tip_log['count'] = {p1000: data['tips1000']}
-#                 else:
-#                     tip_log['count'] = {p1000: 0}
-#     else:
-#         tip_log['count'] = {p1000: 0}
-#
-#     tip_log['tips'] = {
-#         p1000: [tip for rack in tipracks1000 for tip in rack.wells()]}
-#     tip_log['max'] = {p1000: len(tip_log['tips'][p1000])}
-#
-#     return tip_log
-#
-# def save_tip_info(file_path):
-#     if not ctx.is_simulating():
-#         data = {'tips1000': tip_log['count'][p1000]}
-#         with open(file_path, 'w') as outfile:
-#             json.dump(data, outfile)
-#
-# def pick_up(pip):
-#     nonlocal tip_log
-#     if tip_log['count'][pip] == tip_log['max'][pip]:
-#         ctx.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
-# resuming.')
-#         pip.reset_tipracks()
-#         tip_log['count'][pip] = 0
-#     tip_log['count'][pip] += 1
-#     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
+def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
+    global tip_log
+    if not tip_log or pip not in tip_log['count']:
+        if not robot.is_simulating():
+            if os.path.isfile(file_path):
+                with open(file_path) as json_file:
+                    data = json.load(json_file)
+                    if 'tips1000' in data:
+                        tip_log['count'][pip] = data['tips1000']
+                    else:
+                        tip_log['count'][pip] = 0
+                    if 'tips300' in data:
+                        tip_log['count'][pip] = data['tips300']
+                    else:
+                        tip_log['count'][pip] = 0
+            else:
+                tip_log['count'][pip] = 0
+        else:
+            tip_log['count'][pip] = 0
+
+        if "8-Channel" in str(pip):
+            tip_log['tips'][pip] =  [tip for rack in tipracks for tip in rack.rows()[0]]
+        else:
+            tip_log['tips'][pip] = [tip for rack in tipracks for tip in rack.wells()]
+
+        tip_log['max'][pip] = len(tip_log['tips'][pip])
+
+    return tip_log
+
+def save_tip_info(pip, file_path = '/data/A/tip_log.json'):
+    if not robot.is_simulating():
+        if "P1000" in str(pip):
+            data = {'tips1000': tip_log['count'][pip]}
+        elif "P300" in str(pip):
+            data = {'tips300': tip_log['count'][pip]}
+
+        with open(file_path, 'w') as outfile:
+            json.dump(data, outfile)
+
+def pick_up(pip,tiprack):
+    ## retrieve tip_log
+    global tip_log
+    if not tip_log:
+        tip_log = {}
+    tip_log = retrieve_tip_info(pip,tiprack)
+    if tip_log['count'][pip] == tip_log['max'][pip]:
+        robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
+resuming.')
+        pip.reset_tipracks()
+        tip_log['count'][pip] = 0
+    pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
+    tip_log['count'][pip] += 1
 
 def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
     if 'strip' in ELUTION_LABWARE:
@@ -120,7 +137,7 @@ def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
             for well in col[4*h_block:4*(h_block+1)]][:NUM_SAMPLES]
     return sources, dests
 
-def transfer_samples(ELUTION_LABWARE, sources, dests, pip):
+def transfer_samples(ELUTION_LABWARE, sources, dests, pip, tiprack):
     # height for aspiration has to be different depending if you ar useing tubes or wells
     if 'strip' in ELUTION_LABWARE or 'plate' in ELUTION_LABWARE:
         height = 1.5
@@ -128,7 +145,7 @@ def transfer_samples(ELUTION_LABWARE, sources, dests, pip):
         height = 2
     # transfer
     for s, d in zip(sources, dests):
-        pip.pick_up_tip()
+        pick_up(pip,tiprack)
         pip.transfer(400, s.bottom(height), d.bottom(15), air_gap=2, new_tip='never')
         pip.blow_out(d.top(-2))
         pip.aspirate(50, d.top(-2))
@@ -175,24 +192,11 @@ following:\nhigh generic well plate')
 
     # setup samples
     sources, dests = get_source_dest_coordinates(ELUTION_LABWARE, source_racks, wells_plate)
-    # sources = [
-    #     well for rack in source_racks for well in rack.wells()][:NUM_SAMPLES]
-    # dests = [well for col in dest_plate.columns()[0::2] for well in col] + [
-    #     well for col in dest_plate.columns()[1::2] for well in col]
-
-    # tip log
-    # tip_log = retrieve_tip_info(file_path = '/data/A/tip_log.json')
 
     # transfer
-    transfer_samples(ELUTION_LABWARE, sources, dests, p1000)
-    # for s, d in zip(sources, dests):
-    #     pick_up(p1000)
-    #     p1000.transfer(
-    #         SAMPLE_VOLUME, s.bottom(5), d.bottom(5), new_tip='never')
-    #     p1000.aspirate(100, d.top())
-    #     p1000.drop_tip()
+    transfer_samples(ELUTION_LABWARE, sources, dests, p1000, tips1000)
 
     # track final used tip
-    # save_tip_info(file_path = '/data/A/tip_log.json')
+    save_tip_info(p1000)
 
     finish_run()

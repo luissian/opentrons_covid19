@@ -157,8 +157,6 @@ def get_source_dest_coordinates(LYSATE_LABWARE, source_racks, pcr_plate):
     return sources, dests
 
 def transfer_samples(labware, volume , sources, dests, pip, tiprack):
-    global robot
-    robot = ctx
     # height for aspiration has to be different depending if you ar useing tubes or wells
     if 'strip' in labware or 'plate' in labware:
         height = 1.5
@@ -174,7 +172,8 @@ def transfer_samples(labware, volume , sources, dests, pip, tiprack):
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):
-
+    global robot
+    robot = ctx
     # confirm door is closed
     if not ctx.is_simulating():
         confirm_door_is_closed(ctx)

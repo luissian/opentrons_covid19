@@ -23,6 +23,10 @@ VOLUME_BUFFER = 300
 ## global vars
 robot = None
 tip_log = {}
+tip_log = {}
+tip_log['count'] = {}
+tip_log['tips'] = {}
+tip_log['max'] = {}
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number
@@ -74,45 +78,59 @@ def finish_run():
 
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
-    if not robot.is_simulating():
-        if os.path.isfile(file_path):
-            with open(file_path) as json_file:
-                data = json.load(json_file)
-                if 'tips1000' in data:
-                    tip_log['count'] = {pip: data['tips1000']}
-                else:
-                    tip_log['count'] = {pip: 0}
+    global tip_log
+    if not tip_log or pip not in tip_log['count']:
+        if not robot.is_simulating():
+            if os.path.isfile(file_path):
+                with open(file_path) as json_file:
+                    data = json.load(json_file)
+                    if 'tips1000' in data:
+                        tip_log['count'][pip] = data['tips1000']
+                    else:
+                        tip_log['count'][pip] = 0
+                    if 'tips300' in data:
+                        tip_log['count'][pip] = data['tips300']
+                    else:
+                        tip_log['count'][pip] = 0
+            else:
+                tip_log['count'][pip] = 0
         else:
-            tip_log['count'] = {pip: 0}
-    else:
-        tip_log['count'] = {pip: 0}
+            tip_log['count'][pip] = 0
 
-    tip_log['tips'] = {
-        pip: [tip for rack in tipracks for tip in rack.wells()]}
-    tip_log['max'] = {pip: len(tip_log['tips'][pip])}
+        if "8-Channel" in str(pip):
+            tip_log['tips'][pip] =  [tip for rack in tipracks for tip in rack.rows()[0]]
+        else:
+            tip_log['tips'][pip] = [tip for rack in tipracks for tip in rack.wells()]
+
+        tip_log['max'][pip] = len(tip_log['tips'][pip])
 
     return tip_log
 
 def save_tip_info(pip, file_path = '/data/A/tip_log.json'):
     if not robot.is_simulating():
-        data = {'tips1000': tip_log['count'][pip]}
+        if "P1000" in str(pip):
+            data = {'tips1000': tip_log['count'][pip]}
+        elif "P300" in str(pip):
+            data = {'tips300': tip_log['count'][pip]}
+
         with open(file_path, 'w') as outfile:
             json.dump(data, outfile)
 
 def pick_up(pip,tiprack):
     ## retrieve tip_log
     global tip_log
-    tip_log = {}
+    if not tip_log:
+        tip_log = {}
     tip_log = retrieve_tip_info(pip,tiprack)
     if tip_log['count'][pip] == tip_log['max'][pip]:
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
 resuming.')
         pip.reset_tipracks()
         tip_log['count'][pip] = 0
-    tip_log['count'][pip] += 1
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
+    tip_log['count'][pip] += 1
 
-def transfer_buffer(bf_tube, dests, VOLUME_BUFFER, pip,tiprack):
+def transfer_buffer(bf_tube, dests, volume, pip,tiprack):
     max_trans_per_asp = 3  # 1000/VOLUME_BUFFER = 3
     split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
@@ -120,7 +138,7 @@ def transfer_buffer(bf_tube, dests, VOLUME_BUFFER, pip,tiprack):
     pick_up(pip,tiprack)
     for set in dest_sets:
         pip.aspirate(50, bf_tube.bottom(2))
-        pip.distribute(VOLUME_BUFFER, bf_tube.bottom(2), [d.bottom(10) for d in set],
+        pip.distribute(volume, bf_tube.bottom(2), [d.bottom(10) for d in set],
                    air_gap=10, disposal_volume=0, new_tip='never')
         pip.blow_out(bf_tube.top(-20))
     pip.drop_tip()
@@ -172,6 +190,7 @@ following:\nopentrons plastic 50ml tubes')
     number_racks = math.ceil(NUM_SAMPLES/len(dest_racks[0].wells()))
 
     # dest_sets is a list of lists. Each list is the destination well for each rack
+    # example: [[tube1,tube2,...tube24](first rack),[tube1,tube2(second rack),...]
     dest_sets = [
         [tube
          for rack in dest_racks

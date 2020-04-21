@@ -30,7 +30,7 @@ REAGENT SETUP:
 # Parameters to adapt the protocol
 NUM_SAMPLES = 48
 REAGENT_LABWARE = 'nest 12 reservoir plate'
-MAGPLATE_LABWARE = 'nest deep well plate'
+MAGPLATE_LABWARE = 'nest deep generic well plate'
 WASTE_LABWARE = 'nest 1 reservoir plate'
 ELUTION_LABWARE = 'opentrons aluminum biorad plate'
 TIP_TRACK = True
@@ -50,10 +50,13 @@ REAGENT_LABWARE must be one of the following:
     nest 12 reservoir plate
 
 MAGPLATE_LABWARE must be one of the following:
-    nest deep well plate
+    opentrons deep generic well plate
+    nest deep generic well plate
+    vwr deep generic well plate
 
 WASTE labware
     nest 1 reservoir plate
+
 ELUTION_LABWARE
     opentrons aluminum biorad plate
 """
@@ -65,7 +68,9 @@ REAGENT_LW_DICT = {
 }
 
 MAGPLATE_LW_DICT = {
-    'nest deep well plate': 'usascientific_96_wellplate_2.4ml_deep'
+    'opentrons deep generic well plate': 'usascientific_96_wellplate_2.4ml_deep',
+    'nest deep generic well plate': 'usascientific_96_wellplate_2.4ml_deep',
+    'vwr deep generic well plate': 'usascientific_96_wellplate_2.4ml_deep'
 }
 
 WASTE_LW_DICT = {
@@ -129,7 +134,11 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
 
 def save_tip_info(pip, file_path = '/data/B/tip_log.json'):
     if not robot.is_simulating():
-        data = {'tips1000': tip_log['count'][pip]}
+        if "P1000" in str(pip):
+            data = {'tips1000': tip_log['count'][pip]}
+        elif "P300" in str(pip):
+            data = {'tips300': tip_log['count'][pip]}
+
         with open(file_path, 'w') as outfile:
             json.dump(data, outfile)
 
@@ -160,6 +169,7 @@ def dispense_beads(sources,dests,pip,tiprack):
         if not pip.hw_pipette['has_tip']:
             pick_up(pip,tiprack)
         pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=5)
+        pip.blow_out(m.top(-2))
         pip.drop_tip()
         pick_up(pip,tiprack)
         pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=5)
@@ -252,7 +262,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     if MAGPLATE_LABWARE not in MAGPLATE_LW_DICT:
         raise Exception('Invalid MAGPLATE_LABWARE. Must be one of the \
-    following:\nnest deep well plate')
+following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr deep generic well plate')
 
     magplate = magdeck.load_labware(MAGPLATE_LW_DICT[MAGPLATE_LABWARE])
 

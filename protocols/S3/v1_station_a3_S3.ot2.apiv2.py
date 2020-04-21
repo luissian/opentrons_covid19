@@ -115,7 +115,7 @@ resuming.')
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
     tip_log['count'][pip] += 1
 
-def transfer_buffer(beads_tube, dests, VOLUME_BUFFER, pip,tiprack):
+def transfer_buffer(beads_tube, dests, volume, pip,tiprack):
     max_trans_per_asp = 3  # 1000/VOLUME_BUFFER = 3
     split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
@@ -123,7 +123,7 @@ def transfer_buffer(beads_tube, dests, VOLUME_BUFFER, pip,tiprack):
     pick_up(pip,tiprack)
     for set in dest_sets:
         pip.aspirate(50, bf_tube.bottom(2))
-        pip.distribute(VOLUME_BUFFER, bf_tube.bottom(2), [d.bottom(10) for d in set],
+        pip.distribute(volume, bf_tube.bottom(2), [d.bottom(10) for d in set],
                    air_gap=10, disposal_volume=0, new_tip='never')
         pip.blow_out(bf_tube.top(-20))
     pip.drop_tip()
@@ -144,25 +144,20 @@ def run(ctx: protocol_api.ProtocolContext):
         'p1000_single_gen2', 'left', tip_racks=tips1000)
 
     # check source (elution) labware type
-    if ELUTION_LABWARE not in EL_LW_DICT:
-        raise Exception('Invalid ELUTION_LABWARE. Must be one of the \
-following:\nopentrons plastic 2ml tubes')
-    # load elution labware
-    if 'plate' in ELUTION_LABWARE:
-        source_racks = ctx.load_labware(
-            EL_LW_DICT[ELUTION_LABWARE], '1',
-            'RNA elution labware')
-    else:
-        source_racks = [
-            ctx.load_labware(EL_LW_DICT[ELUTION_LABWARE], slot,
-                            'sample elution labware ' + str(i+1))
-            for i, slot in enumerate(['4', '1', '5', '2'])
-    ]
+    if BEADS_LABWARE not in BD_LW_DICT:
+        raise Exception('Invalid BF_LABWARE. Must be one of the \
+following:\nopentrons plastic 50ml tubes')
+
+    # load mastermix labware
+    buffer_rack = ctx.load_labware(
+        BUFFER_LW_DICT[BUFFER_LABWARE], '10',
+        BUFFER_LABWARE)
 
     # check plate
     if PLATE_LABWARE not in PL_LW_DICT:
         raise Exception('Invalid PLATE_LABWARE. Must be one of the \
-following:\nhigh generic well plate')
+following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr deep generic well plate')
+
     # load pcr plate
     wells_plate = ctx.load_labware(PL_LW_DICT[PLATE_LABWARE], 10,
                     'sample elution well plate ')

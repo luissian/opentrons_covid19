@@ -262,7 +262,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     if MAGPLATE_LABWARE not in MAGPLATE_LW_DICT:
         raise Exception('Invalid MAGPLATE_LABWARE. Must be one of the \
-    following:\nnest deep well plate')
+following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr deep generic well plate')
 
     magplate = magdeck.load_labware(MAGPLATE_LW_DICT[MAGPLATE_LABWARE])
 

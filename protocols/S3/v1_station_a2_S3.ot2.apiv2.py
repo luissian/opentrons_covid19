@@ -196,7 +196,8 @@ following:\nopentrons plastic 2ml tubes')
     # check plate
     if PLATE_LABWARE not in PL_LW_DICT:
         raise Exception('Invalid PLATE_LABWARE. Must be one of the \
-following:\nhigh generic well plate')
+following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr deep generic well plate')
+
     # load pcr plate
     wells_plate = ctx.load_labware(PL_LW_DICT[PLATE_LABWARE], 10,
                     'sample LYSATE well plate ')

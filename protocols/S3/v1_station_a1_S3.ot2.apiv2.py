@@ -126,7 +126,7 @@ resuming.')
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
     tip_log['count'][pip] += 1
 
-def transfer_buffer(bf_tube, dests, VOLUME_BUFFER, pip,tiprack):
+def transfer_buffer(bf_tube, dests, volume, pip,tiprack):
     max_trans_per_asp = 3  # 1000/VOLUME_BUFFER = 3
     split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
@@ -134,7 +134,7 @@ def transfer_buffer(bf_tube, dests, VOLUME_BUFFER, pip,tiprack):
     pick_up(pip,tiprack)
     for set in dest_sets:
         pip.aspirate(50, bf_tube.bottom(2))
-        pip.distribute(VOLUME_BUFFER, bf_tube.bottom(2), [d.bottom(10) for d in set],
+        pip.distribute(volume, bf_tube.bottom(2), [d.bottom(10) for d in set],
                    air_gap=10, disposal_volume=0, new_tip='never')
         pip.blow_out(bf_tube.top(-20))
     pip.drop_tip()

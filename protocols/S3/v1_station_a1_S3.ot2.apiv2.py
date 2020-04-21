@@ -186,6 +186,7 @@ following:\nopentrons plastic 50ml tubes')
     number_racks = math.ceil(NUM_SAMPLES/len(dest_racks[0].wells()))
 
     # dest_sets is a list of lists. Each list is the destination well for each rack
+    # example: [[tube1,tube2,...tube24](first rack),[tube1,tube2(second rack),...]
     dest_sets = [
         [tube
          for rack in dest_racks

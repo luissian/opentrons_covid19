@@ -175,7 +175,9 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
                     'sample elution well plate ')
 
     # prepare beads
+    # One tube for each 24 samples
     num_tubes = math.ceil(NUM_SAMPLES/24)
+    # How many wells for each tube
     num_wells = math.ceil(len(wells_plate.wells())/4)
 
     beads = beads_rack.wells()[0]
@@ -185,7 +187,9 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     # setup dests
     ethanol = beads_rack.wells()[1:5][:num_tubes]
-
+    # Prepare destinations, a list of destination
+    # compose of lists of 24, each 24 is for one tube until end of samples.
+    # example: [[A1,B1,C1...G3,H3],[A4,B4..G4,H4],...]
     dest_sets = [
         [well
          for well in wells_plate.wells()

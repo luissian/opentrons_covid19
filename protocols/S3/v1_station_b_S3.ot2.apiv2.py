@@ -164,6 +164,7 @@ def dispense_beads(sources,dests,pip,tiprack):
         if not pip.hw_pipette['has_tip']:
             pick_up(pip,tiprack)
         pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=5)
+        pip.blow_out(m.top(-2))
         pip.drop_tip()
         pick_up(pip,tiprack)
         pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=5)

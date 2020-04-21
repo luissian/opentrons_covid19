@@ -115,8 +115,20 @@ resuming.')
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
     tip_log['count'][pip] += 1
 
-def transfer_buffer(beads_tube, dests, volume, pip,tiprack):
-    max_trans_per_asp = 3  # 1000/VOLUME_BUFFER = 3
+def prepare_beads(bd_tube,eth_tubes,pip,tiprack):
+    pick_up(pip,tiprack)
+    # Mix beads
+    pip.mix(10,300,bd_tube.bottom(2))
+    # Dispense beads
+    for e in eth_tubes:
+        if not pip.hw_pipette['has_tip']:
+            pick_up(pip,tiprack)
+        pip.transfer(400, bd_tube.bottom(2),e.top(-20))
+        pip.mix(10,300,e.bottom(2))
+        pip.drop_tip()
+
+def transfer_beads(beads_tube, dests, volume, pip,tiprack):
+    max_trans_per_asp = 2  # 1000/VOLUME_BUFFER = 3
     split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
@@ -149,9 +161,9 @@ def run(ctx: protocol_api.ProtocolContext):
 following:\nopentrons plastic 50ml tubes')
 
     # load mastermix labware
-    buffer_rack = ctx.load_labware(
-        BUFFER_LW_DICT[BUFFER_LABWARE], '10',
-        BUFFER_LABWARE)
+    beads_rack = ctx.load_labware(
+        BD_LW_DICT[BEADS_LABWARE], '7',
+        BEADS_LABWARE)
 
     # check plate
     if PLATE_LABWARE not in PL_LW_DICT:
@@ -162,11 +174,28 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     wells_plate = ctx.load_labware(PL_LW_DICT[PLATE_LABWARE], 10,
                     'sample elution well plate ')
 
-    # setup samples
-    sources, dests = get_source_dest_coordinates(ELUTION_LABWARE, source_racks, wells_plate)
+    # prepare beads
+    num_tubes = math.ceil(NUM_SAMPLES/24)
+    num_wells = math.ceil(len(wells_plate.wells())/4)
+
+    beads = beads_rack.wells()[0]
+    ethanol = beads_rack.wells()[1:5][:num_tubes]
+
+    prepare_beads(beads,ethanol,pip,tipracks)
+
+    # setup dests
+    ethanol = beads_rack.wells()[1:5][:num_tubes]
+
+    dest_sets = [
+        [well
+         for well in wells_plate.wells()
+        ][:NUM_SAMPLES][i*num_wells:(i+1)*num_wells]
+        for i in range(num_tubes)
+        ]
 
     # transfer
-    transfer_samples(ELUTION_LABWARE, sources, dests, p1000, tips1000)
+    for bd_tube,dests in zip(ethanol,dest_sets):
+        transfer_beads(bd_tube, dests,VOLUME_BEADS, p1000, tips1000)
 
     # track final used tip
     save_tip_info(p1000)

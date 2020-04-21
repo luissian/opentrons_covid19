@@ -16,13 +16,13 @@ metadata = {
 
 # Parameters to adapt the protocol
 NUM_SAMPLES = 96
-LYSATE_LABWARE = 'opentrons plastic 50 ml tubes'
+BEADS_LABWARE = 'opentrons plastic 50 ml tubes'
 PLATE_LABWARE = 'high generic well plate'
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number
 
-LYSATE_LABWARE must be one of the following:
+ELUTION_LABWARE must be one of the following:
     opentrons plastic 2ml tubes
 
 PLATE_LABWARE must be one of the following:
@@ -110,8 +110,8 @@ resuming.')
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
     tip_log['count'][pip] += 1
 
-def get_source_dest_coordinates(LYSATE_LABWARE, source_racks, pcr_plate):
-    if 'strip' in LYSATE_LABWARE:
+def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
+    if 'strip' in ELUTION_LABWARE:
         sources = [
             tube
             for i, rack in enumerate(source_racks)
@@ -122,7 +122,7 @@ def get_source_dest_coordinates(LYSATE_LABWARE, source_racks, pcr_plate):
             for tube in col
         ][:NUM_SAMPLES]
         dests = pcr_plate.wells()[:NUM_SAMPLES]
-    elif 'plate' in LYSATE_LABWARE:
+    elif 'plate' in ELUTION_LABWARE:
         sources = source_racks.wells()[:NUM_SAMPLES]
         dests = pcr_plate.wells()[:NUM_SAMPLES]
     else:
@@ -137,9 +137,9 @@ def get_source_dest_coordinates(LYSATE_LABWARE, source_racks, pcr_plate):
             for well in col[4*h_block:4*(h_block+1)]][:NUM_SAMPLES]
     return sources, dests
 
-def transfer_samples(LYSATE_LABWARE, sources, dests, pip, tiprack):
+def transfer_samples(ELUTION_LABWARE, sources, dests, pip, tiprack):
     # height for aspiration has to be different depending if you ar useing tubes or wells
-    if 'strip' in LYSATE_LABWARE or 'plate' in LYSATE_LABWARE:
+    if 'strip' in ELUTION_LABWARE or 'plate' in ELUTION_LABWARE:
         height = 1.5
     else:
         height = 2
@@ -166,19 +166,19 @@ def run(ctx: protocol_api.ProtocolContext):
     p1000 = ctx.load_instrument(
         'p1000_single_gen2', 'left', tip_racks=tips1000)
 
-    # check source (LYSATE) labware type
-    if LYSATE_LABWARE not in EL_LW_DICT:
-        raise Exception('Invalid LYSATE_LABWARE. Must be one of the \
+    # check source (elution) labware type
+    if ELUTION_LABWARE not in EL_LW_DICT:
+        raise Exception('Invalid ELUTION_LABWARE. Must be one of the \
 following:\nopentrons plastic 2ml tubes')
-    # load LYSATE labware
-    if 'plate' in LYSATE_LABWARE:
+    # load elution labware
+    if 'plate' in ELUTION_LABWARE:
         source_racks = ctx.load_labware(
-            EL_LW_DICT[LYSATE_LABWARE], '1',
-            'RNA LYSATE labware')
+            EL_LW_DICT[ELUTION_LABWARE], '1',
+            'RNA elution labware')
     else:
         source_racks = [
-            ctx.load_labware(EL_LW_DICT[LYSATE_LABWARE], slot,
-                            'sample LYSATE labware ' + str(i+1))
+            ctx.load_labware(EL_LW_DICT[ELUTION_LABWARE], slot,
+                            'sample elution labware ' + str(i+1))
             for i, slot in enumerate(['4', '1', '5', '2'])
     ]
 
@@ -188,13 +188,13 @@ following:\nopentrons plastic 2ml tubes')
 following:\nhigh generic well plate')
     # load pcr plate
     wells_plate = ctx.load_labware(PL_LW_DICT[PLATE_LABWARE], 10,
-                    'sample LYSATE well plate ')
+                    'sample elution well plate ')
 
     # setup samples
-    sources, dests = get_source_dest_coordinates(LYSATE_LABWARE, source_racks, wells_plate)
+    sources, dests = get_source_dest_coordinates(ELUTION_LABWARE, source_racks, wells_plate)
 
     # transfer
-    transfer_samples(LYSATE_LABWARE, sources, dests, p1000, tips1000)
+    transfer_samples(ELUTION_LABWARE, sources, dests, p1000, tips1000)
 
     # track final used tip
     save_tip_info(p1000)

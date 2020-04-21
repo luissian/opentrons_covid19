@@ -177,7 +177,7 @@ def remove_supernatant(sources,waste,pip,tiprack):
         pip.blow_out(waste)
         pip.drop_tip()
 
-def wash(wash_sets,dests,magdeck,pip,tipracks):
+def wash(wash_sets,dests,magdeck,pip,tiprack):
     for wash_set in wash_sets:
         for i, m in enumerate(dests):
             # transfer and mix wash with beads

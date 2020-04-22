@@ -19,6 +19,7 @@ NUM_SAMPLES = 96
 LYSATE_LABWARE = 'opentrons plastic 2ml tubes'
 PLATE_LABWARE = 'opentrons deep generic well plate'
 VOLUME_LYSATE = 400
+BEADS = True
 
 ## global vars
 robot = None
@@ -166,6 +167,8 @@ def transfer_samples(labware, volume , sources, dests, pip, tiprack):
     for s, d in zip(sources, dests):
         pick_up(pip,tiprack)
         pip.transfer(volume, s.bottom(height), d.bottom(15), air_gap=2, new_tip='never')
+        if BEADS:
+            pip.mix(3,400,d.bottom(4))
         pip.blow_out(d.top(-2))
         pip.aspirate(50, d.top(-2))
         pip.drop_tip()

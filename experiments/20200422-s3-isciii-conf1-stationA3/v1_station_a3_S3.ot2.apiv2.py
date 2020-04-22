@@ -17,7 +17,7 @@ metadata = {
 # Parameters to adapt the protocol
 NUM_SAMPLES = 96
 BEADS_LABWARE = 'opentrons plastic 30ml tubes'
-PLATE_LABWARE = 'nest_96_deepwellplate_2000ul'
+PLATE_LABWARE = 'vwr deep generic well plate'
 VOLUME_BEADS = 400
 
 ## global vars

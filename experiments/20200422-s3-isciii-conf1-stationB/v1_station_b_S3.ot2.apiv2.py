@@ -80,7 +80,7 @@ WASTE_LW_DICT = {
 }
 
 ELUTION_LW_DICT = {
-    'opentrons aluminum biorad plate': 'opentrons_96_aluminumblock_biorad_wellplate_200ul'
+    'opentrons aluminum biorad plate': 'opentrons_96_aluminumblock_biorad_wellplate_200ul',
     'opentrons aluminum nest plate': 'opentrons_96_aluminumblock_nest_wellplate_100ul'
 
 }
@@ -213,7 +213,7 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             pip.move_to(m.top(-20))
 
             magdeck.engage(height_from_base=10)
-            ctx.delay(seconds=60, msg='Incubating on magnet for 60 seconds.')
+            robot.delay(seconds=60, msg='Incubating on magnet for 60 seconds.')
 
             # remove supernatant
             pip.transfer(200, asp_loc, waste, new_tip='never', air_gap=20)

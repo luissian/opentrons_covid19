@@ -210,9 +210,16 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     # Prepare destinations, a list of destination
     # compose of lists of 24, each 24 is for one tube until end of samples.
     # example: [[A1,B1,C1...G3,H3],[A4,B4..G4,H4],...]
+    order_dests = [
+        well
+        for v_block in range(2)
+        for h_block in range(2)
+        for col in wells_plate.columns()[6*v_block:6*(v_block+1)]
+        for well in col[4*h_block:4*(h_block+1)]]
+
     dest_sets = [
         [well
-         for well in wells_plate.wells()
+         for well in order_dests
         ][:NUM_SAMPLES][i*num_wells:(i+1)*num_wells]
         for i in range(num_tubes)
         ]

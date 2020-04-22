@@ -11,7 +11,7 @@ metadata = {
     'protocolName': 'S3 Station B Version 2',
     'author': 'Nick <protocols@opentrons.com> Sara <smonzon@isciii.es> Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
-    'apiLevel': '2.0'
+    'apiLevel': '2.2'
 }
 
 """

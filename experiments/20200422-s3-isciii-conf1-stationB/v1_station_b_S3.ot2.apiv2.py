@@ -171,12 +171,12 @@ def dispense_beads(sources,dests,pip,tiprack):
             pick_up(pip,tiprack)
         pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=20)
         pip.blow_out(m.top(-2))
-        pip.drop_tip()
+        pip.drop_tip(home_after=False)
         pick_up(pip,tiprack)
         pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=20)
         pip.mix(5, 200, m.bottom(20))
         pip.blow_out(m.top(-2))
-        pip.drop_tip()
+        pip.drop_tip(home_after=False)
 
 def mix_beads(dests, pip, tiprack):
     ## Dispense beads to deep well plate.
@@ -185,7 +185,7 @@ def mix_beads(dests, pip, tiprack):
             pick_up(pip,tiprack)
         pip.mix(5, 200, m.bottom(20))
         pip.blow_out(m.top(-2))
-        pip.drop_tip()
+        pip.drop_tip(home_after=False)
 
 def remove_supernatant(sources,waste,pip,tiprack):
     for i, m in enumerate(sources):
@@ -195,7 +195,7 @@ def remove_supernatant(sources,waste,pip,tiprack):
         pip.move_to(m.center())
         pip.transfer(800, loc, waste, air_gap=100, new_tip='never')
         pip.blow_out(waste)
-        pip.drop_tip()
+        pip.drop_tip(home_after=False)
 
 def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
     for wash_set in wash_sets:
@@ -219,7 +219,7 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
 
             # remove supernatant
             pip.transfer(200, asp_loc, waste, new_tip='never', air_gap=20)
-            pip.drop_tip()
+            pip.drop_tip(home_after=False)
 
 def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
     ## dispense buffer
@@ -230,7 +230,7 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
         pip.transfer(
             40, buffer, m.center(), new_tip='never', air_gap=10)
         pip.mix(5, 40, disp_loc)
-        pip.drop_tip()
+        pip.drop_tip(home_after=False)
 
     ## Incubation steps
     robot.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
@@ -246,7 +246,7 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
         # transfer elution to new plate
         pip.transfer(40, asp_loc, e, new_tip='never', air_gap=10)
         pip.blow_out(e.top(-2))
-        pip.drop_tip()
+        pip.drop_tip(home_after=False)
 
 def run(ctx: protocol_api.ProtocolContext):
     global robot

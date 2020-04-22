@@ -18,7 +18,7 @@ metadata = {
 NUM_SAMPLES = 24
 BEADS_LABWARE = 'opentrons plastic 30ml tubes'
 PLATE_LABWARE = 'vwr deep generic well plate'
-VOLUME_BEADS = 400
+VOLUME_BEADS = 410
 
 ## global vars
 robot = None
@@ -130,7 +130,8 @@ def prepare_beads(bd_tube,eth_tubes,pip,tiprack):
     for e in eth_tubes:
         if not pip.hw_pipette['has_tip']:
             pick_up(pip,tiprack)
-        pip.transfer(400, bd_tube.bottom(2),e.bottom(40),new_tip='never')
+        pip.transfer(400, bd_tube.bottom(2),e.bottom(40),air_gap=10,new_tip='never')
+        pip.blow_out(e.bottom(40))
         pip.drop_tip()
 
 def transfer_beads(beads_tube, dests, volume, pip,tiprack):
@@ -150,7 +151,7 @@ def transfer_beads(beads_tube, dests, volume, pip,tiprack):
         pip.aspirate(50, beads_tube.bottom(2))
         pip.distribute(volume, beads_tube.bottom(2), [d.bottom(10) for d in set],
                    air_gap=3, disposal_volume=0, new_tip='never')
-        pip.aspirate(5,d.top(-2))
+        pip.aspirate(5,set[-1].top(-2))
         pip.dispense(55, beads_tube.top(-30))
     pip.drop_tip()
 

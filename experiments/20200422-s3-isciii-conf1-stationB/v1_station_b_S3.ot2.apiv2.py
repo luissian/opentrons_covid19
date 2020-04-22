@@ -30,9 +30,9 @@ REAGENT SETUP:
 # Parameters to adapt the protocol
 NUM_SAMPLES = 24
 REAGENT_LABWARE = 'nest 12 reservoir plate'
-MAGPLATE_LABWARE = 'opentrons deep generic well plate'
+MAGPLATE_LABWARE = 'vwr deep generic well plate'
 WASTE_LABWARE = 'nest 1 reservoir plate'
-ELUTION_LABWARE = 'opentrons aluminum biorad plate'
+ELUTION_LABWARE = 'opentrons aluminum nest plate'
 TIP_TRACK = True
 DISPENSE_BEADS = False
 
@@ -59,6 +59,7 @@ WASTE labware
 
 ELUTION_LABWARE
     opentrons aluminum biorad plate
+    opentrons aluminum nest plate
 """
 
 
@@ -79,7 +80,9 @@ WASTE_LW_DICT = {
 }
 
 ELUTION_LW_DICT = {
-    'opentrons aluminum biorad plate': 'opentrons_96_aluminumblock_nest_wellplate_100ul'
+    'opentrons aluminum biorad plate': 'opentrons_96_aluminumblock_biorad_wellplate_200ul'
+    'opentrons aluminum nest plate': 'opentrons_96_aluminumblock_nest_wellplate_100ul'
+
 }
 
 # Function definitions
@@ -175,10 +178,19 @@ def dispense_beads(sources,dests,pip,tiprack):
         pip.blow_out(m.top(-2))
         pip.drop_tip()
 
+def mix_beads(dests, pip, tiprack):
+    ## Dispense beads to deep well plate.
+    for i, m in enumerate(dests):
+        if not pip.hw_pipette['has_tip']:
+            pick_up(pip,tiprack)
+        pip.mix(5, 200, m.bottom(20))
+        pip.blow_out(m.top(-2))
+        pip.drop_tip()
+
 def remove_supernatant(sources,waste,pip,tiprack):
     for i, m in enumerate(sources):
         side = -1 if (i % 8) % 2 == 0 else 1
-        loc = m.bottom(5).move(Point(x=side*2))
+        loc = m.bottom(0.5).move(Point(x=side*2))
         pick_up(pip,tiprack)
         pip.move_to(m.center())
         pip.transfer(800, loc, waste, air_gap=100, new_tip='never')
@@ -192,8 +204,8 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             magdeck.disengage()
             wash_chan = wash_set[i//6]
             side = 1 if i % 2 == 0 else -1
-            disp_loc = m.bottom(5).move(Point(x=side*2))
-            asp_loc = m.bottom(5).move(Point(x=-1*side*2))
+            disp_loc = m.bottom(0.5).move(Point(x=side*2))
+            asp_loc = m.bottom(0.5).move(Point(x=-1*side*2))
             pick_up(pip,tiprack)
             pip.transfer(
                 200, wash_chan, m.center(), new_tip='never', air_gap=5)
@@ -270,7 +282,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     following:\nnest 1 reservoir plate')
 
     waste = ctx.load_labware(
-        WASTE_LW_DICT[WASTE_LABWARE], '11', 'waste reservoir').wells()[0].top()
+        WASTE_LW_DICT[WASTE_LABWARE], '11', 'waste reservoir').wells()[0].top(-10)
 
     ## REAGENT RESERVOIR
     if REAGENT_LABWARE not in REAGENT_LW_DICT:
@@ -324,6 +336,9 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         #ctx.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
         # FOR TESTING
         ctx.delay(minutes=1, msg='Incubating off magnet for 5 minutes.')
+    else:
+        # Mix bead
+        mix_beads(mag_samples_m,m300,tips300)
 
     ## First incubate on magnet.
     magdeck.engage(height_from_base=10)

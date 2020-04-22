@@ -125,7 +125,11 @@ resuming.')
 def prepare_beads(bd_tube,eth_tubes,pip,tiprack):
     pick_up(pip,tiprack)
     # Mix beads
+    pip.flow_rate.aspirate = 200
+    pip.flow_rate.dispense = 1500
     pip.mix(5,800,bd_tube.bottom(5))
+    pip.flow_rate.aspirate = 100
+    pip.flow_rate.dispense = 1000
     # Dispense beads
     for e in eth_tubes:
         if not pip.hw_pipette['has_tip']:

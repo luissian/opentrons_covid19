@@ -200,7 +200,7 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             pip.mix(5, 175, disp_loc)
             pip.move_to(m.top(-20))
 
-            magdeck.engage()
+            magdeck.engage(height_from_base=10)
             #ctx.delay(seconds=60, msg='Incubating on magnet for 60 seconds.')
             # FOR TESTING
             robot.delay(seconds=10, msg='Incubating on magnet for 20 seconds.')
@@ -222,7 +222,7 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
 
     ## Incubation steps
     robot.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
-    magdeck.engage()
+    magdeck.engage(height_from_base=10)
     robot.delay(seconds=60, msg='Incubating on magnet for 60 seconds.')
 
     ## Dispense elutes in pcr plate.
@@ -326,7 +326,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         ctx.delay(minutes=1, msg='Incubating off magnet for 5 minutes.')
 
     ## First incubate on magnet.
-    magdeck.engage()
+    magdeck.engage(height_from_base=10)
     #ctx.delay(minutes=5, msg='Incubating on magnet for 5 minutes.')
     ##FOR TESTING
     ctx.delay(minutes=1, msg='Incubating on magnet for 5 minutes.')

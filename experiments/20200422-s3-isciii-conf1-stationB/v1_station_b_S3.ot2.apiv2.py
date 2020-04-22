@@ -213,9 +213,7 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             pip.move_to(m.top(-20))
 
             magdeck.engage(height_from_base=10)
-            #ctx.delay(seconds=60, msg='Incubating on magnet for 60 seconds.')
-            # FOR TESTING
-            robot.delay(seconds=10, msg='Incubating on magnet for 20 seconds.')
+            ctx.delay(seconds=60, msg='Incubating on magnet for 60 seconds.')
 
             # remove supernatant
             pip.transfer(200, asp_loc, waste, new_tip='never', air_gap=20)
@@ -333,18 +331,14 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         bead_dests = bead_buffer[:math.ceil(num_cols/4)]
         dispense_beads(bead_dests,mag_samples_m,m300,tips300)
         # incubate off and on magnet
-        #ctx.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
-        # FOR TESTING
-        ctx.delay(minutes=1, msg='Incubating off magnet for 5 minutes.')
+        ctx.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
     else:
         # Mix bead
         mix_beads(mag_samples_m,m300,tips300)
 
     ## First incubate on magnet.
     magdeck.engage(height_from_base=10)
-    #ctx.delay(minutes=5, msg='Incubating on magnet for 5 minutes.')
-    ##FOR TESTING
-    ctx.delay(minutes=1, msg='Incubating on magnet for 5 minutes.')
+    ctx.delay(minutes=5, msg='Incubating on magnet for 5 minutes.')
 
     # remove supernatant with P1000
     remove_supernatant(mag_samples_s,waste,p1000,tips1000)

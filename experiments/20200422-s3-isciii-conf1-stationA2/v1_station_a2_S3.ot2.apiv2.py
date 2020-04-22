@@ -15,11 +15,11 @@ metadata = {
 
 
 # Parameters to adapt the protocol
-NUM_SAMPLES = 96
+NUM_SAMPLES = 24
 LYSATE_LABWARE = 'opentrons plastic 2ml tubes'
 PLATE_LABWARE = 'vwr deep generic well plate'
 VOLUME_LYSATE = 400
-BEADS = True
+BEADS = False
 
 ## global vars
 robot = None

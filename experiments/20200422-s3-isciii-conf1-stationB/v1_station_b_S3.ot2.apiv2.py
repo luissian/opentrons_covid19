@@ -11,7 +11,7 @@ metadata = {
     'protocolName': 'S3 Station B Version 2',
     'author': 'Nick <protocols@opentrons.com> Sara <smonzon@isciii.es> Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
-    'apiLevel': '2.0'
+    'apiLevel': '2.2'
 }
 
 """
@@ -28,11 +28,11 @@ REAGENT SETUP:
 """
 
 # Parameters to adapt the protocol
-NUM_SAMPLES = 96
+NUM_SAMPLES = 24
 REAGENT_LABWARE = 'nest 12 reservoir plate'
-MAGPLATE_LABWARE = 'vmr deep generic well plate'
+MAGPLATE_LABWARE = 'vwr deep generic well plate'
 WASTE_LABWARE = 'nest 1 reservoir plate'
-ELUTION_LABWARE = 'opentrons aluminum biorad plate'
+ELUTION_LABWARE = 'opentrons aluminum nest plate'
 TIP_TRACK = True
 DISPENSE_BEADS = False
 
@@ -59,6 +59,7 @@ WASTE labware
 
 ELUTION_LABWARE
     opentrons aluminum biorad plate
+    opentrons aluminum nest plate
 """
 
 
@@ -79,7 +80,9 @@ WASTE_LW_DICT = {
 }
 
 ELUTION_LW_DICT = {
-    'opentrons aluminum biorad plate': 'opentrons_96_aluminumblock_nest_wellplate_100ul'
+    'opentrons aluminum biorad plate': 'opentrons_96_aluminumblock_biorad_wellplate_200ul'
+    'opentrons aluminum nest plate': 'opentrons_96_aluminumblock_nest_wellplate_100ul'
+
 }
 
 # Function definitions
@@ -166,24 +169,33 @@ def dispense_beads(sources,dests,pip,tiprack):
     for i, m in enumerate(dests):
         if not pip.hw_pipette['has_tip']:
             pick_up(pip,tiprack)
-        pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=5)
+        pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=20)
         pip.blow_out(m.top(-2))
-        pip.drop_tip()
+        pip.drop_tip(home_after=False)
         pick_up(pip,tiprack)
-        pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=5)
+        pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=20)
         pip.mix(5, 200, m.bottom(20))
         pip.blow_out(m.top(-2))
-        pip.drop_tip()
+        pip.drop_tip(home_after=False)
+
+def mix_beads(dests, pip, tiprack):
+    ## Dispense beads to deep well plate.
+    for i, m in enumerate(dests):
+        if not pip.hw_pipette['has_tip']:
+            pick_up(pip,tiprack)
+        pip.mix(5, 200, m.bottom(20))
+        pip.blow_out(m.top(-2))
+        pip.drop_tip(home_after=False)
 
 def remove_supernatant(sources,waste,pip,tiprack):
     for i, m in enumerate(sources):
         side = -1 if (i % 8) % 2 == 0 else 1
-        loc = m.bottom(5).move(Point(x=side*2))
+        loc = m.bottom(0.5).move(Point(x=side*2))
         pick_up(pip,tiprack)
         pip.move_to(m.center())
         pip.transfer(800, loc, waste, air_gap=100, new_tip='never')
         pip.blow_out(waste)
-        pip.drop_tip()
+        pip.drop_tip(home_after=False)
 
 def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
     for wash_set in wash_sets:
@@ -192,22 +204,20 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             magdeck.disengage()
             wash_chan = wash_set[i//6]
             side = 1 if i % 2 == 0 else -1
-            disp_loc = m.bottom(5).move(Point(x=side*2))
-            asp_loc = m.bottom(5).move(Point(x=-1*side*2))
+            disp_loc = m.bottom(0.5).move(Point(x=side*2))
+            asp_loc = m.bottom(0.5).move(Point(x=-1*side*2))
             pick_up(pip,tiprack)
             pip.transfer(
-                200, wash_chan, m.center(), new_tip='never', air_gap=5)
+                200, wash_chan.bottom(2), m.center(), new_tip='never', air_gap=20)
             pip.mix(5, 175, disp_loc)
             pip.move_to(m.top(-20))
 
-            magdeck.engage()
-            #ctx.delay(seconds=60, msg='Incubating on magnet for 60 seconds.')
-            # FOR TESTING
-            robot.delay(seconds=10, msg='Incubating on magnet for 20 seconds.')
+            magdeck.engage(height_from_base=10)
+            ctx.delay(seconds=60, msg='Incubating on magnet for 60 seconds.')
 
             # remove supernatant
-            pip.transfer(200, asp_loc, waste, new_tip='never', air_gap=5)
-            pip.drop_tip()
+            pip.transfer(200, asp_loc, waste, new_tip='never', air_gap=20)
+            pip.drop_tip(home_after=False)
 
 def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
     ## dispense buffer
@@ -216,13 +226,13 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
         disp_loc = m.bottom(5).move(Point(x=side*2))
         pick_up(pip,tipracks)
         pip.transfer(
-            40, buffer, m.center(), new_tip='never', air_gap=7)
+            40, buffer, m.center(), new_tip='never', air_gap=10)
         pip.mix(5, 40, disp_loc)
-        pip.drop_tip()
+        pip.drop_tip(home_after=False)
 
     ## Incubation steps
     robot.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
-    magdeck.engage()
+    magdeck.engage(height_from_base=10)
     robot.delay(seconds=60, msg='Incubating on magnet for 60 seconds.')
 
     ## Dispense elutes in pcr plate.
@@ -232,9 +242,9 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
         asp_loc = m.bottom(5).move(Point(x=-1*side*2))
         pick_up(pip,tipracks)
         # transfer elution to new plate
-        pip.transfer(40, asp_loc, e, new_tip='never', air_gap=7)
+        pip.transfer(40, asp_loc, e, new_tip='never', air_gap=10)
         pip.blow_out(e.top(-2))
-        pip.drop_tip()
+        pip.drop_tip(home_after=False)
 
 def run(ctx: protocol_api.ProtocolContext):
     global robot
@@ -270,7 +280,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     following:\nnest 1 reservoir plate')
 
     waste = ctx.load_labware(
-        WASTE_LW_DICT[WASTE_LABWARE], '11', 'waste reservoir').wells()[0].top()
+        WASTE_LW_DICT[WASTE_LABWARE], '11', 'waste reservoir').wells()[0].top(-10)
 
     ## REAGENT RESERVOIR
     if REAGENT_LABWARE not in REAGENT_LW_DICT:
@@ -321,15 +331,14 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         bead_dests = bead_buffer[:math.ceil(num_cols/4)]
         dispense_beads(bead_dests,mag_samples_m,m300,tips300)
         # incubate off and on magnet
-        #ctx.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
-        # FOR TESTING
-        ctx.delay(minutes=1, msg='Incubating off magnet for 5 minutes.')
+        ctx.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
+    else:
+        # Mix bead
+        mix_beads(mag_samples_m,m300,tips300)
 
     ## First incubate on magnet.
-    magdeck.engage()
-    #ctx.delay(minutes=5, msg='Incubating on magnet for 5 minutes.')
-    ##FOR TESTING
-    ctx.delay(minutes=1, msg='Incubating on magnet for 5 minutes.')
+    magdeck.engage(height_from_base=10)
+    ctx.delay(minutes=5, msg='Incubating on magnet for 5 minutes.')
 
     # remove supernatant with P1000
     remove_supernatant(mag_samples_s,waste,p1000,tips1000)

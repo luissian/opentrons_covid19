@@ -130,7 +130,7 @@ def prepare_beads(bd_tube,eth_tubes,pip,tiprack):
     for e in eth_tubes:
         if not pip.hw_pipette['has_tip']:
             pick_up(pip,tiprack)
-        pip.transfer(400, bd_tube.bottom(2),e.bottom(40),air_gap=10,new_tip='never')
+        pip.transfer(480, bd_tube.bottom(2),e.bottom(40),air_gap=10,new_tip='never')
         pip.blow_out(e.bottom(40))
         pip.drop_tip()
 

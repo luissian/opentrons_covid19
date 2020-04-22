@@ -17,7 +17,7 @@ metadata = {
 # Parameters to adapt the protocol
 NUM_SAMPLES = 96
 LYSATE_LABWARE = 'opentrons plastic 2ml tubes'
-PLATE_LABWARE = 'opentrons deep generic well plate'
+PLATE_LABWARE = 'vwr deep generic well plate'
 VOLUME_LYSATE = 400
 BEADS = True
 

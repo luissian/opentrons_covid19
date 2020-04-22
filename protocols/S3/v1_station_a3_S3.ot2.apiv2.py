@@ -17,7 +17,7 @@ metadata = {
 # Parameters to adapt the protocol
 NUM_SAMPLES = 96
 BEADS_LABWARE = 'opentrons plastic 30ml tubes'
-PLATE_LABWARE = 'vmr deep generic well plate'
+PLATE_LABWARE = 'vwr deep generic well plate'
 VOLUME_BEADS = 400
 
 ## global vars
@@ -73,16 +73,14 @@ def finish_run():
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
     global tip_log
-    if not tip_log or pip not in tip_log['count']:
+    if not tip_log['count'] or pip not in tip_log['count']:
         if not robot.is_simulating():
             if os.path.isfile(file_path):
                 with open(file_path) as json_file:
                     data = json.load(json_file)
                     if 'tips1000' in data:
                         tip_log['count'][pip] = data['tips1000']
-                    else:
-                        tip_log['count'][pip] = 0
-                    if 'tips300' in data:
+                    elif 'tips300' in data:
                         tip_log['count'][pip] = data['tips300']
                     else:
                         tip_log['count'][pip] = 0
@@ -127,13 +125,12 @@ resuming.')
 def prepare_beads(bd_tube,eth_tubes,pip,tiprack):
     pick_up(pip,tiprack)
     # Mix beads
-    pip.mix(10,300,bd_tube.bottom(2))
+    pip.mix(5,800,bd_tube.bottom(5))
     # Dispense beads
     for e in eth_tubes:
         if not pip.hw_pipette['has_tip']:
             pick_up(pip,tiprack)
-        pip.transfer(400, bd_tube.bottom(2),e.top(-20),new_tip='never')
-        pip.mix(10,300,e.bottom(2))
+        pip.transfer(400, bd_tube.bottom(2),e.bottom(40),new_tip='never')
         pip.drop_tip()
 
 def transfer_beads(beads_tube, dests, volume, pip,tiprack):
@@ -142,11 +139,18 @@ def transfer_beads(beads_tube, dests, volume, pip,tiprack):
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
     pick_up(pip,tiprack)
+ # Mix bead tubes prior to dispensing
+    pip.flow_rate.aspirate = 200
+    pip.flow_rate.dispense = 1500
+    pip.mix(6,800,beads_tube.bottom(15))
+    pip.flow_rate.aspirate = 100
+    pip.flow_rate.dispense = 1000
     for set in dest_sets:
         pip.aspirate(50, beads_tube.bottom(2))
         pip.distribute(volume, beads_tube.bottom(2), [d.bottom(10) for d in set],
-                   air_gap=10, disposal_volume=0, new_tip='never')
-        pip.blow_out(beads_tube.top(-20))
+                   air_gap=3, disposal_volume=0, new_tip='never')
+        pip.aspirate(5,d.top(-2))
+        pip.dispense(55, beads_tube.top(-30))
     pip.drop_tip()
 
 # RUN PROTOCOL
@@ -160,7 +164,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     tips1000 = [ctx.load_labware('opentrons_96_filtertiprack_1000ul',
                                      slot, '1000µl tiprack')
-                    for slot in ['3', '6', '9', '8']]
+                    for slot in ['3', '6', '9']]
 
     # load pipette
     p1000 = ctx.load_instrument(
@@ -173,7 +177,7 @@ following:\nopentrons plastic 50ml tubes')
 
     # load mastermix labware
     beads_rack = ctx.load_labware(
-        BD_LW_DICT[BEADS_LABWARE], '7',
+        BD_LW_DICT[BEADS_LABWARE], '8',
         BEADS_LABWARE)
 
     # check plate
@@ -190,14 +194,14 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     num_tubes = math.ceil(NUM_SAMPLES/24)
     # How many wells for each tube
     num_wells = math.ceil(len(wells_plate.wells())/4)
-
-    beads = beads_rack.wells()[0]
-    ethanol = beads_rack.wells()[1:5][:num_tubes]
+    # beads and ethanol
+    beads = beads_rack.wells()[4]
+    ethanol = beads_rack.wells()[0:3][:num_tubes]
 
     prepare_beads(beads,ethanol,p1000,tips1000)
 
     # setup dests
-    ethanol = beads_rack.wells()[1:5][:num_tubes]
+
     # Prepare destinations, a list of destination
     # compose of lists of 24, each 24 is for one tube until end of samples.
     # example: [[A1,B1,C1...G3,H3],[A4,B4..G4,H4],...]

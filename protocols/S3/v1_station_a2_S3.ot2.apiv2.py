@@ -164,7 +164,7 @@ def transfer_samples(labware, volume , sources, dests, pip, tiprack):
     # transfer
     for s, d in zip(sources, dests):
         pick_up(pip,tiprack)
-        pip.transfer(volume, s.bottom(height), d.bottom(15), air_gap=2, new_tip='never')
+        pip.transfer(volume, s.bottom(height), d.bottom(15), air_gap=20, new_tip='never')
         if BEADS:
             pip.mix(3,400,d.bottom(4))
         pip.blow_out(d.top(-2))

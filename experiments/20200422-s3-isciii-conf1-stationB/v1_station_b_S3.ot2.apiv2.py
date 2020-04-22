@@ -208,7 +208,7 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             asp_loc = m.bottom(0.5).move(Point(x=-1*side*2))
             pick_up(pip,tiprack)
             pip.transfer(
-                200, wash_chan, m.center(), new_tip='never', air_gap=20)
+                200, wash_chan.bottom(2), m.center(), new_tip='never', air_gap=20)
             pip.mix(5, 175, disp_loc)
             pip.move_to(m.top(-20))
 

@@ -112,9 +112,7 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
                     data = json.load(json_file)
                     if 'tips1000' in data:
                         tip_log['count'][pip] = data['tips1000']
-                    else:
-                        tip_log['count'][pip] = 0
-                    if 'tips300' in data:
+                    elif 'tips300' in data:
                         tip_log['count'][pip] = data['tips300']
                     else:
                         tip_log['count'][pip] = 0

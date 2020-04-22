@@ -79,16 +79,14 @@ def finish_run():
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
     global tip_log
-    if not tip_log or pip not in tip_log['count']:
+    if not tip_log['count'] or pip not in tip_log['count']:
         if not robot.is_simulating():
             if os.path.isfile(file_path):
                 with open(file_path) as json_file:
                     data = json.load(json_file)
                     if 'tips1000' in data:
                         tip_log['count'][pip] = data['tips1000']
-                    else:
-                        tip_log['count'][pip] = 0
-                    if 'tips300' in data:
+                    elif 'tips300' in data:
                         tip_log['count'][pip] = data['tips300']
                     else:
                         tip_log['count'][pip] = 0

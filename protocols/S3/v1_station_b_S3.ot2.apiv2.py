@@ -28,13 +28,13 @@ REAGENT SETUP:
 """
 
 # Parameters to adapt the protocol
-NUM_SAMPLES = 48
+NUM_SAMPLES = 96
 REAGENT_LABWARE = 'nest 12 reservoir plate'
 MAGPLATE_LABWARE = 'vmr deep generic well plate'
 WASTE_LABWARE = 'nest 1 reservoir plate'
 ELUTION_LABWARE = 'opentrons aluminum biorad plate'
 TIP_TRACK = True
-DISPENSE_BEADS = True
+DISPENSE_BEADS = False
 
 ## global vars
 robot = None

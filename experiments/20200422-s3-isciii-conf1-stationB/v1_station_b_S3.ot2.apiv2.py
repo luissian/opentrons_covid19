@@ -11,7 +11,7 @@ metadata = {
     'protocolName': 'S3 Station B Version 2',
     'author': 'Nick <protocols@opentrons.com> Sara <smonzon@isciii.es> Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
-    'apiLevel': '2.2'
+    'apiLevel': '2.3'
 }
 
 """
@@ -28,7 +28,7 @@ REAGENT SETUP:
 """
 
 # Parameters to adapt the protocol
-NUM_SAMPLES = 96
+NUM_SAMPLES = 24
 REAGENT_LABWARE = 'nest 12 reservoir plate'
 MAGPLATE_LABWARE = 'vwr deep generic well plate'
 WASTE_LABWARE = 'nest 1 reservoir plate'
@@ -61,11 +61,7 @@ ELUTION_LABWARE
     opentrons aluminum biorad plate
     opentrons aluminum nest plate
 """
-# Parameters to adapt the protocol
-# Warning writing any Parameters below this line.
-# It will be deleted if opentronsWeb is used.
 
-# End Parameters to adapt the protocol
 
 # Constants
 REAGENT_LW_DICT = {
@@ -161,6 +157,29 @@ resuming.')
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
     tip_log['count'][pip] += 1
 
+def mix_beads(reps, dests, pip, tiprack):
+    ## Dispense beads to deep well plate.
+    for i, m in enumerate(dests):
+        if not pip.hw_pipette['has_tip']:
+            pick_up(pip,tiprack)
+        #pip.mix(5, 150, m.bottom(2))
+        #pip.move_to(m.bottom(2))
+        for i in range(reps):
+            pip.aspirate(200, m.bottom(2))
+            pip.dispense(200, m.bottom(2), rate=2)
+            #pip.dispense(130,m.bottom(2),0.5)
+            #pip.dispense(150,m.top(-10),0.5)
+            #pip.blow_out(m.top(-2))
+        #pip.flow_rate.blow_out = 100
+        pip.blow_out(m.top(-2))
+        pip.aspirate(20, m.top(-2))
+        #pip.dispense(50, m.top(-2))
+        #pip.aspirate(50, m.top(-2))
+        #pip.blow_out(m.top(-2))
+        #pip.move_to(m.top(-10).move(Point(y=-2)), speed=100)
+        #pip.move_to(m.top(-10).move(Point(y=2)), speed=100)
+        pip.drop_tip(home_after=False)
+
 def dispense_beads(sources,dests,pip,tiprack):
     ## Mix beads prior to dispensing.
     pick_up(pip,tiprack)
@@ -178,21 +197,7 @@ def dispense_beads(sources,dests,pip,tiprack):
         pip.drop_tip(home_after=False)
         pick_up(pip,tiprack)
         pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=20)
-        pip.mix(5, 200, m.bottom(10))
-        pip.blow_out(m.top(-2))
-        pip.drop_tip(home_after=False)
-
-def mix_beads(dests, pip, tiprack):
-    ## Dispense beads to deep well plate.
-    for i, m in enumerate(dests):
-        if not pip.hw_pipette['has_tip']:
-            pick_up(pip,tiprack)
-        pip.mix(5, 200, m.bottom(5))
-        pip.blow_out(m.top(-2))
-        pip.aspirate(20, m.top(-2))
-        pip.dispense(20, m.top(-2))
-        pip.blow_out(m.top(-2))
-        pip.drop_tip(home_after=False)
+        mix_beads(7, dests, pip, tiprack)
 
 def remove_supernatant(sources,waste,pip,tiprack):
     for i, m in enumerate(sources):
@@ -219,7 +224,7 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             pip.mix(5, 175, disp_loc)
             pip.move_to(m.top(-20))
 
-            magdeck.engage(height_from_base=10)
+            #magdeck.engage(height_from_base=17)
             robot.delay(seconds=60, msg='Incubating on magnet for 60 seconds.')
 
             # remove supernatant
@@ -239,7 +244,7 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
 
     ## Incubation steps
     robot.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
-    magdeck.engage(height_from_base=10)
+    #magdeck.engage(height_from_base=17)
     robot.delay(seconds=60, msg='Incubating on magnet for 60 seconds.')
 
     ## Dispense elutes in pcr plate.
@@ -341,10 +346,10 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         ctx.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
     else:
         # Mix bead
-        mix_beads(mag_samples_m,m300,tips300)
+        mix_beads(7, mag_samples_m,m300,tips300)
 
     ## First incubate on magnet.
-    magdeck.engage(height_from_base=10)
+    #magdeck.engage(height_from_base=17)
     ctx.delay(minutes=5, msg='Incubating on magnet for 5 minutes.')
 
     # remove supernatant with P1000

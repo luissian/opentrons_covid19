@@ -13,16 +13,11 @@ metadata = {
     'apiLevel': '2.2'
 }
 
-
 # Parameters to adapt the protocol
-# Warning writing any Parameters below this line.
-# It will be deleted if opentronsWeb is used.
-
-NUM_SAMPLES = 96
-LYSATE_LABWARE = 'opentrons plastic 2ml tubes'
+NUM_SAMPLES = 24
+BEADS_LABWARE = 'opentrons plastic 30ml tubes'
 PLATE_LABWARE = 'vwr deep generic well plate'
-VOLUME_LYSATE = 400
-BEADS = True
+VOLUME_BEADS = 410
 
 ## global vars
 robot = None
@@ -31,14 +26,12 @@ tip_log['count'] = {}
 tip_log['tips'] = {}
 tip_log['max'] = {}
 
-
-# End Parameters to adapt the protocol
-
 """
 NUM_SAMPLES is the number of samples, must be an integer number
 
-LYSATE_LABWARE must be one of the following:
-    opentrons plastic 2ml tubes
+BEADS_LABWARE must be one of the following:
+    opentrons plastic 50 ml tubes
+    opentrons plastic 30ml tubes
 
 PLATE_LABWARE must be one of the following:
     opentrons deep generic well plate
@@ -46,8 +39,9 @@ PLATE_LABWARE must be one of the following:
     vwr deep generic well plate
 """
 
-LY_LW_DICT = {
-    'opentrons plastic 2ml tubes': 'opentrons_24_tuberack_generic_2ml_screwcap'
+BD_LW_DICT = {
+    'opentrons plastic 50 ml tubes': 'opentrons_6_tuberack_falcon_50ml_conical',
+    'opentrons plastic 30ml tubes': 'opentrons_6_tuberack_generic_30ml_conical'
 }
 
 PL_LW_DICT = {
@@ -55,12 +49,6 @@ PL_LW_DICT = {
     'nest deep generic well plate': 'nest_96_deepwellplate_2000ul',
     'vwr deep generic well plate': 'vwr_96_deepwellplate_2000ul'
 }
-
-LYSTUBE_LW_DICT = {
-    # Radius of each possible tube
-    '2ml tubes': 4
-}
-
 
 # Function definitions
 def check_door():
@@ -133,80 +121,69 @@ resuming.')
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
     tip_log['count'][pip] += 1
 
-def get_source_dest_coordinates(LYSATE_LABWARE, source_racks, pcr_plate):
-    if 'strip' in LYSATE_LABWARE:
-        sources = [
-            tube
-            for i, rack in enumerate(source_racks)
-            for col in [
-                rack.columns()[c] if i < 2 else rack.columns()[c+1]
-                for c in [0, 5, 10]
-            ]
-            for tube in col
-        ][:NUM_SAMPLES]
-        dests = pcr_plate.wells()[:NUM_SAMPLES]
-    elif 'plate' in LYSATE_LABWARE:
-        sources = source_racks.wells()[:NUM_SAMPLES]
-        dests = pcr_plate.wells()[:NUM_SAMPLES]
-    else:
-        sources = [
-            tube
-            for rack in source_racks for tube in rack.wells()][:NUM_SAMPLES]
-        dests = [
-            well
-            for v_block in range(2)
-            for h_block in range(2)
-            for col in pcr_plate.columns()[6*v_block:6*(v_block+1)]
-            for well in col[4*h_block:4*(h_block+1)]][:NUM_SAMPLES]
-    return sources, dests
+def prepare_beads(bd_tube,eth_tubes,pip,tiprack):
+    pick_up(pip,tiprack)
+    # Mix beads
+    pip.flow_rate.aspirate = 500
+    pip.flow_rate.dispense = 2500
+    pip.mix(5,800,bd_tube.bottom(5))
+    pip.flow_rate.aspirate = 100
+    pip.flow_rate.dispense = 1000
+    # Dispense beads
+    for e in eth_tubes:
+        if not pip.hw_pipette['has_tip']:
+            pick_up(pip,tiprack)
+        pip.transfer(480, bd_tube.bottom(2),e.bottom(40),air_gap=20,new_tip='never')
+        pip.blow_out(e.bottom(40))
+        pip.drop_tip()
 
-def transfer_samples(labware, volume , sources, dests, pip, tiprack):
-    # height for aspiration has to be different depending if you ar useing tubes or wells
-    if 'strip' in labware or 'plate' in labware:
-        height = 1.5
-    else:
-        height = 2
-    # transfer
-    for s, d in zip(sources, dests):
-        pick_up(pip,tiprack)
-        pip.transfer(volume, s.bottom(height), d.bottom(15), air_gap=20, new_tip='never')
-        if BEADS:
-            pip.mix(3,400,d.bottom(4))
-        pip.blow_out(d.top(-2))
-        pip.aspirate(50, d.top(-2))
-        pip.drop_tip(home_after=False)
+def transfer_beads(beads_tube, dests, volume, pip,tiprack):
+    max_trans_per_asp = 2  # 1000/VOLUME_BUFFER = 3
+    split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
+    dest_sets = [dests[split_ind[i]:split_ind[i+1]]
+             for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
+    pick_up(pip,tiprack)
+ # Mix bead tubes prior to dispensing
+    pip.flow_rate.aspirate = 200
+    pip.flow_rate.dispense = 1500
+    pip.mix(6,800,beads_tube.bottom(15))
+    pip.flow_rate.aspirate = 100
+    pip.flow_rate.dispense = 1000
+
+    for set in dest_sets:
+        pip.aspirate(50, beads_tube.bottom(2))
+        pip.distribute(volume, beads_tube.bottom(2), [d.bottom(15) for d in set],
+                   air_gap=20, disposal_volume=0, new_tip='never')
+        pip.aspirate(20,set[-1].top(-2))
+        pip.dispense(80, beads_tube.top(-30))
+    pip.drop_tip()
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):
     global robot
     robot = ctx
+
     # confirm door is closed
     if not ctx.is_simulating():
         confirm_door_is_closed(ctx)
 
     tips1000 = [ctx.load_labware('opentrons_96_filtertiprack_1000ul',
                                      slot, '1000µl tiprack')
-                    for slot in ['3', '6', '9', '8', '7']]
+                    for slot in ['3', '6', '9']]
 
     # load pipette
     p1000 = ctx.load_instrument(
         'p1000_single_gen2', 'left', tip_racks=tips1000)
 
-    # check source (LYSATE) labware type
-    if LYSATE_LABWARE not in LY_LW_DICT:
-        raise Exception('Invalid LYSATE_LABWARE. Must be one of the \
-following:\nopentrons plastic 2ml tubes')
-    # load LYSATE labware
-    if 'plate' in LYSATE_LABWARE:
-        source_racks = ctx.load_labware(
-            LY_LW_DICT[LYSATE_LABWARE], '1',
-            'RNA LYSATE labware')
-    else:
-        source_racks = [
-            ctx.load_labware(LY_LW_DICT[LYSATE_LABWARE], slot,
-                            'sample LYSATE labware ' + str(i+1))
-            for i, slot in enumerate(['4', '1', '5', '2'])
-    ]
+    # check source (elution) labware type
+    if BEADS_LABWARE not in BD_LW_DICT:
+        raise Exception('Invalid BF_LABWARE. Must be one of the \
+following:\nopentrons plastic 50ml tubes')
+
+    # load mastermix labware
+    beads_rack = ctx.load_labware(
+        BD_LW_DICT[BEADS_LABWARE], '8',
+        BEADS_LABWARE)
 
     # check plate
     if PLATE_LABWARE not in PL_LW_DICT:
@@ -215,15 +192,41 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     # load pcr plate
     wells_plate = ctx.load_labware(PL_LW_DICT[PLATE_LABWARE], 10,
-                    'sample LYSATE well plate ')
+                    'sample elution well plate ')
 
-    # setup samples
-    #sources, dests = get_source_dest_coordinates(LYSATE_LABWARE, source_racks, wells_plate)
-    sources = [tube for s in source_racks for tube in s.wells()][:NUM_SAMPLES]
-    dests = wells_plate.wells()[:NUM_SAMPLES]
+    # prepare beads
+    # One tube for each 24 samples
+    num_tubes = math.ceil(NUM_SAMPLES/24)
+    # How many wells for each tube
+    num_wells = math.ceil(len(wells_plate.wells())/4)
+    # beads and ethanol
+    beads = beads_rack.wells()[4]
+    ethanol = beads_rack.wells()[0:3][:num_tubes]
+
+    prepare_beads(beads,ethanol,p1000,tips1000)
+
+    # setup dests
+    # Prepare destinations, a list of destination
+    # Order destination for disposal in squares.
+    # compose of lists of 24, each 24 is for one tube until end of samples.
+    # example: [[A1,B1,C1...G3,H3],[A4,B4..G4,H4],...]
+    order_dests = [
+        well
+        for v_block in range(2)
+        for h_block in range(2)
+        for col in wells_plate.columns()[6*v_block:6*(v_block+1)]
+        for well in col[4*h_block:4*(h_block+1)]]
+
+    dest_sets = [
+        [well
+         for well in order_dests
+        ][:NUM_SAMPLES][i*num_wells:(i+1)*num_wells]
+        for i in range(num_tubes)
+        ]
 
     # transfer
-    transfer_samples(LYSATE_LABWARE,VOLUME_LYSATE, sources, dests, p1000, tips1000)
+    for bd_tube,dests in zip(ethanol,dest_sets):
+        transfer_beads(bd_tube, dests,VOLUME_BEADS, p1000, tips1000)
 
     # track final used tip
     save_tip_info(p1000)

@@ -15,14 +15,11 @@ metadata = {
 
 
 # Parameters to adapt the protocol
-# Warning writing any Parameters below this line.
-# It will be deleted if opentronsWeb is used.
-
-NUM_SAMPLES = 96
+NUM_SAMPLES = 24
 LYSATE_LABWARE = 'opentrons plastic 2ml tubes'
 PLATE_LABWARE = 'vwr deep generic well plate'
 VOLUME_LYSATE = 400
-BEADS = True
+BEADS = False
 
 ## global vars
 robot = None
@@ -31,8 +28,6 @@ tip_log['count'] = {}
 tip_log['tips'] = {}
 tip_log['max'] = {}
 
-
-# End Parameters to adapt the protocol
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number
@@ -174,7 +169,7 @@ def transfer_samples(labware, volume , sources, dests, pip, tiprack):
             pip.mix(3,400,d.bottom(4))
         pip.blow_out(d.top(-2))
         pip.aspirate(50, d.top(-2))
-        pip.drop_tip(home_after=False)
+        pip.drop_tip()
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):
@@ -218,9 +213,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
                     'sample LYSATE well plate ')
 
     # setup samples
-    #sources, dests = get_source_dest_coordinates(LYSATE_LABWARE, source_racks, wells_plate)
-    sources = [tube for s in source_racks for tube in s.wells()][:NUM_SAMPLES]
-    dests = wells_plate.wells()[:NUM_SAMPLES]
+    sources, dests = get_source_dest_coordinates(LYSATE_LABWARE, source_racks, wells_plate)
 
     # transfer
     transfer_samples(LYSATE_LABWARE,VOLUME_LYSATE, sources, dests, p1000, tips1000)

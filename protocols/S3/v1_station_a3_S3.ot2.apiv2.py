@@ -13,7 +13,7 @@ metadata = {
     'apiLevel': '2.2'
 }
 
-
+hola que tal
 # Parameters to adapt the protocol
 NUM_SAMPLES = 96
 BEADS_LABWARE = 'opentrons plastic 30ml tubes'

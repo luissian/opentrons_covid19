@@ -23,7 +23,6 @@ VOLUME_BUFFER = 300
 ## global vars
 robot = None
 tip_log = {}
-tip_log = {}
 tip_log['count'] = {}
 tip_log['tips'] = {}
 tip_log['max'] = {}
@@ -106,6 +105,7 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
 
     return tip_log
 
+## TODO MODIFY FOR NOT OVERRIDING tip_log.json
 def save_tip_info(pip, file_path = '/data/A/tip_log.json'):
     if not robot.is_simulating():
         if "P1000" in str(pip):

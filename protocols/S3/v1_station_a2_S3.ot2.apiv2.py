@@ -15,6 +15,9 @@ metadata = {
 
 
 # Parameters to adapt the protocol
+# Warning writing any Parameters below this line.
+# It will be deleted if opentronsWeb is used.
+
 NUM_SAMPLES = 96
 LYSATE_LABWARE = 'opentrons plastic 2ml tubes'
 PLATE_LABWARE = 'vwr deep generic well plate'
@@ -28,6 +31,8 @@ tip_log['count'] = {}
 tip_log['tips'] = {}
 tip_log['max'] = {}
 
+
+# End Parameters to adapt the protocol
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number

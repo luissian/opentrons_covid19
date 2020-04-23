@@ -13,7 +13,6 @@ metadata = {
     'apiLevel': '2.2'
 }
 
-hola que tal
 # Parameters to adapt the protocol
 NUM_SAMPLES = 96
 BEADS_LABWARE = 'opentrons plastic 30ml tubes'
@@ -136,7 +135,7 @@ def prepare_beads(bd_tube,eth_tubes,pip,tiprack):
             pick_up(pip,tiprack)
         pip.transfer(480, bd_tube.bottom(2),e.bottom(40),air_gap=10,new_tip='never')
         pip.blow_out(e.bottom(40))
-        pip.drop_tip(home_after=False)
+        pip.drop_tip()
 
 def transfer_beads(beads_tube, dests, volume, pip,tiprack):
     max_trans_per_asp = 2  # 1000/VOLUME_BUFFER = 3
@@ -156,7 +155,7 @@ def transfer_beads(beads_tube, dests, volume, pip,tiprack):
                    air_gap=3, disposal_volume=0, new_tip='never')
         pip.aspirate(5,set[-1].top(-2))
         pip.dispense(55, beads_tube.top(-30))
-    pip.drop_tip(home_after=False)
+    pip.drop_tip()
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):
@@ -210,16 +209,9 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     # Prepare destinations, a list of destination
     # compose of lists of 24, each 24 is for one tube until end of samples.
     # example: [[A1,B1,C1...G3,H3],[A4,B4..G4,H4],...]
-    order_dests = [
-        well
-        for v_block in range(2)
-        for h_block in range(2)
-        for col in wells_plate.columns()[6*v_block:6*(v_block+1)]
-        for well in col[4*h_block:4*(h_block+1)]]
-
     dest_sets = [
         [well
-         for well in order_dests
+         for well in wells_plate.wells()
         ][:NUM_SAMPLES][i*num_wells:(i+1)*num_wells]
         for i in range(num_tubes)
         ]

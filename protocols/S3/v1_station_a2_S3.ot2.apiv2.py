@@ -10,11 +10,14 @@ metadata = {
     'protocolName': 'S3 Station A Version 1',
     'author': 'Nick <protocols@opentrons.com>, Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
-    'apiLevel': '2.2'
+    'apiLevel': '2.3'
 }
 
 
 # Parameters to adapt the protocol
+# Warning writing any Parameters below this line.
+# It will be deleted if opentronsWeb is used.
+
 NUM_SAMPLES = 96
 LYSATE_LABWARE = 'opentrons plastic 2ml tubes'
 PLATE_LABWARE = 'vwr deep generic well plate'
@@ -28,6 +31,8 @@ tip_log['count'] = {}
 tip_log['tips'] = {}
 tip_log['max'] = {}
 
+
+# End Parameters to adapt the protocol
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number
@@ -213,7 +218,9 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
                     'sample LYSATE well plate ')
 
     # setup samples
-    sources, dests = get_source_dest_coordinates(LYSATE_LABWARE, source_racks, wells_plate)
+    #sources, dests = get_source_dest_coordinates(LYSATE_LABWARE, source_racks, wells_plate)
+    sources = [tube for s in source_racks for tube in s.wells()][:NUM_SAMPLES]
+    dests = wells_plate.wells()[:NUM_SAMPLES]
 
     # transfer
     transfer_samples(LYSATE_LABWARE,VOLUME_LYSATE, sources, dests, p1000, tips1000)

@@ -28,9 +28,9 @@ REAGENT SETUP:
 """
 
 # Parameters to adapt the protocol
-NUM_SAMPLES = 24
+NUM_SAMPLES = 8
 REAGENT_LABWARE = 'nest 12 reservoir plate'
-MAGPLATE_LABWARE = 'vwr deep generic well plate'
+MAGPLATE_LABWARE = 'nest deep generic well plate'
 WASTE_LABWARE = 'nest 1 reservoir plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 TIP_TRACK = True
@@ -162,22 +162,12 @@ def mix_beads(reps, dests, pip, tiprack):
     for i, m in enumerate(dests):
         if not pip.hw_pipette['has_tip']:
             pick_up(pip,tiprack)
-        #pip.mix(5, 150, m.bottom(2))
-        #pip.move_to(m.bottom(2))
         for i in range(reps):
             pip.aspirate(200, m.bottom(2))
             pip.dispense(200, m.bottom(2), rate=2)
-            #pip.dispense(130,m.bottom(2),0.5)
-            #pip.dispense(150,m.top(-10),0.5)
-            #pip.blow_out(m.top(-2))
-        #pip.flow_rate.blow_out = 100
+        # PENDING TO FIX THIS blow_out
         pip.blow_out(m.top(-2))
         pip.aspirate(20, m.top(-2))
-        #pip.dispense(50, m.top(-2))
-        #pip.aspirate(50, m.top(-2))
-        #pip.blow_out(m.top(-2))
-        #pip.move_to(m.top(-10).move(Point(y=-2)), speed=100)
-        #pip.move_to(m.top(-10).move(Point(y=2)), speed=100)
         pip.drop_tip(home_after=False)
 
 def dispense_beads(sources,dests,pip,tiprack):
@@ -201,8 +191,9 @@ def dispense_beads(sources,dests,pip,tiprack):
 
 def remove_supernatant(sources,waste,pip,tiprack):
     for i, m in enumerate(sources):
-        side = -1 if (i % 8) % 2 == 0 else 1
-        loc = m.bottom(0.5).move(Point(x=side*2))
+        # side = -1 if (i % 8) % 2 == 0 else 1
+        # loc = m.bottom(0.5).move(Point(x=side*2))
+        loc = m.bottom(1)
         pick_up(pip,tiprack)
         pip.move_to(m.center())
         pip.transfer(800, loc, waste, air_gap=100, new_tip='never')
@@ -216,37 +207,49 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             magdeck.disengage()
             wash_chan = wash_set[i//6]
             side = 1 if i % 2 == 0 else -1
-            disp_loc = m.bottom(0.5).move(Point(x=side*2))
-            asp_loc = m.bottom(0.5).move(Point(x=-1*side*2))
+            #disp_loc = m.bottom(1).move(Point(x=side*2))
+            #asp_loc = m.bottom(1).move(Point(x=-1*side*2))
+            asp_loc = m.bottom(1)
+            # disp_loc = m.bottom(2).move(Point(x=side*2))
+            disp_loc = m.bottom(5)
             pick_up(pip,tiprack)
             pip.transfer(
                 200, wash_chan.bottom(2), m.center(), new_tip='never', air_gap=20)
-            pip.mix(5, 175, disp_loc)
+            pip.mix(7, 175, disp_loc)
             pip.move_to(m.top(-20))
 
-            #magdeck.engage(height_from_base=17)
-            robot.delay(seconds=60, msg='Incubating on magnet for 60 seconds.')
+            magdeck.engage(height_from_base=22)
+            robot.delay(seconds=75, msg='Incubating on magnet for 75 seconds.')
 
             # remove supernatant
+            aspire_default_speed = pip.flow_rate.aspirate
+            pip.flow_rate.aspirate = 75
             pip.transfer(200, asp_loc, waste, new_tip='never', air_gap=20)
+            pip.flow_rate.aspirate = aspire_default_speed
+            pip.blow_out(waste)
             pip.drop_tip(home_after=False)
 
 def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
     ## dispense buffer
     for i, m in enumerate(sources):
-        side = 1 if i % 2 == 0 else -1
-        disp_loc = m.bottom(5).move(Point(x=side*2))
+        #side = 1 if i % 2 == 0 else -1
+        #disp_loc = m.bottom(5).move(Point(x=side*2))
         pick_up(pip,tipracks)
+        dispense_default_speed = pip.flow_rate.dispense
+        pip.flow_rate.dispense = 1500
         pip.transfer(
-            40, buffer, m.center(), new_tip='never', air_gap=10)
-        pip.mix(5, 40, disp_loc)
+            50, buffer, m.bottom(1), new_tip='never', air_gap=10)
+        pip.mix(20, 40, m.bottom(1))
+        pip.flow_rate.dispense = dispense_default_speed
         pip.drop_tip(home_after=False)
 
     ## Incubation steps
     robot.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
-    #magdeck.engage(height_from_base=17)
-    robot.delay(seconds=60, msg='Incubating on magnet for 60 seconds.')
+    magdeck.engage(height_from_base=22)
+    robot.delay(seconds=120, msg='Incubating on magnet for 60 seconds.')
 
+    aspire_default_speed = pip.flow_rate.aspirate
+    pip.flow_rate.aspirate = 50
     ## Dispense elutes in pcr plate.
     for i, (m, e) in enumerate(zip(sources, dests)):
         # tranfser and mix elution buffer with beads
@@ -257,6 +260,8 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
         pip.transfer(40, asp_loc, e, new_tip='never', air_gap=10)
         pip.blow_out(e.top(-2))
         pip.drop_tip(home_after=False)
+
+    pip.flow_rate.aspirate = aspire_default_speed
 
 def run(ctx: protocol_api.ProtocolContext):
     global robot
@@ -337,29 +342,31 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     p1000.flow_rate.dispense = 1000
     p1000.flow_rate.blow_out = 1000
 
-    if(DISPENSE_BEADS):
-        # premix, transfer, and mix magnetic beads with sample
-        ## bead dests depending on number of samples
-        bead_dests = bead_buffer[:math.ceil(num_cols/4)]
-        dispense_beads(bead_dests,mag_samples_m,m300,tips300)
-        # incubate off and on magnet
-        ctx.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
-    else:
-        # Mix bead
-        mix_beads(7, mag_samples_m,m300,tips300)
+    # if(DISPENSE_BEADS):
+    #     # premix, transfer, and mix magnetic beads with sample
+    #     ## bead dests depending on number of samples
+    #     bead_dests = bead_buffer[:math.ceil(num_cols/4)]
+    #     dispense_beads(bead_dests,mag_samples_m,m300,tips300)
+    # else:
+    #     # Mix bead
+    #     mix_beads(7, mag_samples_m,m300,tips300)
+
+    # incubate off and on magnet
+    # ctx.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
+    # TESTING: uncomment for definitive test
 
     ## First incubate on magnet.
-    #magdeck.engage(height_from_base=17)
-    ctx.delay(minutes=5, msg='Incubating on magnet for 5 minutes.')
+    # magdeck.engage(height_from_base=22)
+    # ctx.delay(minutes=5, msg='Incubating on magnet for 5 minutes.')
 
     # remove supernatant with P1000
-    remove_supernatant(mag_samples_s,waste,p1000,tips1000)
+    # remove_supernatant(mag_samples_s,waste,p1000,tips1000)
 
     # 3x washes
-    wash(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)
+    # wash(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)
 
-    # Airdrying
-    ctx.delay(minutes=5, msg='Airdrying for 5 minutes.')
+    # Airdrying -> REMOVE THIS STEP
+    #ctx.delay(minutes=5, msg='Airdrying for 5 minutes.')
 
     # elute samples
     elute_samples(mag_samples_m,elution_samples_m,elution_buffer,magdeck,m300,tips300)

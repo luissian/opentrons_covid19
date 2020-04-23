@@ -142,7 +142,7 @@ def transfer_buffer(bf_tube, dests, volume, pip,tiprack):
         pip.distribute(VOLUME_BUFFER, bf_tube.bottom(2), [d.bottom(10) for d in set],
                    air_gap=3, disposal_volume=0, new_tip='never')
         pip.dispense(50,bf_tube.top(-20))
-    pip.drop_tip()
+    pip.drop_tip(home_after=False)
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):

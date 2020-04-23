@@ -61,7 +61,11 @@ ELUTION_LABWARE
     opentrons aluminum biorad plate
     opentrons aluminum nest plate
 """
+# Parameters to adapt the protocol
+# Warning writing any Parameters below this line.
+# It will be deleted if opentronsWeb is used.
 
+# End Parameters to adapt the protocol
 
 # Constants
 REAGENT_LW_DICT = {

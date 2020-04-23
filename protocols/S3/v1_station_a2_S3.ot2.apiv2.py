@@ -169,7 +169,7 @@ def transfer_samples(labware, volume , sources, dests, pip, tiprack):
             pip.mix(3,400,d.bottom(4))
         pip.blow_out(d.top(-2))
         pip.aspirate(50, d.top(-2))
-        pip.drop_tip()
+        pip.drop_tip(home_after=False)
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):

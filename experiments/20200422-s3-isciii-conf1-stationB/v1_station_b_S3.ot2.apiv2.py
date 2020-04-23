@@ -174,7 +174,7 @@ def dispense_beads(sources,dests,pip,tiprack):
         pip.drop_tip(home_after=False)
         pick_up(pip,tiprack)
         pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=20)
-        pip.mix(5, 200, m.bottom(20))
+        pip.mix(5, 200, m.bottom(10))
         pip.blow_out(m.top(-2))
         pip.drop_tip(home_after=False)
 
@@ -183,7 +183,10 @@ def mix_beads(dests, pip, tiprack):
     for i, m in enumerate(dests):
         if not pip.hw_pipette['has_tip']:
             pick_up(pip,tiprack)
-        pip.mix(5, 200, m.bottom(20))
+        pip.mix(5, 200, m.bottom(5))
+        pip.blow_out(m.top(-2))
+        pip.aspirate(20, m.top(-2))
+        pip.dispense(20, m.top(-2))
         pip.blow_out(m.top(-2))
         pip.drop_tip(home_after=False)
 
@@ -258,7 +261,7 @@ def run(ctx: protocol_api.ProtocolContext):
     ## ELUTION LABWARE
     if ELUTION_LABWARE not in ELUTION_LW_DICT:
         raise Exception('Invalid ELUTION_LABWARE. Must be one of the \
-    following:\nopentrons aluminum biorad plate')
+    following:\nopentrons aluminum biorad plate\nopentrons aluminum nest plate')
 
     elution_plate = ctx.load_labware(
         ELUTION_LW_DICT[ELUTION_LABWARE], '1',

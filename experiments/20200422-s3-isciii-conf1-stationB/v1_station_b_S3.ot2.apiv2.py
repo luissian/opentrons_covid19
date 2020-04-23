@@ -183,7 +183,10 @@ def mix_beads(dests, pip, tiprack):
     for i, m in enumerate(dests):
         if not pip.hw_pipette['has_tip']:
             pick_up(pip,tiprack)
-        pip.mix(5, 200, m.bottom(10))
+        pip.mix(5, 200, m.bottom(5))
+        pip.blow_out(m.top(-2))
+        pip.aspirate(20, m.top(-2))
+        pip.dispense(20, m.top(-2))
         pip.blow_out(m.top(-2))
         pip.drop_tip(home_after=False)
 

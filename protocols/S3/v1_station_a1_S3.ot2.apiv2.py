@@ -18,7 +18,7 @@ metadata = {
 # It will be deleted if opentronsWeb is used.
 
 NUM_SAMPLES = 96
-BUFFER_LABWARE = 'opentrons plastic 50 ml tubes'
+BUFFER_LABWARE = 'opentrons plastic 50ml tubes'
 DESTINATION_LABWARE = 'opentrons plastic 2ml tubes'
 DEST_TUBE = '2ml tubes'
 VOLUME_BUFFER = 300
@@ -36,7 +36,7 @@ tip_log['max'] = {}
 NUM_SAMPLES is the number of samples, must be an integer number
 
 BUFFER_LABWARE must be one of the following:
-    opentrons plastic 50 ml tubes
+    opentrons plastic 50ml tubes
     opentrons plastic 30ml tubes
 
 DESTINATION_LABWARE must be one of the following:
@@ -49,7 +49,7 @@ DEST_TUBE
 
 # Constants
 BUFFER_LW_DICT = {
-    'opentrons plastic 50 ml tubes': 'opentrons_6_tuberack_falcon_50ml_conical',
+    'opentrons plastic 50ml tubes': 'opentrons_6_tuberack_falcon_50ml_conical',
     'opentrons plastic 30ml tubes': 'opentrons_6_tuberack_generic_30ml_conical'
 }
 

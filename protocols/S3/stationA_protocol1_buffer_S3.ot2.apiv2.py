@@ -173,11 +173,9 @@ def run(ctx: protocol_api.ProtocolContext):
     # define tips
     tips1000 = ctx.load_labware('opentrons_96_filtertiprack_1000ul',
                                      3, '1000µl tiprack')
-    tips300 = [ctx.load_labware('opentrons_96_filtertiprack_200ul', '9')]
 
     # define pipettes
     p1000 = ctx.load_instrument('p1000_single_gen2', 'left', tip_racks=tips1000)
-    p300 = ctx.load_instrument('p300_single_gen2', 'right', tip_racks=tips300)
 
 
     # check buffer labware type

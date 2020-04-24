@@ -10,19 +10,23 @@ metadata = {
     'protocolName': 'S3 Station C Version 1',
     'author': 'Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
-    'apiLevel': '2.2'
+    'apiLevel': '2.3'
 }
 
 # Parameters to adapt the protocol
+# Warning writing any Parameters below this line.
+# It will be deleted if opentronsWeb is used.
+
 NUM_SAMPLES = 96
-BUFFER_LABWARE = 'opentrons plastic 50 ml tubes'
+BUFFER_LABWARE = 'opentrons plastic 30ml tubes'
 DESTINATION_LABWARE = 'opentrons plastic 2ml tubes'
 DEST_TUBE = '2ml tubes'
 VOLUME_BUFFER = 300
 
+# End Parameters to adapt the protocol
+
 ## global vars
 robot = None
-tip_log = {}
 tip_log = {}
 tip_log['count'] = {}
 tip_log['tips'] = {}
@@ -32,7 +36,8 @@ tip_log['max'] = {}
 NUM_SAMPLES is the number of samples, must be an integer number
 
 BUFFER_LABWARE must be one of the following:
-    opentrons plastic 50 ml tubes
+    opentrons plastic 50ml tubes
+    opentrons plastic 30ml tubes
 
 DESTINATION_LABWARE must be one of the following:
     opentrons plastic 2ml tubes
@@ -44,7 +49,8 @@ DEST_TUBE
 
 # Constants
 BUFFER_LW_DICT = {
-    'opentrons plastic 50 ml tubes': 'opentrons_6_tuberack_falcon_50ml_conical'
+    'opentrons plastic 50ml tubes': 'opentrons_6_tuberack_falcon_50ml_conical',
+    'opentrons plastic 30ml tubes': 'opentrons_6_tuberack_generic_30ml_conical'
 }
 
 DESTINATION_LW_DICT = {
@@ -79,16 +85,14 @@ def finish_run():
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
     global tip_log
-    if not tip_log or pip not in tip_log['count']:
+    if not tip_log['count'] or pip not in tip_log['count']:
         if not robot.is_simulating():
             if os.path.isfile(file_path):
                 with open(file_path) as json_file:
                     data = json.load(json_file)
                     if 'tips1000' in data:
                         tip_log['count'][pip] = data['tips1000']
-                    else:
-                        tip_log['count'][pip] = 0
-                    if 'tips300' in data:
+                    elif 'tips300' in data:
                         tip_log['count'][pip] = data['tips300']
                     else:
                         tip_log['count'][pip] = 0
@@ -106,6 +110,7 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
 
     return tip_log
 
+## TODO MODIFY FOR NOT OVERRIDING tip_log.json
 def save_tip_info(pip, file_path = '/data/A/tip_log.json'):
     if not robot.is_simulating():
         if "P1000" in str(pip):
@@ -113,7 +118,7 @@ def save_tip_info(pip, file_path = '/data/A/tip_log.json'):
         elif "P300" in str(pip):
             data = {'tips300': tip_log['count'][pip]}
 
-        with open(file_path, 'w') as outfile:
+        with open(file_path, 'a+') as outfile:
             json.dump(data, outfile)
 
 def pick_up(pip,tiprack):
@@ -142,7 +147,7 @@ def transfer_buffer(bf_tube, dests, volume, pip,tiprack):
         pip.distribute(VOLUME_BUFFER, bf_tube.bottom(2), [d.bottom(10) for d in set],
                    air_gap=3, disposal_volume=0, new_tip='never')
         pip.dispense(50,bf_tube.top(-20))
-    pip.drop_tip()
+    pip.drop_tip(home_after=False)
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):

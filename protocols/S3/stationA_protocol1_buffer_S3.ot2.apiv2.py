@@ -10,7 +10,7 @@ metadata = {
     'protocolName': 'S3 Station C Version 1',
     'author': 'Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
-    'apiLevel': '2.2'
+    'apiLevel': '2.3'
 }
 
 # Parameters to adapt the protocol

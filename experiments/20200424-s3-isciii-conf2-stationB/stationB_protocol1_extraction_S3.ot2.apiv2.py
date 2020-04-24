@@ -28,9 +28,9 @@ REAGENT SETUP:
 """
 
 # Parameters to adapt the protocol
-NUM_SAMPLES = 96
+NUM_SAMPLES = 8
 REAGENT_LABWARE = 'nest 12 reservoir plate'
-MAGPLATE_LABWARE = 'vwr deep generic well plate'
+MAGPLATE_LABWARE = 'nest deep generic well plate'
 WASTE_LABWARE = 'nest 1 reservoir plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 TIP_TRACK = True
@@ -201,7 +201,7 @@ def dispense_beads(sources,dests,pip,tiprack):
     for s in sources:
         pip.move_to(s.bottom(20))
         custom_mix(pip,200,5)
-        
+
     ## Dispense beads to deep well plate.
     for i, m in enumerate(dests):
         if not pip.hw_pipette['has_tip']:

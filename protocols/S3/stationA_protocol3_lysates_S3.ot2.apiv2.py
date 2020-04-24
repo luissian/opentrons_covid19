@@ -87,20 +87,19 @@ def finish_run():
     #Set light color to blue
     gpio.set_button_light(0,0,1)
 
-def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
+def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
     global tip_log
     if not tip_log['count'] or pip not in tip_log['count']:
         if not robot.is_simulating():
             if os.path.isfile(file_path):
                 with open(file_path) as json_file:
                     data = json.load(json_file)
-                    if 'tips1000' in data:
+                    if 'P1000' in str(pip):
                         tip_log['count'][pip] = data['tips1000']
-                    elif 'tips300' in data:
+                    elif 'P300' in str(pip):
                         tip_log['count'][pip] = data['tips300']
                     else:
                         tip_log['count'][pip] = 0
-                os.remove(file_path)
             else:
                 tip_log['count'][pip] = 0
         else:
@@ -115,12 +114,15 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
 
     return tip_log
 
-def save_tip_info(pip, file_path = '/data/A/tip_log.json'):
+def save_tip_info(file_path = '/data/B/tip_log.json'):
+    data = {}
     if not robot.is_simulating():
-        if "P1000" in str(pip):
-            data = {'tips1000': tip_log['count'][pip]}
-        elif "P300" in str(pip):
-            data = {'tips300': tip_log['count'][pip]}
+        os.rename(file_path,file_path + ".bak")
+        for pip in tip_log['count']:
+            if "P1000" in str(pip):
+                data['tips1000'] = tip_log['count'][pip]
+            elif "P300" in str(pip):
+                data['tips300'] = tip_log['count'][pip]
 
         with open(file_path, 'a+') as outfile:
             json.dump(data, outfile)
@@ -211,6 +213,6 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     transfer_samples(LYSATE_LABWARE,VOLUME_LYSATE, sources, dests, p1000, tips1000)
 
     # track final used tip
-    save_tip_info(p1000)
+    save_tip_info()
 
     finish_run()

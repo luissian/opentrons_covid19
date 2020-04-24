@@ -1,3 +1,4 @@
+from opentrons.types import Point
 from opentrons import protocol_api
 from opentrons.drivers.rpi_drivers import gpio
 import time

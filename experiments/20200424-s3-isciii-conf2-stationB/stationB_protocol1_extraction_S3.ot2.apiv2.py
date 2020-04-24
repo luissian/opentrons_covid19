@@ -11,7 +11,7 @@ metadata = {
     'protocolName': 'S3 Station B Version 2',
     'author': 'Nick <protocols@opentrons.com> Sara <smonzon@isciii.es> Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
-    'apiLevel': '2.3'
+    'apiLevel': '2.0'
 }
 
 """
@@ -173,14 +173,23 @@ def drop(pip):
     pip.drop_tip(drop_loc,home_after=False)
     switch = not switch
 
+def custom_mix(pipette, vol, cycles):
+    pipette.aspirate(vol)
+    for cycle in range(cycles-1):
+        pipette.dispense(vol-1,rate=2)
+        pipette.aspirate(vol-1)
+    pipette.dispense(vol,rate=2)
+
 def mix_beads(reps, dests, pip, tiprack):
     ## Dispense beads to deep well plate.
     for i, m in enumerate(dests):
         if not pip.hw_pipette['has_tip']:
             pick_up(pip,tiprack)
-        for i in range(reps):
-            pip.aspirate(200, m.bottom(2))
-            pip.dispense(200, m.bottom(2), rate=2)
+
+        custom_mix(pip,200,reps)
+        #for i in range(reps):
+        #    pip.aspirate(200, m.bottom(2))
+        #    pip.dispense(200, m.bottom(2), rate=2)
         # PENDING TO FIX THIS blow_out
         pip.blow_out(m.top(-2))
         pip.aspirate(20, m.top(-2))
@@ -190,10 +199,9 @@ def dispense_beads(sources,dests,pip,tiprack):
     ## Mix beads prior to dispensing.
     pick_up(pip,tiprack)
     for s in sources:
-        for _ in range(5):
-            pip.aspirate(200, s.bottom(20))
-            pip.dispense(200, s.bottom(20))
-
+        pip.move_to(s.bottom(20))
+        custom_mix(pip,200,5)
+        
     ## Dispense beads to deep well plate.
     for i, m in enumerate(dests):
         if not pip.hw_pipette['has_tip']:
@@ -226,7 +234,8 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             pick_up(pip,tiprack)
             pip.transfer(
                 200, wash_chan.bottom(2), m.center(), new_tip='never', air_gap=20)
-            pip.mix(7, 175, disp_loc)
+            pip.move_to(m.bottom(5))
+            custom_mix(pip, 175, 7)
             pip.move_to(m.top(-20))
 
             magdeck.engage(height_from_base=22)
@@ -248,7 +257,8 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
         pip.flow_rate.dispense = 1500
         pip.transfer(
             50, buffer, m.bottom(1), new_tip='never', air_gap=10)
-        pip.mix(20, 40, m.bottom(1))
+        pip.move_to(m.bottom(1))
+        custom_mix(pip, 40, 20)
         pip.flow_rate.dispense = dispense_default_speed
         drop(pip)
 

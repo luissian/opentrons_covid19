@@ -18,7 +18,7 @@ metadata = {
 # It will be deleted if opentronsWeb is used.
 
 NUM_SAMPLES = 96
-BUFFER_LABWARE = 'opentrons plastic 50ml tubes'
+BUFFER_LABWARE = 'opentrons plastic 30ml tubes'
 DESTINATION_LABWARE = 'opentrons plastic 2ml tubes'
 DEST_TUBE = '2ml tubes'
 VOLUME_BUFFER = 300
@@ -118,7 +118,7 @@ def save_tip_info(pip, file_path = '/data/A/tip_log.json'):
         elif "P300" in str(pip):
             data = {'tips300': tip_log['count'][pip]}
 
-        with open(file_path, 'a+') as outfile:
+        with open(file_path, 'w') as outfile:
             json.dump(data, outfile)
 
 def pick_up(pip,tiprack):

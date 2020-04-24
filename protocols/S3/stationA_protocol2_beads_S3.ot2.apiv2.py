@@ -88,8 +88,13 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
                         tip_log['count'][pip] = data['tips300']
                     else:
                         tip_log['count'][pip] = 0
+
+                os.remove(file_path)
+
             else:
                 tip_log['count'][pip] = 0
+
+
         else:
             tip_log['count'][pip] = 0
 

@@ -20,7 +20,11 @@ PLATE_LABWARE = 'vwr deep generic well plate'
 VOLUME_BEADS = 410
 
 ## global vars
+## initialize robot object
 robot = None
+# default var for drop tip switching
+switch = True
+# initialize tip_log dictionary
 tip_log = {}
 tip_log['count'] = {}
 tip_log['tips'] = {}
@@ -121,6 +125,13 @@ resuming.')
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
     tip_log['count'][pip] += 1
 
+def drop(pip):
+    global switch
+    side = 1 if switch else -1
+    drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=side*40))
+    pip.drop_tip(drop_loc,home_after=False)
+    switch = not switch
+
 def prepare_beads(bd_tube,eth_tubes,pip,tiprack):
     pick_up(pip,tiprack)
     # Mix beads
@@ -135,7 +146,7 @@ def prepare_beads(bd_tube,eth_tubes,pip,tiprack):
             pick_up(pip,tiprack)
         pip.transfer(480, bd_tube.bottom(2),e.bottom(40),air_gap=10,new_tip='never')
         pip.blow_out(e.bottom(40))
-        pip.drop_tip()
+        drop(pip)
 
 def transfer_beads(beads_tube, dests, volume, pip,tiprack):
     max_trans_per_asp = 2  # 1000/VOLUME_BUFFER = 3
@@ -155,7 +166,7 @@ def transfer_beads(beads_tube, dests, volume, pip,tiprack):
                    air_gap=3, disposal_volume=0, new_tip='never')
         pip.aspirate(5,set[-1].top(-2))
         pip.dispense(55, beads_tube.top(-30))
-    pip.drop_tip()
+    drop(pip)
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):

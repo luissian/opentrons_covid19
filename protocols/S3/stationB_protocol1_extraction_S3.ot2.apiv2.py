@@ -37,7 +37,11 @@ TIP_TRACK = True
 DISPENSE_BEADS = False
 
 ## global vars
+## initialize robot object
 robot = None
+# default var for drop tip switching
+switch = True
+# initialize tip_log dictionary
 tip_log = {}
 tip_log['count'] = {}
 tip_log['tips'] = {}
@@ -161,6 +165,13 @@ resuming.')
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
     tip_log['count'][pip] += 1
 
+def drop(pip):
+    global switch
+    side = 1 if switch else -1
+    drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=side*40))
+    pip.drop_tip(drop_loc,home_after=False)
+    switch = not switch
+
 def mix_beads(reps, dests, pip, tiprack):
     ## Dispense beads to deep well plate.
     for i, m in enumerate(dests):
@@ -172,7 +183,7 @@ def mix_beads(reps, dests, pip, tiprack):
         # PENDING TO FIX THIS blow_out
         pip.blow_out(m.top(-2))
         pip.aspirate(20, m.top(-2))
-        pip.drop_tip(home_after=False)
+        drop(pip)
 
 def dispense_beads(sources,dests,pip,tiprack):
     ## Mix beads prior to dispensing.
@@ -188,7 +199,7 @@ def dispense_beads(sources,dests,pip,tiprack):
             pick_up(pip,tiprack)
         pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=20)
         pip.blow_out(m.top(-2))
-        pip.drop_tip(home_after=False)
+        drop(pip)
         pick_up(pip,tiprack)
         pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=20)
         mix_beads(7, dests, pip, tiprack)
@@ -200,7 +211,7 @@ def remove_supernatant(sources,waste,pip,tiprack):
         pip.move_to(m.center())
         pip.transfer(800, loc, waste, air_gap=100, new_tip='never')
         pip.blow_out(waste)
-        pip.drop_tip(home_after=False)
+        drop(pip)
 
 def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
     for wash_set in wash_sets:
@@ -226,7 +237,7 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             pip.transfer(200, asp_loc, waste, new_tip='never', air_gap=20)
             pip.flow_rate.aspirate = aspire_default_speed
             pip.blow_out(waste)
-            pip.drop_tip(home_after=False)
+            drop(pip)
 
 def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
     ## dispense buffer
@@ -238,7 +249,7 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
             50, buffer, m.bottom(1), new_tip='never', air_gap=10)
         pip.mix(20, 40, m.bottom(1))
         pip.flow_rate.dispense = dispense_default_speed
-        pip.drop_tip(home_after=False)
+        drop(pip)
 
     ## Incubation steps
     robot.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
@@ -256,7 +267,7 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
         # transfer elution to new plate
         pip.transfer(40, asp_loc, e, new_tip='never', air_gap=10)
         pip.blow_out(e.top(-2))
-        pip.drop_tip(home_after=False)
+        drop(pip)
     pip.flow_rate.aspirate = aspire_default_speed
 
 def run(ctx: protocol_api.ProtocolContext):

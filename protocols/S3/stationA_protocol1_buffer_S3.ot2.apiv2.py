@@ -26,7 +26,11 @@ VOLUME_BUFFER = 300
 # End Parameters to adapt the protocol
 
 ## global vars
+## initialize robot object
 robot = None
+# default var for drop tip switching
+switch = True
+# initialize tip_log dictionary
 tip_log = {}
 tip_log['count'] = {}
 tip_log['tips'] = {}
@@ -135,6 +139,13 @@ resuming.')
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
     tip_log['count'][pip] += 1
 
+def drop(pip):
+    global switch
+    side = 1 if switch else -1
+    drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=side*40))
+    pip.drop_tip(drop_loc,home_after=False)
+    switch = not switch
+
 def transfer_buffer(bf_tube, dests, volume, pip,tiprack):
     max_trans_per_asp = 3  # 1000/VOLUME_BUFFER = 3
     split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
@@ -147,7 +158,7 @@ def transfer_buffer(bf_tube, dests, volume, pip,tiprack):
         pip.distribute(VOLUME_BUFFER, bf_tube.bottom(2), [d.bottom(10) for d in set],
                    air_gap=3, disposal_volume=0, new_tip='never')
         pip.dispense(50,bf_tube.top(-20))
-    pip.drop_tip(home_after=False)
+    drop(pip)
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):

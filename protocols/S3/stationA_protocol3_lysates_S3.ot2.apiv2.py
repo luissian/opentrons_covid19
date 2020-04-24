@@ -25,7 +25,11 @@ VOLUME_LYSATE = 400
 BEADS = True
 
 ## global vars
+## initialize robot object
 robot = None
+# default var for drop tip switching
+switch = True
+# initialize tip_log dictionary
 tip_log = {}
 tip_log['count'] = {}
 tip_log['tips'] = {}
@@ -133,32 +137,12 @@ resuming.')
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
     tip_log['count'][pip] += 1
 
-def get_source_dest_coordinates(LYSATE_LABWARE, source_racks, pcr_plate):
-    if 'strip' in LYSATE_LABWARE:
-        sources = [
-            tube
-            for i, rack in enumerate(source_racks)
-            for col in [
-                rack.columns()[c] if i < 2 else rack.columns()[c+1]
-                for c in [0, 5, 10]
-            ]
-            for tube in col
-        ][:NUM_SAMPLES]
-        dests = pcr_plate.wells()[:NUM_SAMPLES]
-    elif 'plate' in LYSATE_LABWARE:
-        sources = source_racks.wells()[:NUM_SAMPLES]
-        dests = pcr_plate.wells()[:NUM_SAMPLES]
-    else:
-        sources = [
-            tube
-            for rack in source_racks for tube in rack.wells()][:NUM_SAMPLES]
-        dests = [
-            well
-            for v_block in range(2)
-            for h_block in range(2)
-            for col in pcr_plate.columns()[6*v_block:6*(v_block+1)]
-            for well in col[4*h_block:4*(h_block+1)]][:NUM_SAMPLES]
-    return sources, dests
+def drop(pip):
+    global switch
+    side = 1 if switch else -1
+    drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=side*40))
+    pip.drop_tip(drop_loc,home_after=False)
+    switch = not switch
 
 def transfer_samples(labware, volume , sources, dests, pip, tiprack):
     # height for aspiration has to be different depending if you ar useing tubes or wells
@@ -174,7 +158,7 @@ def transfer_samples(labware, volume , sources, dests, pip, tiprack):
             pip.mix(3,400,d.bottom(4))
         pip.blow_out(d.top(-2))
         pip.aspirate(50, d.top(-2))
-        pip.drop_tip(home_after=False)
+        drop(pip)
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):

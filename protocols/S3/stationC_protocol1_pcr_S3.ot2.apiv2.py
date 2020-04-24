@@ -27,6 +27,17 @@ TRANSFER_SAMPLES = True
 
 # End Parameters to adapt the protocol
 
+## global vars
+## initialize robot object
+robot = None
+# default var for drop tip switching
+switch = True
+# initialize tip_log dictionary
+tip_log = {}
+tip_log['count'] = {}
+tip_log['tips'] = {}
+tip_log['max'] = {}
+
 """
 NUM_SAMPLES is the number of samples, must be an integer number
 

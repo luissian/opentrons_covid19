@@ -134,7 +134,7 @@ resuming.')
 def drop(pip):
     global switch
     side = 1 if switch else -1
-    drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=side*40))
+    drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=side*20))
     pip.drop_tip(drop_loc,home_after=False)
     switch = not switch
 

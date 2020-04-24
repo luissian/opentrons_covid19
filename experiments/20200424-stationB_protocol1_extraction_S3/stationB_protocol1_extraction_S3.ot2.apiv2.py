@@ -170,17 +170,21 @@ resuming.')
 
 def drop(pip):
     global switch
-    side = 1 if switch else -1
-    drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=side*20))
-    pip.drop_tip(drop_loc,home_after=False)
-    switch = not switch
+    if "8-Channel" not in str(pip):
+        side = 1 if switch else -1
+        drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=side*20))
+        pip.drop_tip(drop_loc,home_after=False)
+        switch = not switch
+    else:
+        drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=20))
+        pip.drop_tip(drop_loc,home_after=False)
 
 def custom_mix(pipette, vol, cycles):
     pipette.aspirate(vol)
     for cycle in range(cycles-1):
-        pipette.dispense(vol-1,rate=2)
+        pipette.dispense(vol-1,rate=6)
         pipette.aspirate(vol-1)
-    pipette.dispense(vol,rate=2)
+    pipette.dispense(vol,rate=6)
 
 def mix_beads(reps, dests, pip, tiprack):
     ## Dispense beads to deep well plate.

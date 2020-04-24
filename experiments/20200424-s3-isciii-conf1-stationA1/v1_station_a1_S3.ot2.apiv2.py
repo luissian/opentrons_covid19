@@ -118,7 +118,7 @@ def save_tip_info(pip, file_path = '/data/A/tip_log.json'):
         elif "P300" in str(pip):
             data = {'tips300': tip_log['count'][pip]}
 
-        with open(file_path, 'w') as outfile:
+        with open(file_path, 'a+') as outfile:
             json.dump(data, outfile)
 
 def pick_up(pip,tiprack):

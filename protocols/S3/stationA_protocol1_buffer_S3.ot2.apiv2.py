@@ -171,10 +171,8 @@ def run(ctx: protocol_api.ProtocolContext):
         confirm_door_is_closed()
 
     # define tips
-    tips1000 = [
-        ctx.load_labware('opentrons_96_filtertiprack_1000ul', slot)
-        for slot in ['3', '6']
-    ]
+    tips1000 = ctx.load_labware('opentrons_96_filtertiprack_1000ul',
+                                     3, '1000µl tiprack')
     tips300 = [ctx.load_labware('opentrons_96_filtertiprack_200ul', '9')]
 
     # define pipettes

@@ -170,9 +170,8 @@ def run(ctx: protocol_api.ProtocolContext):
     if not ctx.is_simulating():
         confirm_door_is_closed(ctx)
 
-    tips1000 = [ctx.load_labware('opentrons_96_filtertiprack_1000ul',
-                                     slot, '1000µl tiprack')
-                    for slot in ['3', '6', '9', '8', '7']]
+    tips1000 = ctx.load_labware('opentrons_96_filtertiprack_1000ul',
+                                     3, '1000µl tiprack')
 
     # load pipette
     p1000 = ctx.load_instrument(

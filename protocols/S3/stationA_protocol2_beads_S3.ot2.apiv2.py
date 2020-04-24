@@ -88,8 +88,13 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
                         tip_log['count'][pip] = data['tips300']
                     else:
                         tip_log['count'][pip] = 0
+
+                os.remove(file_path)
+
             else:
                 tip_log['count'][pip] = 0
+
+
         else:
             tip_log['count'][pip] = 0
 
@@ -129,7 +134,7 @@ resuming.')
 def drop(pip):
     global switch
     side = 1 if switch else -1
-    drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=side*40))
+    drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=side*20))
     pip.drop_tip(drop_loc,home_after=False)
     switch = not switch
 
@@ -212,7 +217,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     num_wells = math.ceil(len(wells_plate.wells())/4)
     # beads and ethanol
     beads = beads_rack.wells()[4]
-    ethanol = beads_rack.wells()[0:3][:num_tubes]
+    ethanol = beads_rack.wells()[0:4][:num_tubes]
 
     prepare_beads(beads,ethanol,p1000,tips1000)
 

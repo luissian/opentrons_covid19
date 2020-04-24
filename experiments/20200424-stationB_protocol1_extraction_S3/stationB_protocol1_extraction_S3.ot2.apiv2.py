@@ -142,6 +142,7 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
     return tip_log
 
 def save_tip_info(file_path = '/data/B/tip_log.json'):
+    data = {}
     if not robot.is_simulating():
         os.rename(file_path,file_path + ".bak")
         for pip in tip_log['count']:

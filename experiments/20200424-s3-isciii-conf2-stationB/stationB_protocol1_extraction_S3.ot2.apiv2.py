@@ -30,7 +30,7 @@ REAGENT SETUP:
 # Parameters to adapt the protocol
 NUM_SAMPLES = 8
 REAGENT_LABWARE = 'nest 12 reservoir plate'
-MAGPLATE_LABWARE = 'nest deep generic well plate'
+MAGPLATE_LABWARE = 'vwr deep generic well plate'
 WASTE_LABWARE = 'nest 1 reservoir plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 TIP_TRACK = True
@@ -185,7 +185,7 @@ def mix_beads(reps, dests, pip, tiprack):
     for i, m in enumerate(dests):
         if not pip.hw_pipette['has_tip']:
             pick_up(pip,tiprack)
-
+        pip.move_to(m.bottom(2))
         custom_mix(pip,200,reps)
         #for i in range(reps):
         #    pip.aspirate(200, m.bottom(2))
@@ -238,7 +238,7 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             custom_mix(pip, 175, 7)
             pip.move_to(m.top(-20))
 
-            magdeck.engage(height_from_base=22)
+            magdeck.engage(height=29)
             robot.delay(seconds=75, msg='Incubating on magnet for 75 seconds.')
 
             # remove supernatant
@@ -264,7 +264,7 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
 
     ## Incubation steps
     robot.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
-    magdeck.engage(height_from_base=22)
+    magdeck.engage(height=29)
     robot.delay(seconds=120, msg='Incubating on magnet for 60 seconds.')
 
     aspire_default_speed = pip.flow_rate.aspirate
@@ -373,7 +373,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     ctx.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
 
     ## First incubate on magnet.
-    magdeck.engage(height_from_base=22)
+    magdeck.engage(height=29)
     ctx.delay(minutes=5, msg='Incubating on magnet for 5 minutes.')
 
     # remove supernatant with P1000

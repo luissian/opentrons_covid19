@@ -61,7 +61,11 @@ ELUTION_LABWARE
     opentrons aluminum biorad plate
     opentrons aluminum nest plate
 """
+# Parameters to adapt the protocol
+# Warning writing any Parameters below this line.
+# It will be deleted if opentronsWeb is used.
 
+# End Parameters to adapt the protocol
 
 # Constants
 REAGENT_LW_DICT = {
@@ -260,7 +264,6 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
         pip.transfer(40, asp_loc, e, new_tip='never', air_gap=10)
         pip.blow_out(e.top(-2))
         pip.drop_tip(home_after=False)
-
     pip.flow_rate.aspirate = aspire_default_speed
 
 def run(ctx: protocol_api.ProtocolContext):
@@ -342,28 +345,27 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     p1000.flow_rate.dispense = 1000
     p1000.flow_rate.blow_out = 1000
 
-    # if(DISPENSE_BEADS):
-    #     # premix, transfer, and mix magnetic beads with sample
-    #     ## bead dests depending on number of samples
-    #     bead_dests = bead_buffer[:math.ceil(num_cols/4)]
-    #     dispense_beads(bead_dests,mag_samples_m,m300,tips300)
-    # else:
-    #     # Mix bead
-    #     mix_beads(7, mag_samples_m,m300,tips300)
+    if(DISPENSE_BEADS):
+        # premix, transfer, and mix magnetic beads with sample
+        ## bead dests depending on number of samples
+        bead_dests = bead_buffer[:math.ceil(num_cols/4)]
+        dispense_beads(bead_dests,mag_samples_m,m300,tips300)
+    else:
+        # Mix bead
+        mix_beads(7, mag_samples_m,m300,tips300)
 
     # incubate off and on magnet
-    # ctx.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
-    # TESTING: uncomment for definitive test
+    ctx.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
 
     ## First incubate on magnet.
-    # magdeck.engage(height_from_base=22)
-    # ctx.delay(minutes=5, msg='Incubating on magnet for 5 minutes.')
+    magdeck.engage(height_from_base=22)
+    ctx.delay(minutes=5, msg='Incubating on magnet for 5 minutes.')
 
     # remove supernatant with P1000
-    # remove_supernatant(mag_samples_s,waste,p1000,tips1000)
+    remove_supernatant(mag_samples_s,waste,p1000,tips1000)
 
     # 3x washes
-    # wash(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)
+    wash(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)
 
     # Airdrying -> REMOVE THIS STEP
     #ctx.delay(minutes=5, msg='Airdrying for 5 minutes.')

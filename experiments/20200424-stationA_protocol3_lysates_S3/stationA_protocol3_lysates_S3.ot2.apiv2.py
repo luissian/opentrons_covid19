@@ -21,7 +21,7 @@ metadata = {
 
 NUM_SAMPLES = 96
 LYSATE_LABWARE = 'opentrons plastic 2ml tubes'
-PLATE_LABWARE = 'vwr deep generic well plate'
+PLATE_LABWARE = 'nest deep generic well plate'
 VOLUME_LYSATE = 400
 BEADS = False
 

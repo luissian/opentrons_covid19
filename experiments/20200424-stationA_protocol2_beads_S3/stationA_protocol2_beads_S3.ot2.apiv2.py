@@ -213,7 +213,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     num_wells = math.ceil(len(wells_plate.wells())/4)
     # beads and ethanol
     beads = beads_rack.wells()[4]
-    ethanol = beads_rack.wells()[0:3][:num_tubes]
+    ethanol = beads_rack.wells()[0:4][:num_tubes]
 
     prepare_beads(beads,ethanol,p1000,tips1000)
 

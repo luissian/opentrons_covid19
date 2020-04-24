@@ -28,9 +28,9 @@ REAGENT SETUP:
 """
 
 # Parameters to adapt the protocol
-NUM_SAMPLES = 8
+NUM_SAMPLES = 24
 REAGENT_LABWARE = 'nest 12 reservoir plate'
-MAGPLATE_LABWARE = 'vwr deep generic well plate'
+MAGPLATE_LABWARE = 'nest deep generic well plate'
 WASTE_LABWARE = 'nest 1 reservoir plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 TIP_TRACK = True
@@ -121,9 +121,9 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
             if os.path.isfile(file_path):
                 with open(file_path) as json_file:
                     data = json.load(json_file)
-                    if 'tips1000' in data:
+                    if 'P1000' in str(pip):
                         tip_log['count'][pip] = data['tips1000']
-                    elif 'tips300' in data:
+                    elif 'P300' in str(pip):
                         tip_log['count'][pip] = data['tips300']
                     else:
                         tip_log['count'][pip] = 0
@@ -142,12 +142,13 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
 
     return tip_log
 
-def save_tip_info(pip, file_path = '/data/B/tip_log.json'):
+def save_tip_info(file_path = '/data/B/tip_log.json'):
     if not robot.is_simulating():
-        if "P1000" in str(pip):
-            data = {'tips1000': tip_log['count'][pip]}
-        elif "P300" in str(pip):
-            data = {'tips300': tip_log['count'][pip]}
+        for pip in tip_log['count']:
+            if "P1000" in str(pip):
+                data['tips1000'] = tip_log['count'][pip]
+            elif "P300" in str(pip):
+                data['tips300'] = tip_log['count'][pip]
 
         with open(file_path, 'a+') as outfile:
             json.dump(data, outfile)
@@ -386,7 +387,6 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     elute_samples(mag_samples_m,elution_samples_m,elution_buffer,magdeck,m300,tips300)
 
     # track final used tip
-    save_tip_info(p1000)
-    save_tip_info(m300)
+    save_tip_info()
 
     finish_run()

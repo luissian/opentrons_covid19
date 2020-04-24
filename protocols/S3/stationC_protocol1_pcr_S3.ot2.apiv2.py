@@ -8,7 +8,7 @@ metadata = {
     'protocolName': 'S3 Station C Version 1',
     'author': 'Nick <protocols@opentrons.com>, Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
-    'apiLevel': '2.1'
+    'apiLevel': '2.3'
 }
 
 # Parameters to adapt the protocol
@@ -311,7 +311,7 @@ def run(ctx: protocol_api.ProtocolContext):
     # check mastermix labware type
     if MM_LABWARE not in MM_LW_DICT:
         raise Exception('Invalid MM_LABWARE. Must be one of the following:\n' + '\n'.join(list(MM_LW_DICT.keys())))
-        
+
 
     # load mastermix labware
     mm_rack = ctx.load_labware(
@@ -320,15 +320,15 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # check mastermix tube labware type
     if MMTUBE_LABWARE not in MMTUBE_LW_DICT:
-        raise Exception('Invalid MMTUBE_LABWARE. Must be one of the following:\n' + '\n'.join(list(MMTUBE_LW_DICT.keys()))) 
+        raise Exception('Invalid MMTUBE_LABWARE. Must be one of the following:\n' + '\n'.join(list(MMTUBE_LW_DICT.keys())))
 
     # This one is not loaded, it contains the raius of each tube to calculate volume height
 
     # check pcr plate
     if PCR_LABWARE not in PCR_LW_DICT:
-        raise Exception('Invalid PCR_LABWARE. Must be one of the following:\n' + '\n'.join(list(PCR_LW_DICT.keys()))) 
-        
-        
+        raise Exception('Invalid PCR_LABWARE. Must be one of the following:\n' + '\n'.join(list(PCR_LW_DICT.keys())))
+
+
     # load pcr plate
     pcr_plate = tempdeck.load_labware(
         PCR_LW_DICT[PCR_LABWARE], 'PCR plate')
@@ -336,8 +336,8 @@ def run(ctx: protocol_api.ProtocolContext):
     # check source (elution) labware type
     if ELUTION_LABWARE not in EL_LW_DICT:
         raise Exception('Invalid ELUTION_LABWARE. Must be one of the following:\n' + '\n'.join(list(EL_LW_DICT.keys())))
-        
-        
+
+
     # load elution labware
     if 'plate' in ELUTION_LABWARE:
         source_racks = ctx.load_labware(

@@ -1,3 +1,4 @@
+from opentrons.types import Point
 from opentrons import protocol_api
 from opentrons.drivers.rpi_drivers import gpio
 import time
@@ -22,7 +23,7 @@ NUM_SAMPLES = 96
 LYSATE_LABWARE = 'opentrons plastic 2ml tubes'
 PLATE_LABWARE = 'vwr deep generic well plate'
 VOLUME_LYSATE = 400
-BEADS = True
+BEADS = False
 
 ## global vars
 ## initialize robot object
@@ -99,6 +100,7 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
                         tip_log['count'][pip] = data['tips300']
                     else:
                         tip_log['count'][pip] = 0
+                os.remove(file_path)
             else:
                 tip_log['count'][pip] = 0
         else:
@@ -140,7 +142,7 @@ resuming.')
 def drop(pip):
     global switch
     side = 1 if switch else -1
-    drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=side*40))
+    drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=side*20))
     pip.drop_tip(drop_loc,home_after=False)
     switch = not switch
 

@@ -127,7 +127,6 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
                         tip_log['count'][pip] = data['tips300']
                     else:
                         tip_log['count'][pip] = 0
-                os.remove(file_path)
             else:
                 tip_log['count'][pip] = 0
         else:
@@ -144,6 +143,7 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
 
 def save_tip_info(file_path = '/data/B/tip_log.json'):
     if not robot.is_simulating():
+        os.rename(file_path,file_path + ".bak")
         for pip in tip_log['count']:
             if "P1000" in str(pip):
                 data['tips1000'] = tip_log['count'][pip]
@@ -371,11 +371,11 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         mix_beads(7, mag_samples_m,m300,tips300)
 
     # incubate off and on magnet
-    ctx.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
+    ctx.delay(minutes=1, msg='Incubating off magnet for 5 minutes.')
 
     ## First incubate on magnet.
     magdeck.engage(height=29)
-    ctx.delay(minutes=5, msg='Incubating on magnet for 5 minutes.')
+    ctx.delay(minutes=1, msg='Incubating on magnet for 5 minutes.')
 
     # remove supernatant with P1000
     remove_supernatant(mag_samples_s,waste,p1000,tips1000)

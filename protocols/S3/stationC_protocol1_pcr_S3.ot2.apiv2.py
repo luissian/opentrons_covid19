@@ -9,7 +9,7 @@ metadata = {
     'protocolName': 'S3 Station C Protocol 1 pcr Version 1',
     'author': 'Nick <protocols@opentrons.com>, Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
-    'apiLevel': '2.2'
+    'apiLevel': '2.3'
 }
 
 # Parameters to adapt the protocol

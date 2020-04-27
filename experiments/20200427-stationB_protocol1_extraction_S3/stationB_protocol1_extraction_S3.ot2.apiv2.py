@@ -233,7 +233,7 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             pip.transfer(
                 200, wash_chan.bottom(2), m.center(), new_tip='never', air_gap=20)
             # Mix heigh has to be really close to bottom, it was 5 now reduced to 2, maybe should be 1?
-            pip.mix(5, 200, m.bottom(2))
+            pip.mix(7, 200, m.bottom(2))
 
             magdeck.engage(height_from_base=22)
             robot.delay(seconds=75, msg='Incubating on magnet for 75 seconds.')
@@ -254,7 +254,7 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
         pip.flow_rate.dispense = 1500
         pip.transfer(
             50, buffer, m.bottom(1), new_tip='never', air_gap=10)
-        pip.mix(reps, 200, m.bottom(1))
+        pip.mix(20, 200, m.bottom(1))
         pip.flow_rate.dispense = dispense_default_speed
         drop(pip)
 

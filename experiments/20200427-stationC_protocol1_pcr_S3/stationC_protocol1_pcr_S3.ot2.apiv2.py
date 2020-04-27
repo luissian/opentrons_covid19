@@ -9,7 +9,7 @@ metadata = {
     'protocolName': 'S3 Station C Protocol 1 pcr Version 1',
     'author': 'Nick <protocols@opentrons.com>, Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
-    'apiLevel': '2.3'
+    'apiLevel': '2.2'
 }
 
 # Parameters to adapt the protocol
@@ -238,10 +238,13 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
     for tube, vol in mm_dict[MM_TYPE].items():
         mm_vol = vol*(NUM_SAMPLES+5)
         disp_loc = mm_tube.top(-10)
-        pip = p300 if mm_vol > 20 else p20
+        if mm_vol >= 15:
+            air_gap_vol = 5
+        else:
+            air_gap_vol = 2
+        pip = p300 if (mm_vol + air_gap_vol) > 20 else p20
         pip.pick_up_tip()
         #pip.transfer(mm_vol, tube.bottom(0.5), disp_loc, air_gap=2, touch_tip=True, new_tip='never')
-        air_gap_vol = 5
         num_transfers = math.ceil(mm_vol/(200-air_gap_vol))
         for i in range(num_transfers):
             if i == 0:

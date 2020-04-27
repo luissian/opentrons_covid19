@@ -172,8 +172,8 @@ def run(ctx: protocol_api.ProtocolContext):
         confirm_door_is_closed()
 
     # define tips
-    tips1000 = ctx.load_labware('opentrons_96_filtertiprack_1000ul',
-                                     3, '1000µl tiprack')
+    tips1000 = [ctx.load_labware('opentrons_96_filtertiprack_1000ul',
+                                     3, '1000µl tiprack')]
 
     # define pipettes
     p1000 = ctx.load_instrument('p1000_single_gen2', 'left', tip_racks=tips1000)

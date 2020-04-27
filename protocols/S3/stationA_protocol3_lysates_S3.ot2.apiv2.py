@@ -23,7 +23,7 @@ NUM_SAMPLES = 96
 LYSATE_LABWARE = 'opentrons plastic 2ml tubes'
 PLATE_LABWARE = 'vwr deep generic well plate'
 VOLUME_LYSATE = 400
-BEADS = True
+BEADS = False
 
 ## global vars
 ## initialize robot object
@@ -87,7 +87,7 @@ def finish_run():
     #Set light color to blue
     gpio.set_button_light(0,0,1)
 
-def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
+def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
     global tip_log
     if not tip_log['count'] or pip not in tip_log['count']:
         if not robot.is_simulating():
@@ -114,7 +114,7 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
 
     return tip_log
 
-def save_tip_info(file_path = '/data/B/tip_log.json'):
+def save_tip_info(file_path = '/data/A/tip_log.json'):
     data = {}
     if not robot.is_simulating():
         os.rename(file_path,file_path + ".bak")

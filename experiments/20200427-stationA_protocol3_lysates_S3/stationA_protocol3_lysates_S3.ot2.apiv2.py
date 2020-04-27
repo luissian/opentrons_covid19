@@ -8,7 +8,7 @@ import os
 
 # metadata
 metadata = {
-    'protocolName': 'S3 Station A Version 1',
+    'protocolName': 'S3 Station A Protocol 3 lysates Version 1',
     'author': 'Nick <protocols@opentrons.com>, Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
     'apiLevel': '2.3'
@@ -21,7 +21,7 @@ metadata = {
 
 NUM_SAMPLES = 96
 LYSATE_LABWARE = 'opentrons plastic 2ml tubes'
-PLATE_LABWARE = 'vwr deep generic well plate'
+PLATE_LABWARE = 'nest deep generic well plate'
 VOLUME_LYSATE = 400
 BEADS = False
 

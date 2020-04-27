@@ -8,7 +8,7 @@ import os
 
 # metadata
 metadata = {
-    'protocolName': 'S3 Station A Version 1',
+    'protocolName': 'S3 Station A Protocol 2 beads Version 1',
     'author': 'Nick <protocols@opentrons.com>, Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
     'apiLevel': '2.3'
@@ -17,7 +17,7 @@ metadata = {
 # Parameters to adapt the protocol
 NUM_SAMPLES = 96
 BEADS_LABWARE = 'opentrons plastic 30ml tubes'
-PLATE_LABWARE = 'vwr deep generic well plate'
+PLATE_LABWARE = 'nest deep generic well plate'
 VOLUME_BEADS = 410
 
 ## global vars

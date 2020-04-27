@@ -30,7 +30,7 @@ REAGENT SETUP:
 # Parameters to adapt the protocol
 NUM_SAMPLES = 96
 REAGENT_LABWARE = 'nest 12 reservoir plate'
-MAGPLATE_LABWARE = 'vwr deep generic well plate'
+MAGPLATE_LABWARE = 'nest deep generic well plate'
 WASTE_LABWARE = 'nest 1 reservoir plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 TIP_TRACK = True
@@ -121,9 +121,9 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
             if os.path.isfile(file_path):
                 with open(file_path) as json_file:
                     data = json.load(json_file)
-                    if 'tips1000' in data:
+                    if 'P1000' in str(pip):
                         tip_log['count'][pip] = data['tips1000']
-                    elif 'tips300' in data:
+                    elif 'P300' in str(pip):
                         tip_log['count'][pip] = data['tips300']
                     else:
                         tip_log['count'][pip] = 0
@@ -142,12 +142,15 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
 
     return tip_log
 
-def save_tip_info(pip, file_path = '/data/B/tip_log.json'):
+def save_tip_info(file_path = '/data/B/tip_log.json'):
+    data = {}
     if not robot.is_simulating():
-        if "P1000" in str(pip):
-            data = {'tips1000': tip_log['count'][pip]}
-        elif "P300" in str(pip):
-            data = {'tips300': tip_log['count'][pip]}
+        os.rename(file_path,file_path + ".bak")
+        for pip in tip_log['count']:
+            if "P1000" in str(pip):
+                data['tips1000'] = tip_log['count'][pip]
+            elif "P300" in str(pip):
+                data['tips300'] = tip_log['count'][pip]
 
         with open(file_path, 'a+') as outfile:
             json.dump(data, outfile)
@@ -168,19 +171,32 @@ resuming.')
 
 def drop(pip):
     global switch
-    side = 1 if switch else -1
-    drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=side*20))
-    pip.drop_tip(drop_loc,home_after=False)
-    switch = not switch
+    if "8-Channel" not in str(pip):
+        side = 1 if switch else -1
+        drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=side*20))
+        pip.drop_tip(drop_loc,home_after=False)
+        switch = not switch
+    else:
+        drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=20))
+        pip.drop_tip(drop_loc,home_after=False)
+
+def custom_mix(pipette, vol, cycles):
+    pipette.aspirate(vol)
+    for cycle in range(cycles-1):
+        pipette.dispense(vol-1,rate=6)
+        pipette.aspirate(vol-1)
+    pipette.dispense(vol,rate=6)
 
 def mix_beads(reps, dests, pip, tiprack):
     ## Dispense beads to deep well plate.
     for i, m in enumerate(dests):
         if not pip.hw_pipette['has_tip']:
             pick_up(pip,tiprack)
-        for i in range(reps):
-            pip.aspirate(200, m.bottom(2))
-            pip.dispense(200, m.bottom(2), rate=2)
+        pip.move_to(m.bottom(2))
+        custom_mix(pip,200,reps)
+        #for i in range(reps):
+        #    pip.aspirate(200, m.bottom(2))
+        #    pip.dispense(200, m.bottom(2), rate=2)
         # PENDING TO FIX THIS blow_out
         pip.blow_out(m.top(-2))
         pip.aspirate(20, m.top(-2))
@@ -190,9 +206,8 @@ def dispense_beads(sources,dests,pip,tiprack):
     ## Mix beads prior to dispensing.
     pick_up(pip,tiprack)
     for s in sources:
-        for _ in range(5):
-            pip.aspirate(200, s.bottom(20))
-            pip.dispense(200, s.bottom(20))
+        pip.move_to(s.bottom(20))
+        custom_mix(pip,200,5)
 
     ## Dispense beads to deep well plate.
     for i, m in enumerate(dests):
@@ -226,7 +241,9 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             pick_up(pip,tiprack)
             pip.transfer(
                 200, wash_chan.bottom(2), m.center(), new_tip='never', air_gap=20)
-            pip.mix(7, 175, disp_loc)
+            # Mix heigh has to be really close to bottom, it was 5 now reduced to 2, maybe should be one?
+            pip.move_to(m.bottom(2))
+            custom_mix(pip, 175, 7)
             pip.move_to(m.top(-20))
 
             magdeck.engage(height_from_base=22)
@@ -248,7 +265,8 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
         pip.flow_rate.dispense = 1500
         pip.transfer(
             50, buffer, m.bottom(1), new_tip='never', air_gap=10)
-        pip.mix(20, 40, m.bottom(1))
+        pip.move_to(m.bottom(1))
+        custom_mix(pip, 40, 20)
         pip.flow_rate.dispense = dispense_default_speed
         drop(pip)
 
@@ -262,8 +280,9 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
     ## Dispense elutes in pcr plate.
     for i, (m, e) in enumerate(zip(sources, dests)):
         # tranfser and mix elution buffer with beads
-        side = 1 if i % 2 == 0 else -1
-        asp_loc = m.bottom(5).move(Point(x=-1*side*2))
+        # side = 1 if i % 2 == 0 else -1
+        # asp_loc = m.bottom(5).move(Point(x=-1*side*2))
+        asp_loc = m.bottom(1)
         pick_up(pip,tipracks)
         # transfer elution to new plate
         pip.transfer(40, asp_loc, e, new_tip='never', air_gap=10)
@@ -376,7 +395,6 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     elute_samples(mag_samples_m,elution_samples_m,elution_buffer,magdeck,m300,tips300)
 
     # track final used tip
-    save_tip_info(p1000)
-    save_tip_info(m300)
+    save_tip_info()
 
     finish_run()

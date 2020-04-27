@@ -16,10 +16,10 @@ metadata = {
 # Warning writing any Parameters below this line.
 # It will be deleted if opentronsWeb is used.
 
-NUM_SAMPLES = 24
+NUM_SAMPLES = 26
 MM_LABWARE = 'opentrons aluminum block'
 MMTUBE_LABWARE = '2ml tubes'
-PCR_LABWARE = 'opentrons aluminum nest plate'
+PCR_LABWARE = 'opentrons aluminum biorad plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 PREPARE_MASTERMIX = True
 MM_TYPE = 'MM1'

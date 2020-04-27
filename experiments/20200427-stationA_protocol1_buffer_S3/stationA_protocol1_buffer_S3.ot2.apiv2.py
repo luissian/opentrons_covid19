@@ -19,7 +19,7 @@ metadata = {
 # It will be deleted if opentronsWeb is used.
 
 NUM_SAMPLES = 96
-BUFFER_LABWARE = 'opentrons plastic 50ml tubes'
+BUFFER_LABWARE = 'opentrons plastic 30ml tubes'
 DESTINATION_LABWARE = 'opentrons plastic 2ml tubes'
 DEST_TUBE = '2ml tubes'
 VOLUME_BUFFER = 300

@@ -233,7 +233,7 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             pip.transfer(
                 200, wash_chan.bottom(2), m.center(), new_tip='never', air_gap=20)
             # Mix heigh has to be really close to bottom, it was 5 now reduced to 2, maybe should be 1?
-            pip.mix(reps, 200, m.bottom(2))
+            pip.mix(5, 200, m.bottom(2))
 
             magdeck.engage(height_from_base=22)
             robot.delay(seconds=75, msg='Incubating on magnet for 75 seconds.')

@@ -240,7 +240,8 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             pick_up(pip,tiprack)
             pip.transfer(
                 200, wash_chan.bottom(2), m.center(), new_tip='never', air_gap=20)
-            pip.move_to(m.bottom(5))
+            # Mix heigh has to be really close to bottom, it was 5 now reduced to 2, maybe should be one?
+            pip.move_to(m.bottom(2))
             custom_mix(pip, 175, 7)
             pip.move_to(m.top(-20))
 
@@ -278,8 +279,9 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
     ## Dispense elutes in pcr plate.
     for i, (m, e) in enumerate(zip(sources, dests)):
         # tranfser and mix elution buffer with beads
-        side = 1 if i % 2 == 0 else -1
-        asp_loc = m.bottom(5).move(Point(x=-1*side*2))
+        # side = 1 if i % 2 == 0 else -1
+        # asp_loc = m.bottom(5).move(Point(x=-1*side*2))
+        asp_loc = m.bottom(1)
         pick_up(pip,tipracks)
         # transfer elution to new plate
         pip.transfer(40, asp_loc, e, new_tip='never', air_gap=10)
@@ -366,27 +368,27 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     p1000.flow_rate.dispense = 1000
     p1000.flow_rate.blow_out = 1000
 
-    if(DISPENSE_BEADS):
-        # premix, transfer, and mix magnetic beads with sample
-        ## bead dests depending on number of samples
-        bead_dests = bead_buffer[:math.ceil(num_cols/4)]
-        dispense_beads(bead_dests,mag_samples_m,m300,tips300)
-    else:
-        # Mix bead
-        mix_beads(7, mag_samples_m,m300,tips300)
-
-    # incubate off and on magnet
-    ctx.delay(minutes=1, msg='Incubating off magnet for 5 minutes.')
-
-    ## First incubate on magnet.
-    magdeck.engage(height=29)
-    ctx.delay(minutes=1, msg='Incubating on magnet for 5 minutes.')
-
-    # remove supernatant with P1000
-    remove_supernatant(mag_samples_s,waste,p1000,tips1000)
-
-    # 3x washes
-    wash(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)
+    # if(DISPENSE_BEADS):
+    #     # premix, transfer, and mix magnetic beads with sample
+    #     ## bead dests depending on number of samples
+    #     bead_dests = bead_buffer[:math.ceil(num_cols/4)]
+    #     dispense_beads(bead_dests,mag_samples_m,m300,tips300)
+    # else:
+    #     # Mix bead
+    #     mix_beads(7, mag_samples_m,m300,tips300)
+    #
+    # # incubate off and on magnet
+    # ctx.delay(minutes=1, msg='Incubating off magnet for 5 minutes.')
+    #
+    # ## First incubate on magnet.
+    # magdeck.engage(height=29)
+    # ctx.delay(minutes=1, msg='Incubating on magnet for 5 minutes.')
+    #
+    # # remove supernatant with P1000
+    # remove_supernatant(mag_samples_s,waste,p1000,tips1000)
+    #
+    # # 3x washes
+    # wash(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)
 
     # elute samples
     elute_samples(mag_samples_m,elution_samples_m,elution_buffer,magdeck,m300,tips300)

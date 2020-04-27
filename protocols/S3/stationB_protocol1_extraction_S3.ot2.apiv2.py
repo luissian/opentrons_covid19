@@ -388,4 +388,6 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     # track final used tip
     save_tip_info()
 
+    magdeck.disengage()
+    
     finish_run()

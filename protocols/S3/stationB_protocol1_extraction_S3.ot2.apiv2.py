@@ -127,7 +127,6 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
                         tip_log['count'][pip] = data['tips300']
                     else:
                         tip_log['count'][pip] = 0
-                os.remove(file_path)
             else:
                 tip_log['count'][pip] = 0
         else:
@@ -145,7 +144,8 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
 def save_tip_info(file_path = '/data/B/tip_log.json'):
     data = {}
     if not robot.is_simulating():
-        os.rename(file_path,file_path + ".bak")
+        if os.path.isfile(file_path):
+            os.rename(file_path,file_path + ".bak")
         for pip in tip_log['count']:
             if "P1000" in str(pip):
                 data['tips1000'] = tip_log['count'][pip]

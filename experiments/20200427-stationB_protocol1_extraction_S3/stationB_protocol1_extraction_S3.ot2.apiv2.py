@@ -28,7 +28,7 @@ REAGENT SETUP:
 """
 
 # Parameters to adapt the protocol
-NUM_SAMPLES = 96
+NUM_SAMPLES = 16
 REAGENT_LABWARE = 'nest 12 reservoir plate'
 MAGPLATE_LABWARE = 'nest deep generic well plate'
 WASTE_LABWARE = 'nest 1 reservoir plate'
@@ -185,12 +185,12 @@ def mix_beads(reps, dests, pip, tiprack):
     for i, m in enumerate(dests):
         if not pip.hw_pipette['has_tip']:
             pick_up(pip,tiprack)
-        #for i in range(reps):
-        #    pip.aspirate(200, m.bottom(2))
-        #    pip.dispense(200, m.bottom(2), rate=2)
+        dispense_default_speed = pip.flow_rate.dispense
+        pip.flow_rate.dispense = 600
         pip.mix(reps, 200, m.bottom(2))
+        pip.flow_rate.dispense = dispense_default_speed
         # PENDING TO FIX THIS blow_out
-        pip.blow_out(m.top(-2))
+        # pip.blow_out(m.top(-2))
         pip.aspirate(20, m.top(-2))
         drop(pip)
 
@@ -215,7 +215,6 @@ def remove_supernatant(sources,waste,pip,tiprack):
     for i, m in enumerate(sources):
         loc = m.bottom(1)
         pick_up(pip,tiprack)
-        pip.move_to(m.center())
         pip.transfer(800, loc, waste, air_gap=100, new_tip='never')
         pip.blow_out(waste)
         drop(pip)
@@ -233,7 +232,10 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             pip.transfer(
                 200, wash_chan.bottom(2), m.center(), new_tip='never', air_gap=20)
             # Mix heigh has to be really close to bottom, it was 5 now reduced to 2, maybe should be 1?
+            dispense_default_speed = pip.flow_rate.dispense
+            pip.flow_rate.dispense = 1500
             pip.mix(7, 200, m.bottom(2))
+            pip.flow_rate.dispense = dispense_default_speed
 
             magdeck.engage(height_from_base=22)
             robot.delay(seconds=75, msg='Incubating on magnet for 75 seconds.')
@@ -380,6 +382,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     wash(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)
 
     # elute samples
+    magdeck.disengage()
     elute_samples(mag_samples_m,elution_samples_m,elution_buffer,magdeck,m300,tips300)
 
     # track final used tip

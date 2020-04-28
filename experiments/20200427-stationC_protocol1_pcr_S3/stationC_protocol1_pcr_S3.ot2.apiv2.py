@@ -16,12 +16,12 @@ metadata = {
 # Warning writing any Parameters below this line.
 # It will be deleted if opentronsWeb is used.
 
-NUM_SAMPLES = 26
+NUM_SAMPLES = 38
 MM_LABWARE = 'opentrons aluminum block'
 MMTUBE_LABWARE = '2ml tubes'
 PCR_LABWARE = 'opentrons aluminum biorad plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
-PREPARE_MASTERMIX = True
+PREPARE_MASTERMIX = False
 MM_TYPE = 'MM1'
 TRANSFER_MASTERMIX = True
 TRANSFER_SAMPLES = True
@@ -252,6 +252,9 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
             else:
                 transfer_vol = (200-air_gap_vol)
             pip.transfer(transfer_vol, tube.bottom(0.5), disp_loc, air_gap=air_gap_vol, new_tip='never')
+            # if (mm_vol + air_gap_vol):
+            #     pip.aspirate(5, mm_tube.top(2))
+            #     pip.dispense(5, mm_tube.top(2))
             pip.blow_out(disp_loc)
         pip.aspirate(5, mm_tube.top(2))
         pip.drop_tip(home_after=False)
@@ -318,6 +321,14 @@ def run(ctx: protocol_api.ProtocolContext):
     # define pipettes
     p20 = ctx.load_instrument('p20_single_gen2', 'right', tip_racks=tips20)
     p300 = ctx.load_instrument('p300_single_gen2', 'left', tip_racks=tips300)
+
+    p20.flow_rate.aspirate = 3.78
+    p20.flow_rate.dispense = 3.78
+    # p20.flow_rate.blow_out = 3.78
+    p20.flow_rate.blow_out = 20
+    p300.flow_rate.aspirate = 150
+    p300.flow_rate.dispense = 300
+    p300.flow_rate.blow_out = 300
 
     # tempdeck module
     tempdeck = ctx.load_module('tempdeck', '10')

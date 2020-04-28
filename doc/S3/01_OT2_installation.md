@@ -9,7 +9,7 @@
 
 1) [Unboxing](https://support.opentrons.com/en/articles/2687501-get-started-unbox-the-ot-2)
 
-2) [Unlock](https://slack-redir.net/link?url=https%3A%2F%2Fsupport.opentrons.com%2Fen%2Farticles%2F2687521-get-started-unlock-the-ot-2)
+2) [Unlock](https://support.opentrons.com/en/articles/2687521-get-started-unlock-the-ot-2)
 
 3) **Make inventory:** This is an example of the info you should collect. IDs mean serial numbers for the robot, pipettes and modules.
 

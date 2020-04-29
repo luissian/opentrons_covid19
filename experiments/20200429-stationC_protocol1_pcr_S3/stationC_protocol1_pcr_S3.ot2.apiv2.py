@@ -16,7 +16,7 @@ metadata = {
 # Warning writing any Parameters below this line.
 # It will be deleted if opentronsWeb is used.
 
-NUM_SAMPLES = 96
+NUM_SAMPLES = 4
 MM_LABWARE = 'opentrons aluminum block'
 MMTUBE_LABWARE = '2ml tubes'
 PCR_LABWARE = 'opentrons aluminum nest plate'
@@ -322,7 +322,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # tempdeck module
     tempdeck = ctx.load_module('tempdeck', '10')
-    tempdeck.set_temperature(4)
+    # tempdeck.set_temperature(4)
 
     # check mastermix labware type
     if MM_LABWARE not in MM_LW_DICT:

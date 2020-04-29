@@ -81,7 +81,7 @@ def confirm_door_is_closed():
         confirm_door_is_closed()
     else:
         #Set light color to green
-        gpio.set_button_light(0,1,1)
+        gpio.set_button_light(0,1,0)
 
 def finish_run():
     #Set light color to blue

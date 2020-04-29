@@ -13,12 +13,16 @@ metadata = {
     'source': 'Custom Protocol Request',
     'apiLevel': '2.3'
 }
-
 # Parameters to adapt the protocol
+# Warning writing any Parameters below this line.
+# It will be deleted if opentronsWeb is used.
+
 NUM_SAMPLES = 96
 BEADS_LABWARE = 'opentrons plastic 30ml tubes'
 PLATE_LABWARE = 'nest deep generic well plate'
 VOLUME_BEADS = 410
+
+# End Parameters to adapt the protocol
 
 ## global vars
 ## initialize robot object

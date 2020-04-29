@@ -25,6 +25,8 @@ PLATE_LABWARE = 'vwr deep generic well plate'
 VOLUME_LYSATE = 400
 BEADS = False
 
+# End Parameters to adapt the protocol
+
 ## global vars
 ## initialize robot object
 robot = None

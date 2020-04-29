@@ -9,17 +9,17 @@ metadata = {
     'protocolName': 'S3 Station C Protocol 1 pcr Version 1',
     'author': 'Nick <protocols@opentrons.com>, Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
-    'apiLevel': '2.3'
+    'apiLevel': '2.2'
 }
 
 # Parameters to adapt the protocol
 # Warning writing any Parameters below this line.
 # It will be deleted if opentronsWeb is used.
 
-NUM_SAMPLES = 96
+NUM_SAMPLES = 38
 MM_LABWARE = 'opentrons aluminum block'
 MMTUBE_LABWARE = '2ml tubes'
-PCR_LABWARE = 'opentrons aluminum nest plate'
+PCR_LABWARE = 'opentrons aluminum biorad plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 PREPARE_MASTERMIX = False
 MM_TYPE = 'MM1'
@@ -205,7 +205,7 @@ def homogenize_mm(mm_tube, p300, times=5):
         p300.dispense(200, mm_tube.bottom(volume_height))
     # clow out before dropping tip
     p300.blow_out(mm_tube.top(-2))
-    # p300.drop_tip(home_after=False)
+    p300.drop_tip(home_after=False)
 
 def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
     # setup mastermix coordinates
@@ -238,10 +238,13 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
     for tube, vol in mm_dict[MM_TYPE].items():
         mm_vol = vol*(NUM_SAMPLES+5)
         disp_loc = mm_tube.top(-10)
-        pip = p300 if mm_vol > 20 else p20
+        if mm_vol >= 15:
+            air_gap_vol = 5
+        else:
+            air_gap_vol = 2
+        pip = p300 if (mm_vol + air_gap_vol) > 20 else p20
         pip.pick_up_tip()
         #pip.transfer(mm_vol, tube.bottom(0.5), disp_loc, air_gap=2, touch_tip=True, new_tip='never')
-        air_gap_vol = 5
         num_transfers = math.ceil(mm_vol/(200-air_gap_vol))
         for i in range(num_transfers):
             if i == 0:
@@ -249,6 +252,9 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
             else:
                 transfer_vol = (200-air_gap_vol)
             pip.transfer(transfer_vol, tube.bottom(0.5), disp_loc, air_gap=air_gap_vol, new_tip='never')
+            # if (mm_vol + air_gap_vol):
+            #     pip.aspirate(5, mm_tube.top(2))
+            #     pip.dispense(5, mm_tube.top(2))
             pip.blow_out(disp_loc)
         pip.aspirate(5, mm_tube.top(2))
         pip.drop_tip(home_after=False)
@@ -264,7 +270,7 @@ def transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20):
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
     pip = p300 if VOLUME_MMIX >= 20 else p20
-    # pip.pick_up_tip()
+    pip.pick_up_tip()
     # get initial fluid height to avoid overflowing mm when aspiring
     mm_volume = VOLUME_MMIX * NUM_SAMPLES
     volume_height = get_mm_height(mm_volume)
@@ -291,10 +297,6 @@ def transfer_samples(ELUTION_LABWARE, sources, dests, p20):
         height = 1
     # transfer
     for s, d in zip(sources, dests):
-        # Skip for negative control, position NUM_SAMPLES-2
-        if s == sources[NUM_SAMPLES-2]:
-            continue
-
         p20.pick_up_tip()
         p20.transfer(7, s.bottom(height), d.bottom(2), air_gap=2, new_tip='never')
         #p20.mix(1, 10, d.bottom(2))
@@ -319,6 +321,14 @@ def run(ctx: protocol_api.ProtocolContext):
     # define pipettes
     p20 = ctx.load_instrument('p20_single_gen2', 'right', tip_racks=tips20)
     p300 = ctx.load_instrument('p300_single_gen2', 'left', tip_racks=tips300)
+
+    p20.flow_rate.aspirate = 3.78
+    p20.flow_rate.dispense = 3.78
+    # p20.flow_rate.blow_out = 3.78
+    p20.flow_rate.blow_out = 20
+    p300.flow_rate.aspirate = 150
+    p300.flow_rate.dispense = 300
+    p300.flow_rate.blow_out = 300
 
     # tempdeck module
     tempdeck = ctx.load_module('tempdeck', '10')
@@ -384,7 +394,5 @@ def run(ctx: protocol_api.ProtocolContext):
     # transfer samples to corresponding locations
     if TRANSFER_SAMPLES:
         transfer_samples(ELUTION_LABWARE, sources, dests, p20)
-        # transfer negative control to position NUM_SAMPLES-2
-        p20.transfer(7, mm_rack.wells()[4].bottom(1), dests[NUM_SAMPLES-2].bottom(2), air_gap=2, new_tip='always')
 
     finish_run()

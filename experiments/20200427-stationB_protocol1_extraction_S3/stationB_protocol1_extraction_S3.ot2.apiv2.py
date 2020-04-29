@@ -28,18 +28,13 @@ REAGENT SETUP:
 """
 
 # Parameters to adapt the protocol
-# Warning writing any Parameters below this line.
-# It will be deleted if opentronsWeb is used.
-
-NUM_SAMPLES = 96
+NUM_SAMPLES = 24
 REAGENT_LABWARE = 'nest 12 reservoir plate'
 MAGPLATE_LABWARE = 'nest deep generic well plate'
 WASTE_LABWARE = 'nest 1 reservoir plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 TIP_TRACK = True
 DISPENSE_BEADS = False
-
-# End Parameters to adapt the protocol
 
 ## global vars
 ## initialize robot object
@@ -373,8 +368,8 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         # Mix bead
         mix_beads(7, mag_samples_m,m300,tips300)
 
-    # incubate off the magnet
-    ctx.delay(minutes=10, msg='Incubating off magnet for 5 minutes.')
+    # incubate off and on magnet
+    ctx.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
 
     ## First incubate on magnet.
     magdeck.engage(height_from_base=22)
@@ -392,7 +387,5 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     # track final used tip
     save_tip_info()
-
     magdeck.disengage()
-
     finish_run()

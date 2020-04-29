@@ -28,9 +28,9 @@ REAGENT SETUP:
 """
 
 # Parameters to adapt the protocol
-NUM_SAMPLES = 96
+NUM_SAMPLES = 24
 REAGENT_LABWARE = 'nest 12 reservoir plate'
-MAGPLATE_LABWARE = 'vwr deep generic well plate'
+MAGPLATE_LABWARE = 'nest deep generic well plate'
 WASTE_LABWARE = 'nest 1 reservoir plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 TIP_TRACK = True
@@ -121,13 +121,12 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
             if os.path.isfile(file_path):
                 with open(file_path) as json_file:
                     data = json.load(json_file)
-                    if 'tips1000' in data:
+                    if 'P1000' in str(pip):
                         tip_log['count'][pip] = data['tips1000']
-                    elif 'tips300' in data:
+                    elif 'P300' in str(pip):
                         tip_log['count'][pip] = data['tips300']
                     else:
                         tip_log['count'][pip] = 0
-                os.remove(file_path)
             else:
                 tip_log['count'][pip] = 0
         else:
@@ -142,12 +141,15 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
 
     return tip_log
 
-def save_tip_info(pip, file_path = '/data/B/tip_log.json'):
+def save_tip_info(file_path = '/data/B/tip_log.json'):
+    data = {}
     if not robot.is_simulating():
-        if "P1000" in str(pip):
-            data = {'tips1000': tip_log['count'][pip]}
-        elif "P300" in str(pip):
-            data = {'tips300': tip_log['count'][pip]}
+        os.rename(file_path,file_path + ".bak")
+        for pip in tip_log['count']:
+            if "P1000" in str(pip):
+                data['tips1000'] = tip_log['count'][pip]
+            elif "P300" in str(pip):
+                data['tips300'] = tip_log['count'][pip]
 
         with open(file_path, 'a+') as outfile:
             json.dump(data, outfile)
@@ -185,7 +187,7 @@ def mix_beads(reps, dests, pip, tiprack):
     for i, m in enumerate(dests):
         if not pip.hw_pipette['has_tip']:
             pick_up(pip,tiprack)
-
+        pip.move_to(m.bottom(2))
         custom_mix(pip,200,reps)
         #for i in range(reps):
         #    pip.aspirate(200, m.bottom(2))
@@ -201,7 +203,7 @@ def dispense_beads(sources,dests,pip,tiprack):
     for s in sources:
         pip.move_to(s.bottom(20))
         custom_mix(pip,200,5)
-        
+
     ## Dispense beads to deep well plate.
     for i, m in enumerate(dests):
         if not pip.hw_pipette['has_tip']:
@@ -238,7 +240,7 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             custom_mix(pip, 175, 7)
             pip.move_to(m.top(-20))
 
-            magdeck.engage(height_from_base=22)
+            magdeck.engage(height=29)
             robot.delay(seconds=75, msg='Incubating on magnet for 75 seconds.')
 
             # remove supernatant
@@ -264,7 +266,7 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
 
     ## Incubation steps
     robot.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
-    magdeck.engage(height_from_base=22)
+    magdeck.engage(height=29)
     robot.delay(seconds=120, msg='Incubating on magnet for 60 seconds.')
 
     aspire_default_speed = pip.flow_rate.aspirate
@@ -370,11 +372,11 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         mix_beads(7, mag_samples_m,m300,tips300)
 
     # incubate off and on magnet
-    ctx.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
+    ctx.delay(minutes=1, msg='Incubating off magnet for 5 minutes.')
 
     ## First incubate on magnet.
-    magdeck.engage(height_from_base=22)
-    ctx.delay(minutes=5, msg='Incubating on magnet for 5 minutes.')
+    magdeck.engage(height=29)
+    ctx.delay(minutes=1, msg='Incubating on magnet for 5 minutes.')
 
     # remove supernatant with P1000
     remove_supernatant(mag_samples_s,waste,p1000,tips1000)
@@ -386,7 +388,6 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     elute_samples(mag_samples_m,elution_samples_m,elution_buffer,magdeck,m300,tips300)
 
     # track final used tip
-    save_tip_info(p1000)
-    save_tip_info(m300)
+    save_tip_info()
 
     finish_run()

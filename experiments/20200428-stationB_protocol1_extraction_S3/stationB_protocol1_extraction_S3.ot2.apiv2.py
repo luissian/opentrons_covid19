@@ -28,18 +28,13 @@ REAGENT SETUP:
 """
 
 # Parameters to adapt the protocol
-# Warning writing any Parameters below this line.
-# It will be deleted if opentronsWeb is used.
-
-NUM_SAMPLES = 96
+NUM_SAMPLES = 24
 REAGENT_LABWARE = 'nest 12 reservoir plate'
 MAGPLATE_LABWARE = 'nest deep generic well plate'
 WASTE_LABWARE = 'nest 1 reservoir plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 TIP_TRACK = True
 DISPENSE_BEADS = False
-
-# End Parameters to adapt the protocol
 
 ## global vars
 ## initialize robot object

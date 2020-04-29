@@ -8,17 +8,21 @@ import os
 
 # metadata
 metadata = {
-    'protocolName': 'S3 Station A Version 1',
+    'protocolName': 'S3 Station A Protocol 2 beads Version 1',
     'author': 'Nick <protocols@opentrons.com>, Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
     'apiLevel': '2.3'
 }
-
 # Parameters to adapt the protocol
+# Warning writing any Parameters below this line.
+# It will be deleted if opentronsWeb is used.
+
 NUM_SAMPLES = 96
 BEADS_LABWARE = 'opentrons plastic 30ml tubes'
-PLATE_LABWARE = 'vwr deep generic well plate'
+PLATE_LABWARE = 'nest deep generic well plate'
 VOLUME_BEADS = 410
+
+# End Parameters to adapt the protocol
 
 ## global vars
 ## initialize robot object
@@ -82,19 +86,14 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
             if os.path.isfile(file_path):
                 with open(file_path) as json_file:
                     data = json.load(json_file)
-                    if 'tips1000' in data:
+                    if 'P1000' in str(pip):
                         tip_log['count'][pip] = data['tips1000']
-                    elif 'tips300' in data:
+                    elif 'P300' in str(pip):
                         tip_log['count'][pip] = data['tips300']
                     else:
                         tip_log['count'][pip] = 0
-
-                os.remove(file_path)
-
             else:
                 tip_log['count'][pip] = 0
-
-
         else:
             tip_log['count'][pip] = 0
 
@@ -107,12 +106,15 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
 
     return tip_log
 
-def save_tip_info(pip, file_path = '/data/A/tip_log.json'):
+def save_tip_info(file_path = '/data/A/tip_log.json'):
+    data = {}
     if not robot.is_simulating():
-        if "P1000" in str(pip):
-            data = {'tips1000': tip_log['count'][pip]}
-        elif "P300" in str(pip):
-            data = {'tips300': tip_log['count'][pip]}
+        os.rename(file_path,file_path + ".bak")
+        for pip in tip_log['count']:
+            if "P1000" in str(pip):
+                data['tips1000'] = tip_log['count'][pip]
+            elif "P300" in str(pip):
+                data['tips300'] = tip_log['count'][pip]
 
         with open(file_path, 'a+') as outfile:
             json.dump(data, outfile)
@@ -162,7 +164,7 @@ def transfer_beads(beads_tube, dests, volume, pip,tiprack):
     pick_up(pip,tiprack)
  # Mix bead tubes prior to dispensing
     pip.flow_rate.aspirate = 200
-    pip.flow_rate.dispense = 1500
+    pip.flow_rate.dispense = 2000
     pip.mix(6,800,beads_tube.bottom(15))
     pip.flow_rate.aspirate = 100
     pip.flow_rate.dispense = 1000
@@ -184,8 +186,7 @@ def run(ctx: protocol_api.ProtocolContext):
         confirm_door_is_closed(ctx)
 
     tips1000 = [ctx.load_labware('opentrons_96_filtertiprack_1000ul',
-                                     slot, '1000µl tiprack')
-                    for slot in ['3', '6', '9']]
+                                     3, '1000µl tiprack')]
 
     # load pipette
     p1000 = ctx.load_instrument(
@@ -238,6 +239,6 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         transfer_beads(bd_tube, dests,VOLUME_BEADS, p1000, tips1000)
 
     # track final used tip
-    save_tip_info(p1000)
+    save_tip_info()
 
     finish_run()

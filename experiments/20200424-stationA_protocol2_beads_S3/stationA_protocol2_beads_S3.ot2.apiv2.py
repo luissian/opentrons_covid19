@@ -17,7 +17,7 @@ metadata = {
 # Parameters to adapt the protocol
 NUM_SAMPLES = 96
 BEADS_LABWARE = 'opentrons plastic 30ml tubes'
-PLATE_LABWARE = 'vwr deep generic well plate'
+PLATE_LABWARE = 'nest deep generic well plate'
 VOLUME_BEADS = 410
 
 ## global vars
@@ -158,7 +158,7 @@ def transfer_beads(beads_tube, dests, volume, pip,tiprack):
     pick_up(pip,tiprack)
  # Mix bead tubes prior to dispensing
     pip.flow_rate.aspirate = 200
-    pip.flow_rate.dispense = 1500
+    pip.flow_rate.dispense = 2000
     pip.mix(6,800,beads_tube.bottom(15))
     pip.flow_rate.aspirate = 100
     pip.flow_rate.dispense = 1000

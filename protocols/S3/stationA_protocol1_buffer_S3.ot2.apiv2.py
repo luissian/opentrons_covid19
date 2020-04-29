@@ -8,7 +8,7 @@ import os
 
 # Metadata
 metadata = {
-    'protocolName': 'S3 Station C Version 1',
+    'protocolName': 'S3 Station A Protocol 1 buffer Version 1',
     'author': 'Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
     'apiLevel': '2.3'
@@ -19,7 +19,7 @@ metadata = {
 # It will be deleted if opentronsWeb is used.
 
 NUM_SAMPLES = 96
-BUFFER_LABWARE = 'opentrons plastic 50ml tubes'
+BUFFER_LABWARE = 'opentrons plastic 30ml tubes'
 DESTINATION_LABWARE = 'opentrons plastic 2ml tubes'
 DEST_TUBE = '2ml tubes'
 VOLUME_BUFFER = 300
@@ -81,7 +81,7 @@ def confirm_door_is_closed():
         confirm_door_is_closed()
     else:
         #Set light color to green
-        gpio.set_button_light(0,1,1)
+        gpio.set_button_light(0,1,0)
 
 def finish_run():
     #Set light color to blue
@@ -95,13 +95,12 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
             if os.path.isfile(file_path):
                 with open(file_path) as json_file:
                     data = json.load(json_file)
-                    if 'tips1000' in data:
+                    if 'P1000' in str(pip):
                         tip_log['count'][pip] = data['tips1000']
-                    elif 'tips300' in data:
+                    elif 'P300' in str(pip):
                         tip_log['count'][pip] = data['tips300']
                     else:
                         tip_log['count'][pip] = 0
-                os.remove(file_path)
             else:
                 tip_log['count'][pip] = 0
         else:
@@ -116,13 +115,15 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
 
     return tip_log
 
-## TODO MODIFY FOR NOT OVERRIDING tip_log.json
-def save_tip_info(pip, file_path = '/data/A/tip_log.json'):
+def save_tip_info(file_path = '/data/A/tip_log.json'):
+    data = {}
     if not robot.is_simulating():
-        if "P1000" in str(pip):
-            data = {'tips1000': tip_log['count'][pip]}
-        elif "P300" in str(pip):
-            data = {'tips300': tip_log['count'][pip]}
+        os.rename(file_path,file_path + ".bak")
+        for pip in tip_log['count']:
+            if "P1000" in str(pip):
+                data['tips1000'] = tip_log['count'][pip]
+            elif "P300" in str(pip):
+                data['tips300'] = tip_log['count'][pip]
 
         with open(file_path, 'a+') as outfile:
             json.dump(data, outfile)
@@ -171,15 +172,11 @@ def run(ctx: protocol_api.ProtocolContext):
         confirm_door_is_closed()
 
     # define tips
-    tips1000 = [
-        ctx.load_labware('opentrons_96_filtertiprack_1000ul', slot)
-        for slot in ['3', '6']
-    ]
-    tips300 = [ctx.load_labware('opentrons_96_filtertiprack_200ul', '9')]
+    tips1000 = [ctx.load_labware('opentrons_96_filtertiprack_1000ul',
+                                     3, '1000µl tiprack')]
 
     # define pipettes
     p1000 = ctx.load_instrument('p1000_single_gen2', 'left', tip_racks=tips1000)
-    p300 = ctx.load_instrument('p300_single_gen2', 'right', tip_racks=tips300)
 
 
     # check buffer labware type
@@ -223,6 +220,6 @@ following:\nopentrons plastic 50ml tubes')
         transfer_buffer(bf_tube, dests,VOLUME_BUFFER, p1000, tips1000)
 
     # track final used tip
-    save_tip_info(p1000)
+    save_tip_info()
 
     finish_run()

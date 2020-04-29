@@ -16,7 +16,7 @@ metadata = {
 # Warning writing any Parameters below this line.
 # It will be deleted if opentronsWeb is used.
 
-NUM_SAMPLES = 4
+NUM_SAMPLES = 8
 MM_LABWARE = 'opentrons aluminum block'
 MMTUBE_LABWARE = '2ml tubes'
 PCR_LABWARE = 'opentrons aluminum nest plate'
@@ -385,6 +385,6 @@ def run(ctx: protocol_api.ProtocolContext):
     if TRANSFER_SAMPLES:
         transfer_samples(ELUTION_LABWARE, sources, dests, p20)
         # transfer negative control to position NUM_SAMPLES-2
-        p20.transfer(7, mm_rack.wells()[5].bottom(1), dests[NUM_SAMPLES-2].bottom(2), air_gap=2, new_tip='always')
+        p20.transfer(7, mm_rack.wells()[4].bottom(1), dests[NUM_SAMPLES-2].bottom(2), air_gap=2, new_tip='always')
 
     finish_run()

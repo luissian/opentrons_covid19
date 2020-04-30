@@ -121,6 +121,7 @@ def finish_run():
 def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
     global tip_log
     if not tip_log['count'] or pip not in tip_log['count']:
+        tip_log['count'][pip] = 0
         if not robot.is_simulating():
             if os.path.isfile(file_path):
                 with open(file_path) as json_file:
@@ -129,12 +130,8 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
                         tip_log['count'][pip] = data['tips1000']
                     elif 'P300' in str(pip):
                         tip_log['count'][pip] = data['tips300']
-                    else:
-                        tip_log['count'][pip] = 0
-            else:
-                tip_log['count'][pip] = 0
-        else:
-            tip_log['count'][pip] = 0
+                    elif 'P20' in str(pip):
+                        tip_log['count'][pip] = data['tips20']
 
         if "8-Channel" in str(pip):
             tip_log['tips'][pip] =  [tip for rack in tipracks for tip in rack.rows()[0]]
@@ -155,6 +152,8 @@ def save_tip_info(file_path = '/data/B/tip_log.json'):
                 data['tips1000'] = tip_log['count'][pip]
             elif "P300" in str(pip):
                 data['tips300'] = tip_log['count'][pip]
+            elif "P20" in str(pip):
+                data['tips20'] = tip_log['count'][pip]
 
         with open(file_path, 'a+') as outfile:
             json.dump(data, outfile)

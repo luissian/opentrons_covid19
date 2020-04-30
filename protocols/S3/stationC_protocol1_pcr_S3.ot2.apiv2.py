@@ -321,7 +321,7 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20,tiprack300,tiprack20):
         drop(pip)
 
     # homogenize mastermix
-    homogenize_mm(mm_tube, p300)
+    homogenize_mm(mm_tube, p300,tiprack300,VOLUME_MMIX)
 
     return mm_tube
 

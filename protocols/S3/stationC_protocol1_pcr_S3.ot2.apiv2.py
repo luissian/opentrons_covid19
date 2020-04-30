@@ -442,15 +442,15 @@ def run(ctx: protocol_api.ProtocolContext):
     else:
         mm_tube = mm_rack.wells()[0]
         if TRANSFER_MASTERMIX:
-            homogenize_mm(mm_tube, p300,tiprack300)
+            homogenize_mm(mm_tube, p300,tips300)
 
     # transfer mastermix
     if TRANSFER_MASTERMIX:
-        transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20,tiprack300,tiprack20)
+        transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20,tips300,tips20)
 
     # transfer samples to corresponding locations
     if TRANSFER_SAMPLES:
-        transfer_samples(ELUTION_LABWARE, sources, dests, p20,tiprack20)
+        transfer_samples(ELUTION_LABWARE, sources, dests, p20,tips20)
         # transfer negative control to position NUM_SAMPLES-2
         p20.transfer(7, mm_rack.wells()[4].bottom(1), dests[NUM_SAMPLES-2].bottom(2), air_gap=2, new_tip='always')
 

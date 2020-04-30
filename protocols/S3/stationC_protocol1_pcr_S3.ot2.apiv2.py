@@ -86,9 +86,9 @@ TRANSFER_SAMPLES: True or False
 
 # Calculated variables
 if MM_TYPE == 'MM3':
-    volume_mm = 15
+    VOLUME_MMIX = 15
 else:
-    volume_mm = 20
+    VOLUME_MMIX = 20
 
 # Constants
 MM_LW_DICT = {
@@ -252,7 +252,7 @@ def get_mm_height(volume):
     else:
         return height
 
-def homogenize_mm(mm_tube, pip, tiprack, times=5):
+def homogenize_mm(mm_tube, pip, tiprack, VOLUME_MMIX, times=5):
     # homogenize mastermix tube a given number of times
     pick_up(pip,tiprack)
     volume = VOLUME_MMIX * NUM_SAMPLES
@@ -330,10 +330,10 @@ def transfer_mastermix(mm_tube, dests, p300, p20):
     split_ind = [ind for ind in range(0, NUM_SAMPLES, max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
-    pip = p300 if volume >= 20 else p20
+    pip = p300 if VOLUME_MMIX >= 20 else p20
     # pip.pick_up_tip()
     # get initial fluid height to avoid overflowing mm when aspiring
-    mm_volume = volume * NUM_SAMPLES
+    mm_volume = VOLUME_MMIX * NUM_SAMPLES
     volume_height = get_mm_height(mm_volume)
     for set in dest_sets:
         # check height and if it is low enought, aim for the bottom
@@ -444,7 +444,7 @@ def run(ctx: protocol_api.ProtocolContext):
     else:
         mm_tube = mm_rack.wells()[0]
         if TRANSFER_MASTERMIX:
-            homogenize_mm(mm_tube, p300,tips300)
+            homogenize_mm(mm_tube, p300,tips300,VOLUME_MMIX)
 
     # transfer mastermix
     if TRANSFER_MASTERMIX:

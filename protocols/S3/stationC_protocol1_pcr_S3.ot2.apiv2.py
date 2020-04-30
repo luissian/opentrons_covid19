@@ -86,9 +86,9 @@ TRANSFER_SAMPLES: True or False
 
 # Calculated variables
 if MM_TYPE == 'MM3':
-    VOLUME_MMIX = 15
+    volume_mm = 15
 else:
-    VOLUME_MMIX = 20
+    volume_mm = 20
 
 # Constants
 MM_LW_DICT = {
@@ -325,15 +325,15 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20,tiprack300,tiprack20):
 
     return mm_tube
 
-def transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20):
+def transfer_mastermix(mm_tube, dests, volume, p300, p20):
     max_trans_per_asp = 8  #230//(VOLUME_MMIX+5)
     split_ind = [ind for ind in range(0, NUM_SAMPLES, max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
-    pip = p300 if VOLUME_MMIX >= 20 else p20
+    pip = p300 if volume >= 20 else p20
     # pip.pick_up_tip()
     # get initial fluid height to avoid overflowing mm when aspiring
-    mm_volume = VOLUME_MMIX * NUM_SAMPLES
+    mm_volume = volume * NUM_SAMPLES
     volume_height = get_mm_height(mm_volume)
     for set in dest_sets:
         # check height and if it is low enought, aim for the bottom
@@ -448,7 +448,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # transfer mastermix
     if TRANSFER_MASTERMIX:
-        transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20,tips300,tips20)
+        transfer_mastermix(mm_tube, dests, volume_mm, p300, p20)
 
     # transfer samples to corresponding locations
     if TRANSFER_SAMPLES:

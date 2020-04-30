@@ -371,6 +371,8 @@ def transfer_samples(ELUTION_LABWARE, sources, dests, pip,tiprack):
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):
+    global robot
+    robot = ctx
 
     # confirm door is closed
     if not ctx.is_simulating():

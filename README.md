@@ -3,7 +3,7 @@ This is a collaboration repository originated with the work of [covidWarriors](h
 
 [BU-ISCIII](https://github.com/BU-ISCIII) is in charge of the setup, calibration, configuration, maintenance and protocol development for [OT-2 robots](https://opentrons.com/ot-2) in [Instituto de Salud Carlos III](https://www.isciii.es/Paginas/Inicio.aspx). These robots have been deployed to automate COVID-19 diagnostics, and once the pandemic is over they will be repurposed to suit new challenges.
 
-This repo is a copy of [opentrons'](https://github.com/Opentrons/opentrons) repo for covid19. 
+This repo is a copy of [opentrons](https://github.com/Opentrons/opentrons) repo for covid19. 
 
 In this repo you will find:
 

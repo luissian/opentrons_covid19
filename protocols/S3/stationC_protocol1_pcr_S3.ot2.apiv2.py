@@ -318,7 +318,7 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20,tiprack300,tiprack20):
             pip.transfer(transfer_vol, tube.bottom(0.5), disp_loc, air_gap=air_gap_vol, new_tip='never')
             pip.blow_out(disp_loc)
         pip.aspirate(5, mm_tube.top(2))
-        drop_tip(pip)
+        drop(pip)
 
     # homogenize mastermix
     homogenize_mm(mm_tube, p300)
@@ -348,7 +348,7 @@ def transfer_mastermix(mm_tube, dests, p300, p20):
         pip.distribute(VOLUME_MMIX, disp_loc, [d.bottom(2) for d in set],
                    air_gap=1, disposal_volume=0, new_tip='never')
         pip.blow_out(disp_loc)
-    drop_tip(pip)
+    drop(pip)
 
 def transfer_samples(ELUTION_LABWARE, sources, dests, pip,tiprack):
     # height for aspiration has to be different depending if you ar useing tubes or wells
@@ -367,7 +367,7 @@ def transfer_samples(ELUTION_LABWARE, sources, dests, pip,tiprack):
         #p20.mix(1, 10, d.bottom(2))
         #p20.blow_out(d.top(-2))
         pip.aspirate(1, d.top(-2))
-        drop_tip(pip)
+        drop(pip)
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):

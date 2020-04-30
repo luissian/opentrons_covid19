@@ -252,7 +252,7 @@ def get_mm_height(volume):
     else:
         return height
 
-def homogenize_mm(mm_tube, pip, tiprack, VOLUME_MMIX, times=5):
+def homogenize_mm(mm_tube, pip, tiprack, times=5):
     # homogenize mastermix tube a given number of times
     pick_up(pip,tiprack)
     volume = VOLUME_MMIX * NUM_SAMPLES

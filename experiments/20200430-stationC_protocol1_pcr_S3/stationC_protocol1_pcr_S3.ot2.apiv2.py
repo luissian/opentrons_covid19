@@ -3,13 +3,15 @@ from opentrons.types import Point
 from opentrons.drivers.rpi_drivers import gpio
 import time
 import math
+import os
+import json
 
 # Metadata
 metadata = {
     'protocolName': 'S3 Station C Protocol 1 pcr Version 1',
     'author': 'Nick <protocols@opentrons.com>, Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
-    'apiLevel': '2.2'
+    'apiLevel': '2.3'
 }
 
 # Parameters to adapt the protocol
@@ -23,8 +25,8 @@ PCR_LABWARE = 'opentrons aluminum nest plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 PREPARE_MASTERMIX = True
 MM_TYPE = 'MM1'
-TRANSFER_MASTERMIX = False
-TRANSFER_SAMPLES = False
+TRANSFER_MASTERMIX = True
+TRANSFER_SAMPLES = True
 
 # End Parameters to adapt the protocol
 
@@ -151,7 +153,72 @@ def finish_run():
     #Set light color to blue
     gpio.set_button_light(0,0,1)
 
-def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
+def retrieve_tip_info(pip,tipracks,file_path = '/data/C/tip_log.json'):
+    global tip_log
+    if not tip_log['count'] or pip not in tip_log['count']:
+        tip_log['count'][pip] = 0
+        if not robot.is_simulating():
+            if os.path.isfile(file_path):
+                with open(file_path) as json_file:
+                    data = json.load(json_file)
+                    if 'P1000' in str(pip):
+                        tip_log['count'][pip] = data['tips1000']
+                    elif 'P300' in str(pip):
+                        tip_log['count'][pip] = data['tips300']
+                    elif 'P20' in str(pip):
+                        tip_log['count'][pip] = data['tips20']
+
+        if "8-Channel" in str(pip):
+            tip_log['tips'][pip] =  [tip for rack in tipracks for tip in rack.rows()[0]]
+        else:
+            tip_log['tips'][pip] = [tip for rack in tipracks for tip in rack.wells()]
+
+        tip_log['max'][pip] = len(tip_log['tips'][pip])
+
+    return tip_log
+
+def save_tip_info(file_path = '/data/C/tip_log.json'):
+    data = {}
+    if not robot.is_simulating():
+        if os.path.isfile(file_path):
+            os.rename(file_path,file_path + ".bak")
+        for pip in tip_log['count']:
+            if "P1000" in str(pip):
+                data['tips1000'] = tip_log['count'][pip]
+            elif "P300" in str(pip):
+                data['tips300'] = tip_log['count'][pip]
+            elif "P20" in str(pip):
+                data['tips20'] = tip_log['count'][pip]
+
+        with open(file_path, 'a+') as outfile:
+            json.dump(data, outfile)
+
+def pick_up(pip,tiprack):
+    ## retrieve tip_log
+    global tip_log
+    if not tip_log:
+        tip_log = {}
+    tip_log = retrieve_tip_info(pip,tiprack)
+    if tip_log['count'][pip] == tip_log['max'][pip]:
+        robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
+resuming.')
+        pip.reset_tipracks()
+        tip_log['count'][pip] = 0
+    pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
+    tip_log['count'][pip] += 1
+
+def drop(pip):
+    global switch
+    if "8-Channel" not in str(pip):
+        side = 1 if switch else -1
+        drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=side*20))
+        pip.drop_tip(drop_loc,home_after=False)
+        switch = not switch
+    else:
+        drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=20))
+        pip.drop_tip(drop_loc,home_after=False)
+
+def get_source_dest_coordinates(source_racks, pcr_plate):
     if 'strip' in ELUTION_LABWARE:
         sources = [
             tube
@@ -187,9 +254,9 @@ def get_mm_height(volume):
     else:
         return height
 
-def homogenize_mm(mm_tube, p300, times=5):
+def homogenize_mm(mm_tube, pip, tiprack, times=5):
     # homogenize mastermix tube a given number of times
-    p300.pick_up_tip()
+    pick_up(pip,tiprack)
     volume = VOLUME_MMIX * NUM_SAMPLES
     volume_height = get_mm_height(volume)
     #p300.mix(5, 200, mm_tube.bottom(5))
@@ -197,17 +264,17 @@ def homogenize_mm(mm_tube, p300, times=5):
         for j in range(5):
             # depending on the number of samples, start at a different height and move as it aspires
             if volume_height < 12:
-                p300.aspirate(40, mm_tube.bottom(1))
+                pip.aspirate(40, mm_tube.bottom(1))
             else:
                 aspirate_height = volume_height-(3*j)
-                p300.aspirate(40, mm_tube.bottom(aspirate_height))
+                pip.aspirate(40, mm_tube.bottom(aspirate_height))
         # empty pipete
-        p300.dispense(200, mm_tube.bottom(volume_height))
-    # clow out before dropping tip
-    p300.blow_out(mm_tube.top(-2))
+        pip.dispense(200, mm_tube.bottom(volume_height))
+    # blow out before dropping tip
+    pip.blow_out(mm_tube.top(-2))
     # p300.drop_tip(home_after=False)
 
-def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
+def prepare_mastermix(mm_rack, p300, p20,tiprack300,tiprack20):
     # setup mastermix coordinates
     """ mastermix component maps """
     mm1 = {
@@ -239,7 +306,9 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
         mm_vol = vol*(NUM_SAMPLES+5)
         disp_loc = mm_tube.top(-10)
         pip = p300 if mm_vol > 20 else p20
-        pip.pick_up_tip()
+        tiprack = tiprack300 if mm_vol > 20 else tiprack20
+
+        pick_up(pip,tiprack)
         #pip.transfer(mm_vol, tube.bottom(0.5), disp_loc, air_gap=2, touch_tip=True, new_tip='never')
         air_gap_vol = 5
         num_transfers = math.ceil(mm_vol/(200-air_gap_vol))
@@ -251,20 +320,22 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
             pip.transfer(transfer_vol, tube.bottom(0.5), disp_loc, air_gap=air_gap_vol, new_tip='never')
             pip.blow_out(disp_loc)
         pip.aspirate(5, mm_tube.top(2))
-        pip.drop_tip(home_after=False)
+        drop(pip)
 
     # homogenize mastermix
-    homogenize_mm(mm_tube, p300)
+    homogenize_mm(mm_tube, p300,tiprack300)
 
     return mm_tube
 
-def transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20):
+def transfer_mastermix(mm_tube, dests, p300, p20, tiprack300, tiprack20):
     max_trans_per_asp = 8  #230//(VOLUME_MMIX+5)
     split_ind = [ind for ind in range(0, NUM_SAMPLES, max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
     pip = p300 if VOLUME_MMIX >= 20 else p20
-    # pip.pick_up_tip()
+    tiprack = tiprack300 if VOLUME_MMIX >= 20 else tiprack20
+    if not pip.hw_pipette['has_tip']:
+        pick_up(pip,tiprack)
     # get initial fluid height to avoid overflowing mm when aspiring
     mm_volume = VOLUME_MMIX * NUM_SAMPLES
     volume_height = get_mm_height(mm_volume)
@@ -281,9 +352,9 @@ def transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20):
         pip.distribute(VOLUME_MMIX, disp_loc, [d.bottom(2) for d in set],
                    air_gap=1, disposal_volume=0, new_tip='never')
         pip.blow_out(disp_loc)
-    pip.drop_tip(home_after=False)
+    drop(pip)
 
-def transfer_samples(ELUTION_LABWARE, sources, dests, p20):
+def transfer_samples(sources, dests, pip,tiprack):
     # height for aspiration has to be different depending if you ar useing tubes or wells
     if 'strip' in ELUTION_LABWARE or 'plate' in ELUTION_LABWARE:
         height = 1.5
@@ -295,15 +366,17 @@ def transfer_samples(ELUTION_LABWARE, sources, dests, p20):
         if s == sources[NUM_SAMPLES-2]:
             continue
 
-        p20.pick_up_tip()
-        p20.transfer(7, s.bottom(height), d.bottom(2), air_gap=2, new_tip='never')
+        pick_up(pip,tiprack)
+        pip.transfer(7, s.bottom(height), d.bottom(2), air_gap=2, new_tip='never')
         #p20.mix(1, 10, d.bottom(2))
         #p20.blow_out(d.top(-2))
-        p20.aspirate(1, d.top(-2))
-        p20.drop_tip(home_after=False)
+        pip.aspirate(1, d.top(-2))
+        drop(pip)
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):
+    global robot
+    robot = ctx
 
     # confirm door is closed
     if not ctx.is_simulating():
@@ -367,23 +440,25 @@ def run(ctx: protocol_api.ProtocolContext):
     ]
 
     # setup sample sources and destinations
-    sources, dests = get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate)
+    sources, dests = get_source_dest_coordinates(source_racks, pcr_plate)
 
     # prepare mastermix
     if PREPARE_MASTERMIX:
-        mm_tube = prepare_mastermix(MM_TYPE, mm_rack, p300, p20)
+        mm_tube = prepare_mastermix(mm_rack, p300, p20,tips300,tips20)
+        if TRANSFER_MASTERMIX:
+            p300.drop_tip(home_after=False)
     else:
         mm_tube = mm_rack.wells()[0]
         if TRANSFER_MASTERMIX:
-            homogenize_mm(mm_tube, p300)
+            homogenize_mm(mm_tube, p300,tips300)
 
     # transfer mastermix
     if TRANSFER_MASTERMIX:
-        transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20)
+        transfer_mastermix(mm_tube, dests, p300, p20, tips300, tips20)
 
     # transfer samples to corresponding locations
     if TRANSFER_SAMPLES:
-        transfer_samples(ELUTION_LABWARE, sources, dests, p20)
+        transfer_samples(sources, dests, p20,tips20)
         # transfer negative control to position NUM_SAMPLES-2
         p20.transfer(7, mm_rack.wells()[4].bottom(1), dests[NUM_SAMPLES-2].bottom(2), air_gap=2, new_tip='always')
 

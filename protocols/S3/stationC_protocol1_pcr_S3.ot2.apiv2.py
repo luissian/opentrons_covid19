@@ -3,6 +3,8 @@ from opentrons.types import Point
 from opentrons.drivers.rpi_drivers import gpio
 import time
 import math
+import os
+import json
 
 # Metadata
 metadata = {
@@ -21,7 +23,7 @@ MM_LABWARE = 'opentrons aluminum block'
 MMTUBE_LABWARE = '2ml tubes'
 PCR_LABWARE = 'opentrons aluminum nest plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
-PREPARE_MASTERMIX = True
+PREPARE_MASTERMIX = False
 MM_TYPE = 'MM1'
 TRANSFER_MASTERMIX = True
 TRANSFER_SAMPLES = True
@@ -268,7 +270,7 @@ def homogenize_mm(mm_tube, pip, tiprack, times=5):
                 pip.aspirate(40, mm_tube.bottom(aspirate_height))
         # empty pipete
         pip.dispense(200, mm_tube.bottom(volume_height))
-    # clow out before dropping tip
+    # blow out before dropping tip
     pip.blow_out(mm_tube.top(-2))
     # p300.drop_tip(home_after=False)
 
@@ -325,13 +327,15 @@ def prepare_mastermix(mm_rack, p300, p20,tiprack300,tiprack20):
 
     return mm_tube
 
-def transfer_mastermix(mm_tube, dests, p300, p20):
+def transfer_mastermix(mm_tube, dests, p300, p20, tiprack300, tiprack20):
     max_trans_per_asp = 8  #230//(VOLUME_MMIX+5)
     split_ind = [ind for ind in range(0, NUM_SAMPLES, max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
     pip = p300 if VOLUME_MMIX >= 20 else p20
-    # pip.pick_up_tip()
+    tiprack = tiprack300 if VOLUME_MMIX >= 20 else tiprack20
+    if not pip.hw_pipette['has_tip']:
+        pick_up(pip,tiprack)
     # get initial fluid height to avoid overflowing mm when aspiring
     mm_volume = VOLUME_MMIX * NUM_SAMPLES
     volume_height = get_mm_height(mm_volume)
@@ -441,6 +445,8 @@ def run(ctx: protocol_api.ProtocolContext):
     # prepare mastermix
     if PREPARE_MASTERMIX:
         mm_tube = prepare_mastermix(mm_rack, p300, p20,tips300,tips20)
+        if TRANSFER_MASTERMIX:
+            p300.drop_tip(home_after=False)
     else:
         mm_tube = mm_rack.wells()[0]
         if TRANSFER_MASTERMIX:
@@ -448,7 +454,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # transfer mastermix
     if TRANSFER_MASTERMIX:
-        transfer_mastermix(mm_tube, dests, p300, p20)
+        transfer_mastermix(mm_tube, dests, p300, p20, tips300, tips20)
 
     # transfer samples to corresponding locations
     if TRANSFER_SAMPLES:

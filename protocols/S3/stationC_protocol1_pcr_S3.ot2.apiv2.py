@@ -151,6 +151,72 @@ def finish_run():
     #Set light color to blue
     gpio.set_button_light(0,0,1)
 
+def retrieve_tip_info(pip,tipracks,file_path = '/data/C/tip_log.json'):
+    global tip_log
+    if not tip_log['count'] or pip not in tip_log['count']:
+        if not robot.is_simulating():
+            if os.path.isfile(file_path):
+                with open(file_path) as json_file:
+                    data = json.load(json_file)
+                    if 'P1000' in str(pip):
+                        tip_log['count'][pip] = data['tips1000']
+                    elif 'P300' in str(pip):
+                        tip_log['count'][pip] = data['tips300']
+                    else:
+                        tip_log['count'][pip] = 0
+            else:
+                tip_log['count'][pip] = 0
+        else:
+            tip_log['count'][pip] = 0
+
+        if "8-Channel" in str(pip):
+            tip_log['tips'][pip] =  [tip for rack in tipracks for tip in rack.rows()[0]]
+        else:
+            tip_log['tips'][pip] = [tip for rack in tipracks for tip in rack.wells()]
+
+        tip_log['max'][pip] = len(tip_log['tips'][pip])
+
+    return tip_log
+
+def save_tip_info(file_path = '/data/C/tip_log.json'):
+    data = {}
+    if not robot.is_simulating():
+        if os.path.isfile(file_path):
+            os.rename(file_path,file_path + ".bak")
+        for pip in tip_log['count']:
+            if "P1000" in str(pip):
+                data['tips1000'] = tip_log['count'][pip]
+            elif "P300" in str(pip):
+                data['tips300'] = tip_log['count'][pip]
+
+        with open(file_path, 'a+') as outfile:
+            json.dump(data, outfile)
+
+def pick_up(pip,tiprack):
+    ## retrieve tip_log
+    global tip_log
+    if not tip_log:
+        tip_log = {}
+    tip_log = retrieve_tip_info(pip,tiprack)
+    if tip_log['count'][pip] == tip_log['max'][pip]:
+        robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
+resuming.')
+        pip.reset_tipracks()
+        tip_log['count'][pip] = 0
+    pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
+    tip_log['count'][pip] += 1
+
+def drop(pip):
+    global switch
+    if "8-Channel" not in str(pip):
+        side = 1 if switch else -1
+        drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=side*20))
+        pip.drop_tip(drop_loc,home_after=False)
+        switch = not switch
+    else:
+        drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=20))
+        pip.drop_tip(drop_loc,home_after=False)
+
 def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
     if 'strip' in ELUTION_LABWARE:
         sources = [

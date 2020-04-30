@@ -156,7 +156,7 @@ def prepare_beads(bd_tube,eth_tubes,pip,tiprack):
         pip.blow_out(e.bottom(40))
         drop(pip)
 
-def transfer_beads(beads_tube, dests, volume, pip,tiprack):
+def transfer_beads(beads_tube, dests, pip,tiprack):
     max_trans_per_asp = 2  # 1000/VOLUME_BUFFER = 3
     split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
@@ -170,7 +170,7 @@ def transfer_beads(beads_tube, dests, volume, pip,tiprack):
     pip.flow_rate.dispense = 1000
     for set in dest_sets:
         pip.aspirate(50, beads_tube.bottom(2))
-        pip.distribute(volume, beads_tube.bottom(2), [d.bottom(10) for d in set],
+        pip.distribute(VOLUME_BEADS, beads_tube.bottom(2), [d.bottom(10) for d in set],
                    air_gap=3, disposal_volume=0, new_tip='never')
         pip.aspirate(5,set[-1].top(-2))
         pip.dispense(55, beads_tube.top(-30))
@@ -236,7 +236,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     # transfer
     for bd_tube,dests in zip(ethanol,dest_sets):
-        transfer_beads(bd_tube, dests,VOLUME_BEADS, p1000, tips1000)
+        transfer_beads(bd_tube, dests, p1000, tips1000)
 
     # track final used tip
     save_tip_info()

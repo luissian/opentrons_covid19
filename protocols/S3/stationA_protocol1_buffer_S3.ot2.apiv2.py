@@ -149,7 +149,7 @@ def drop(pip):
     pip.drop_tip(drop_loc,home_after=False)
     switch = not switch
 
-def transfer_buffer(bf_tube, dests, volume, pip,tiprack):
+def transfer_buffer(bf_tube, dests, pip,tiprack):
     max_trans_per_asp = 3  # 1000/VOLUME_BUFFER = 3
     split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
@@ -217,7 +217,7 @@ following:\nopentrons plastic 50ml tubes')
 
     # transfer buffer to tubes
     for bf_tube,dests in zip(bf_tubes,dest_sets):
-        transfer_buffer(bf_tube, dests,VOLUME_BUFFER, p1000, tips1000)
+        transfer_buffer(bf_tube, dests, p1000, tips1000)
 
     # track final used tip
     save_tip_info()

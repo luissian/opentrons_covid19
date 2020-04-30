@@ -3,6 +3,7 @@ from opentrons.types import Point
 from opentrons.drivers.rpi_drivers import gpio
 import time
 import math
+import os
 
 # Metadata
 metadata = {
@@ -331,7 +332,8 @@ def transfer_mastermix(mm_tube, dests, p300, p20):
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
     pip = p300 if VOLUME_MMIX >= 20 else p20
-    # pip.pick_up_tip() # comented to reuse tip from homogeneize_mm
+    if not pip.hw_pipette['has_tip']:
+        pick_up(pip,tiprack)
     # get initial fluid height to avoid overflowing mm when aspiring
     mm_volume = VOLUME_MMIX * NUM_SAMPLES
     volume_height = get_mm_height(mm_volume)

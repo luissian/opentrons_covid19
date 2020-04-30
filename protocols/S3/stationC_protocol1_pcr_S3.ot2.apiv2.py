@@ -252,9 +252,9 @@ def get_mm_height(volume):
     else:
         return height
 
-def homogenize_mm(mm_tube, pip, times=5):
+def homogenize_mm(mm_tube, pip, tiprack, times=5):
     # homogenize mastermix tube a given number of times
-    pick_up(pip)
+    pick_up(pip,tiprack)
     volume = VOLUME_MMIX * NUM_SAMPLES
     volume_height = get_mm_height(volume)
     #p300.mix(5, 200, mm_tube.bottom(5))
@@ -272,7 +272,7 @@ def homogenize_mm(mm_tube, pip, times=5):
     pip.blow_out(mm_tube.top(-2))
     # p300.drop_tip(home_after=False)
 
-def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
+def prepare_mastermix(MM_TYPE, mm_rack, p300, p20,tiprack300,tiprack20):
     # setup mastermix coordinates
     """ mastermix component maps """
     mm1 = {
@@ -304,7 +304,9 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20):
         mm_vol = vol*(NUM_SAMPLES+5)
         disp_loc = mm_tube.top(-10)
         pip = p300 if mm_vol > 20 else p20
-        pick_up(pip)
+        tiprack = tiprack300 if mm_vol > 20 else tiprack20
+
+        pick_up(pip,tiprack)
         #pip.transfer(mm_vol, tube.bottom(0.5), disp_loc, air_gap=2, touch_tip=True, new_tip='never')
         air_gap_vol = 5
         num_transfers = math.ceil(mm_vol/(200-air_gap_vol))
@@ -348,7 +350,7 @@ def transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20):
         pip.blow_out(disp_loc)
     drop_tip(pip)
 
-def transfer_samples(ELUTION_LABWARE, sources, dests, pip):
+def transfer_samples(ELUTION_LABWARE, sources, dests, pip,tiprack):
     # height for aspiration has to be different depending if you ar useing tubes or wells
     if 'strip' in ELUTION_LABWARE or 'plate' in ELUTION_LABWARE:
         height = 1.5
@@ -360,7 +362,7 @@ def transfer_samples(ELUTION_LABWARE, sources, dests, pip):
         if s == sources[NUM_SAMPLES-2]:
             continue
 
-        pick_up(pip)
+        pick_up(pip,tiprack)
         pip.transfer(7, s.bottom(height), d.bottom(2), air_gap=2, new_tip='never')
         #p20.mix(1, 10, d.bottom(2))
         #p20.blow_out(d.top(-2))
@@ -440,15 +442,15 @@ def run(ctx: protocol_api.ProtocolContext):
     else:
         mm_tube = mm_rack.wells()[0]
         if TRANSFER_MASTERMIX:
-            homogenize_mm(mm_tube, p300)
+            homogenize_mm(mm_tube, p300,tiprack300)
 
     # transfer mastermix
     if TRANSFER_MASTERMIX:
-        transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20)
+        transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20,tiprack300,tiprack20)
 
     # transfer samples to corresponding locations
     if TRANSFER_SAMPLES:
-        transfer_samples(ELUTION_LABWARE, sources, dests, p20)
+        transfer_samples(ELUTION_LABWARE, sources, dests, p20,tiprack20)
         # transfer negative control to position NUM_SAMPLES-2
         p20.transfer(7, mm_rack.wells()[4].bottom(1), dests[NUM_SAMPLES-2].bottom(2), air_gap=2, new_tip='always')
 

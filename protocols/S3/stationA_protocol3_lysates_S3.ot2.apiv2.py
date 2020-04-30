@@ -150,16 +150,16 @@ def drop(pip):
     pip.drop_tip(drop_loc,home_after=False)
     switch = not switch
 
-def transfer_samples(labware, volume , sources, dests, pip, tiprack):
+def transfer_samples(sources, dests, pip, tiprack):
     # height for aspiration has to be different depending if you ar useing tubes or wells
-    if 'strip' in labware or 'plate' in labware:
+    if 'strip' in LYSATE_LABWARE or 'plate' in LYSATE_LABWARE:
         height = 1.5
     else:
         height = 2
     # transfer
     for s, d in zip(sources, dests):
         pick_up(pip,tiprack)
-        pip.transfer(volume, s.bottom(height), d.bottom(15), air_gap=20, new_tip='never')
+        pip.transfer(VOLUME_LYSATE, s.bottom(height), d.bottom(15), air_gap=20, new_tip='never')
         if BEADS:
             pip.mix(3,400,d.bottom(4))
         #pip.blow_out(d.top(-2))
@@ -212,7 +212,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     dests = wells_plate.wells()[:NUM_SAMPLES]
 
     # transfer
-    transfer_samples(LYSATE_LABWARE,VOLUME_LYSATE, sources, dests, p1000, tips1000)
+    transfer_samples(sources, dests, p1000, tips1000)
 
     # track final used tip
     save_tip_info()

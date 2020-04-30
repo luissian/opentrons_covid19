@@ -325,7 +325,7 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20,tiprack300,tiprack20):
 
     return mm_tube
 
-def transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20):
+def transfer_mastermix(mm_tube, dests, p300, p20):
     max_trans_per_asp = 8  #230//(VOLUME_MMIX+5)
     split_ind = [ind for ind in range(0, NUM_SAMPLES, max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
@@ -440,7 +440,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # prepare mastermix
     if PREPARE_MASTERMIX:
-        mm_tube = prepare_mastermix(MM_TYPE, mm_rack, p300, p20)
+        mm_tube = prepare_mastermix(MM_TYPE, mm_rack, p300, p20,tips300,tips20)
     else:
         mm_tube = mm_rack.wells()[0]
         if TRANSFER_MASTERMIX:
@@ -448,7 +448,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # transfer mastermix
     if TRANSFER_MASTERMIX:
-        transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20,tips300,tips20)
+        transfer_mastermix(mm_tube, dests, p300, p20)
 
     # transfer samples to corresponding locations
     if TRANSFER_SAMPLES:

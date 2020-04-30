@@ -23,9 +23,12 @@ Instructions for the manual part of this protocol (how to prepare reagents, how 
 
 We're automating a RT-qPCR based diagnostic protocol.  We split it into 3 parts, intended to be run on 3 separate robots:
 
-* **Station A:** Sample intake
-* **Station B:** RNA extraction
-* **Station C:** qPCR setup
+* **Station A:** Sample preparation.
+  * Protocol 1: dispense buffer to tubes.
+  * Protocol 2: dispense beads to deep well plate.
+  * Protocol 3: dispense lysates to deep well plate with beads.
+* **Station B:** RNA extraction.
+* **Station C:** real-time PCR setup.
 
 See [the Python files](protocols) for more details.
 

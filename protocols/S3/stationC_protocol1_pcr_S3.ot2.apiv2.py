@@ -216,7 +216,7 @@ def drop(pip):
         drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=20))
         pip.drop_tip(drop_loc,home_after=False)
 
-def get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate):
+def get_source_dest_coordinates(source_racks, pcr_plate):
     if 'strip' in ELUTION_LABWARE:
         sources = [
             tube
@@ -272,7 +272,7 @@ def homogenize_mm(mm_tube, pip, tiprack, times=5):
     pip.blow_out(mm_tube.top(-2))
     # p300.drop_tip(home_after=False)
 
-def prepare_mastermix(MM_TYPE, mm_rack, p300, p20,tiprack300,tiprack20):
+def prepare_mastermix(mm_rack, p300, p20,tiprack300,tiprack20):
     # setup mastermix coordinates
     """ mastermix component maps """
     mm1 = {
@@ -350,7 +350,7 @@ def transfer_mastermix(mm_tube, dests, p300, p20):
         pip.blow_out(disp_loc)
     drop(pip)
 
-def transfer_samples(ELUTION_LABWARE, sources, dests, pip,tiprack):
+def transfer_samples(sources, dests, pip,tiprack):
     # height for aspiration has to be different depending if you ar useing tubes or wells
     if 'strip' in ELUTION_LABWARE or 'plate' in ELUTION_LABWARE:
         height = 1.5
@@ -436,11 +436,11 @@ def run(ctx: protocol_api.ProtocolContext):
     ]
 
     # setup sample sources and destinations
-    sources, dests = get_source_dest_coordinates(ELUTION_LABWARE, source_racks, pcr_plate)
+    sources, dests = get_source_dest_coordinates(source_racks, pcr_plate)
 
     # prepare mastermix
     if PREPARE_MASTERMIX:
-        mm_tube = prepare_mastermix(MM_TYPE, mm_rack, p300, p20,tips300,tips20)
+        mm_tube = prepare_mastermix(mm_rack, p300, p20,tips300,tips20)
     else:
         mm_tube = mm_rack.wells()[0]
         if TRANSFER_MASTERMIX:
@@ -452,7 +452,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # transfer samples to corresponding locations
     if TRANSFER_SAMPLES:
-        transfer_samples(ELUTION_LABWARE, sources, dests, p20,tips20)
+        transfer_samples(sources, dests, p20,tips20)
         # transfer negative control to position NUM_SAMPLES-2
         p20.transfer(7, mm_rack.wells()[4].bottom(1), dests[NUM_SAMPLES-2].bottom(2), air_gap=2, new_tip='always')
 

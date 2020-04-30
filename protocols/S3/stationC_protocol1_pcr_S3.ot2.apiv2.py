@@ -86,9 +86,9 @@ TRANSFER_SAMPLES: True or False
 
 # Calculated variables
 if MM_TYPE == 'MM3':
-    volume_mm = 15
+    VOLUME_MMIX = 15
 else:
-    volume_mm = 20
+    VOLUME_MMIX = 20
 
 # Constants
 MM_LW_DICT = {

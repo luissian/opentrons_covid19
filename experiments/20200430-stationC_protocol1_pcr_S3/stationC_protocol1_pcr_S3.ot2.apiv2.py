@@ -203,7 +203,7 @@ def homogenize_mm(mm_tube, p300, times=5):
                 p300.aspirate(40, mm_tube.bottom(aspirate_height))
         # empty pipete
         p300.dispense(200, mm_tube.bottom(volume_height))
-    # clow out before dropping tip
+    # blow out before dropping tip
     p300.blow_out(mm_tube.top(-2))
     # p300.drop_tip(home_after=False)
 
@@ -264,7 +264,7 @@ def transfer_mastermix(mm_tube, dests, VOLUME_MMIX, p300, p20):
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
     pip = p300 if VOLUME_MMIX >= 20 else p20
-    # pip.pick_up_tip()
+    # pip.pick_up_tip() # comented to reuse tip from homogeneize_mm
     # get initial fluid height to avoid overflowing mm when aspiring
     mm_volume = VOLUME_MMIX * NUM_SAMPLES
     volume_height = get_mm_height(mm_volume)
@@ -372,6 +372,8 @@ def run(ctx: protocol_api.ProtocolContext):
     # prepare mastermix
     if PREPARE_MASTERMIX:
         mm_tube = prepare_mastermix(MM_TYPE, mm_rack, p300, p20)
+        if TRANSFER_MASTERMIX:
+            p300.drop_tip(home_after=False)
     else:
         mm_tube = mm_rack.wells()[0]
         if TRANSFER_MASTERMIX:

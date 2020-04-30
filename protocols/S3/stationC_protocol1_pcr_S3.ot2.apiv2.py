@@ -321,7 +321,7 @@ def prepare_mastermix(MM_TYPE, mm_rack, p300, p20,tiprack300,tiprack20):
         drop(pip)
 
     # homogenize mastermix
-    homogenize_mm(mm_tube, p300,tiprack300,VOLUME_MMIX)
+    homogenize_mm(mm_tube, p300,tiprack300)
 
     return mm_tube
 
@@ -444,7 +444,7 @@ def run(ctx: protocol_api.ProtocolContext):
     else:
         mm_tube = mm_rack.wells()[0]
         if TRANSFER_MASTERMIX:
-            homogenize_mm(mm_tube, p300,tips300,VOLUME_MMIX)
+            homogenize_mm(mm_tube, p300,tips300)
 
     # transfer mastermix
     if TRANSFER_MASTERMIX:

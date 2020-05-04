@@ -278,7 +278,7 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
         asp_loc = m.bottom(1)
         pick_up(pip,tipracks)
         # transfer elution to new plate
-        pip.transfer(40, asp_loc, e, new_tip='never', air_gap=10)
+        pip.transfer(50, asp_loc, e, new_tip='never', air_gap=10)
         pip.blow_out(e.top(-2))
         drop(pip)
     pip.flow_rate.aspirate = aspire_default_speed

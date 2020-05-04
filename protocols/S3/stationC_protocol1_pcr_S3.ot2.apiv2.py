@@ -455,6 +455,8 @@ def run(ctx: protocol_api.ProtocolContext):
     # transfer mastermix
     if TRANSFER_MASTERMIX:
         transfer_mastermix(mm_tube, dests, p300, p20, tips300, tips20)
+        if TRANSFER_SAMPLES:
+            ctx.pause(f"Please, check that all wells have received the right ammount of mastermix")
 
     # transfer samples to corresponding locations
     if TRANSFER_SAMPLES:

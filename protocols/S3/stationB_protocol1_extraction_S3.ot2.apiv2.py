@@ -106,7 +106,7 @@ def confirm_door_is_closed():
     if check_door() == False:
         #Set light color to red and pause
         gpio.set_button_light(1,0,0)
-        robot.pause(f"Please, close the door")
+        robot.pause()
         time.sleep(3)
         confirm_door_is_closed()
     else:
@@ -288,6 +288,7 @@ def run(ctx: protocol_api.ProtocolContext):
     robot = ctx
 
     # confirm door is close
+    robot.comment(f"Please, close the door")
     if not ctx.is_simulating():
         confirm_door_is_closed()
 

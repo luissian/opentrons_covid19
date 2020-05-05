@@ -381,6 +381,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     # remove supernatant with P1000
     remove_supernatant(mag_samples_s,waste,p1000,tips1000)
+    ctx.pause(f"Please, empty trash")
 
     # 3x washes
     wash(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)

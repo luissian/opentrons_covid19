@@ -73,14 +73,14 @@ LYSTUBE_LW_DICT = {
 def check_door():
     return gpio.read_window_switches()
 
-def confirm_door_is_closed(ctx):
+def confirm_door_is_closed():
     #Check if door is opened
     if check_door() == False:
         #Set light color to red and pause
         gpio.set_button_light(1,0,0)
-        ctx.pause()
+        robot.pause()
         time.sleep(3)
-        confirm_door_is_closed(ctx)
+        confirm_door_is_closed()
     else:
         #Set light color to green
         gpio.set_button_light(0,1,0)
@@ -177,7 +177,7 @@ def run(ctx: protocol_api.ProtocolContext):
     # confirm door is closed
     robot.comment(f"Please, close the door")
     if not ctx.is_simulating():
-        confirm_door_is_closed(ctx)
+        confirm_door_is_closed()
 
     tips1000 = [ctx.load_labware('opentrons_96_filtertiprack_1000ul',
                                      3, '1000µl tiprack')]

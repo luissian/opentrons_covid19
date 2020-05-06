@@ -21,7 +21,7 @@ dns-search=
 method=auto
 ```
 
-This configuration will prepare your robots to get a dynamic IP address that must be set to fixed one by reserving it in your network DNS server. If you wanted to set a manual address, change the `[ipv4]` field as we did in the [wifi setup file](https://github.com/BU-ISCIII/opentrons_covid19/doc/S3/01_OT2_installation.md).
+This configuration will prepare your robots to get a dynamic IP address that must be set to fixed one by reserving it in your network DNS server. If you wanted to set a manual address, change the `[ipv4]` field as we did in the [wifi setup file](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/doc/S3/01_OT2_installation.md).
 
 2) [Connect ethernet cable to the robot](https://support.opentrons.com/en/articles/3767128-connecting-to-your-ot-2-with-an-ethernet-cable)
 

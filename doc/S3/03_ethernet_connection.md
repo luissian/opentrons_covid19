@@ -27,7 +27,7 @@ This configuration will prepare your robots to get a dynamic IP address that mus
 
 3) The easiest way to tidy up the cable without drilling or cutting is by passing it through the left corner of the plastic cover, where there is already an aperture to pass the other cables. Then, take the cable down using the magnetic cable management hooks for the USB cables of the modules and take it out of the box through the bottom left hole of the rear panel.
 
-![Ethernet cable configuration](https://github.com/BU-ISCIII/opentrons_covid19/img/ethernet_cable_configuration.jpg)
+![Ethernet cable configuration](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/ethernet_cable_configuration.jpg?raw=true)
 
 4) Plug the cable and restart the robot. Now you should be able to find the robot in your wired network. Use the DNS manager to reserve a fix IP for the robot IPs.
 

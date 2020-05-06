@@ -17,7 +17,7 @@ metadata = {
 # Warning writing any Parameters below this line.
 # It will be deleted if opentronsWeb is used.
 
-NUM_SAMPLES = 1
+NUM_SAMPLES = 33
 BEADS_LABWARE = 'opentrons plastic 30ml tubes'
 PLATE_LABWARE = 'nest deep generic well plate'
 VOLUME_BEADS = 410
@@ -158,20 +158,20 @@ def prepare_beads(bd_tube,eth_tubes,pip,tiprack):
             pick_up(pip,tiprack)
         pip.transfer(480, bd_tube.bottom(2),e.bottom(40),air_gap=10,new_tip='never')
         pip.blow_out(e.bottom(40))
-        drop(pip)
+        # drop(pip)
 
 def transfer_beads(beads_tube, dests, pip,tiprack):
     max_trans_per_asp = 2  # 1000/VOLUME_BUFFER = 3
     split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
-    pick_up(pip,tiprack)
- # Mix bead tubes prior to dispensing
+    # pick_up(pip,tiprack)
+    # Mix bead tubes prior to dispensing
     pip.flow_rate.aspirate = 800
     pip.flow_rate.dispense = 8000
     # pip.mix(12,800,beads_tube.bottom(15))
     for i in range(12):
-        pip.aspirate(800, beads_tube.bottom(15))
+        pip.aspirate(800, beads_tube.bottom(20))
         pip.dispense(800, beads_tube.bottom(2))
     pip.flow_rate.aspirate = 100
     pip.flow_rate.dispense = 1000
@@ -228,8 +228,6 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     beads = beads_rack.wells()[4]
     ethanol = beads_rack.wells()[0:4][:num_tubes]
 
-    prepare_beads(beads,ethanol,p1000,tips1000)
-
     # setup dests
 
     # Prepare destinations, a list of destination
@@ -242,8 +240,10 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         for i in range(num_tubes)
         ]
 
-    # transfer
     for bd_tube,dests in zip(ethanol,dest_sets):
+        # prepare beads
+        prepare_beads(beads, bd_tube, p1000, tips1000)
+        # transfer
         transfer_beads(bd_tube, dests, p1000, tips1000)
 
     # track final used tip

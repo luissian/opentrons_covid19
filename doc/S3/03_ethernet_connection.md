@@ -21,7 +21,15 @@ dns-search=
 method=auto
 ```
 
-This configuration will prepare your robots to get a dynamic IP address that must be set to fixed one by reserving it in your network DHCP server. If you wanted to set a manual address, change the `[ipv4]` field as we did in the [wifi setup file](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/doc/S3/01_OT2_installation.md).
+This configuration will prepare your robots to get a dynamic IP address that must be set to fixed one by reserving it in your network DHCP server. If you wanted to set a manual address, change the `[ipv4]` field as we did in the [wifi setup file](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/doc/S3/01_OT2_installation.md):
+
+```
+[ipv4]
+address1=<IP>/24
+dns=8.8.8.8;8.8.4.4;
+dns-search=
+method=manual
+```
 
 2) [Connect ethernet cable to the robot](https://support.opentrons.com/en/articles/3767128-connecting-to-your-ot-2-with-an-ethernet-cable)
 
@@ -31,6 +39,6 @@ This configuration will prepare your robots to get a dynamic IP address that mus
 
 4) Plug the cable and restart the robot. Now you should be able to find the robot in your wired network. Use the DHCP server to reserve a fix IP for the robot IPs.
 
-**NOTE:** yes, IPs in plural. It has 2 IPs, one physical that has the hostname of the robot and a second virtual one called opentrons.
+**NOTE:** yes, IPs in plural. It has 2 IPs, one physical IP that has the hostname of the robot and a second virtual IP with hostname opentrons.
 
 5) Try to connect your computer to the robot using its new IP address and with the opentrons' app. In case you connect with the robot on the browser but not in the app, try forcing the app to connect to the robot by adding the IP or hostname to the list of robots in More -> Manage. In case you can not connect on your browser, doublecheck you are in the same network and your firewall and connection permissions.

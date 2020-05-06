@@ -224,9 +224,9 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     num_tubes = math.ceil(NUM_SAMPLES/24)
     # How many wells for each tube
     num_wells = math.ceil(len(wells_plate.wells())/4)
-    # beads and ethanol
+    # beads and dipersion_reactive
     beads = beads_rack.wells()[4]
-    ethanol = beads_rack.wells()[0:4][:num_tubes]
+    dipersion_reactive = beads_rack.wells()[0:4][:num_tubes]
 
     # setup dests
 
@@ -240,7 +240,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         for i in range(num_tubes)
         ]
 
-    for bd_tube,dests in zip(ethanol,dest_sets):
+    for bd_tube,dests in zip(dipersion_reactive,dest_sets):
         # prepare beads
         prepare_beads(beads, bd_tube, p1000, tips1000)
         # transfer

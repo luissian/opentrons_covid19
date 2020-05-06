@@ -21,7 +21,7 @@ dns-search=
 method=auto
 ```
 
-This configuration will prepare your robots to get a dynamic IP address that must be set to fixed one by reserving it in your network DNS server. If you wanted to set a manual address, change the `[ipv4]` field as we did in the [wifi setup file](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/doc/S3/01_OT2_installation.md).
+This configuration will prepare your robots to get a dynamic IP address that must be set to fixed one by reserving it in your network DHCP server. If you wanted to set a manual address, change the `[ipv4]` field as we did in the [wifi setup file](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/doc/S3/01_OT2_installation.md).
 
 2) [Connect ethernet cable to the robot](https://support.opentrons.com/en/articles/3767128-connecting-to-your-ot-2-with-an-ethernet-cable)
 
@@ -29,7 +29,7 @@ This configuration will prepare your robots to get a dynamic IP address that mus
 
 ![Ethernet cable configuration](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/ethernet_cable_configuration.jpg?raw=true)
 
-4) Plug the cable and restart the robot. Now you should be able to find the robot in your wired network. Use the DNS manager to reserve a fix IP for the robot IPs.
+4) Plug the cable and restart the robot. Now you should be able to find the robot in your wired network. Use the DHCP server to reserve a fix IP for the robot IPs.
 
 **NOTE:** yes, IPs in plural. It has 2 IPs, one physical that has the hostname of the robot and a second virtual one called opentrons.
 

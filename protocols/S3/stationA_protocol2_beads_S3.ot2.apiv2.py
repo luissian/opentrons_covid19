@@ -171,7 +171,7 @@ def transfer_beads(beads_tube, dests, pip,tiprack):
     pip.flow_rate.dispense = 8000
     # pip.mix(12,800,beads_tube.bottom(15))
     for i in range(12):
-        pip.aspirate(800, beads_tube.bottom(20))
+        pip.aspirate(800, beads_tube.bottom(35))
         pip.dispense(800, beads_tube.bottom(2))
     pip.flow_rate.aspirate = 100
     pip.flow_rate.dispense = 1000

@@ -17,7 +17,7 @@ metadata = {
 # Warning writing any Parameters below this line.
 # It will be deleted if opentronsWeb is used.
 
-NUM_SAMPLES = 48
+NUM_SAMPLES = 42
 BEADS_LABWARE = 'opentrons plastic 30ml tubes'
 PLATE_LABWARE = 'nest deep generic well plate'
 VOLUME_BEADS = 410

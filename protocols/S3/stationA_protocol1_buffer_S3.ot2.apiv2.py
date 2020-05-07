@@ -173,15 +173,15 @@ def run(ctx: protocol_api.ProtocolContext):
     robot = ctx
     # confirm door is close
     robot.comment(f"Please, close the door")
-    if not ctx.is_simulating():
+    if not robot.is_simulating():
         confirm_door_is_closed()
 
     # define tips
-    tips1000 = [ctx.load_labware('opentrons_96_filtertiprack_1000ul',
+    tips1000 = [robot.load_labware('opentrons_96_filtertiprack_1000ul',
                                      3, '1000µl tiprack')]
 
     # define pipettes
-    p1000 = ctx.load_instrument('p1000_single_gen2', 'left', tip_racks=tips1000)
+    p1000 = robot.load_instrument('p1000_single_gen2', 'left', tip_racks=tips1000)
 
 
     # check buffer labware type
@@ -190,7 +190,7 @@ def run(ctx: protocol_api.ProtocolContext):
 following:\nopentrons plastic 50ml tubes')
 
     # load mastermix labware
-    buffer_rack = ctx.load_labware(
+    buffer_rack = robot.load_labware(
         BUFFER_LW_DICT[BUFFER_LABWARE], '10',
         BUFFER_LABWARE)
 
@@ -201,7 +201,7 @@ following:\nopentrons plastic 50ml tubes')
 
     # load elution labware
     dest_racks = [
-            ctx.load_labware(DESTINATION_LW_DICT[DESTINATION_LABWARE], slot,
+            robot.load_labware(DESTINATION_LW_DICT[DESTINATION_LABWARE], slot,
                             'Destination tubes labware ' + str(i+1))
             for i, slot in enumerate(['4', '1', '5', '2'])
     ]

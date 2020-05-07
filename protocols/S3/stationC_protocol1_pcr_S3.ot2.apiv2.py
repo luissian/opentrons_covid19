@@ -380,22 +380,22 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # confirm door is closed
     robot.comment(f"Please, close the door")
-    if not ctx.is_simulating():
+    if not robot.is_simulating():
         confirm_door_is_closed()
 
     # define tips
     tips20 = [
-        ctx.load_labware('opentrons_96_filtertiprack_20ul', slot)
+        robot.load_labware('opentrons_96_filtertiprack_20ul', slot)
         for slot in ['6', '9', '8', '7']
     ]
-    tips300 = [ctx.load_labware('opentrons_96_filtertiprack_200ul', '3')]
+    tips300 = [robot.load_labware('opentrons_96_filtertiprack_200ul', '3')]
 
     # define pipettes
-    p20 = ctx.load_instrument('p20_single_gen2', 'right', tip_racks=tips20)
-    p300 = ctx.load_instrument('p300_single_gen2', 'left', tip_racks=tips300)
+    p20 = robot.load_instrument('p20_single_gen2', 'right', tip_racks=tips20)
+    p300 = robot.load_instrument('p300_single_gen2', 'left', tip_racks=tips300)
 
     # tempdeck module
-    tempdeck = ctx.load_module('tempdeck', '10')
+    tempdeck = robot.load_module('tempdeck', '10')
     tempdeck.set_temperature(4)
 
     # check mastermix labware type
@@ -404,7 +404,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
 
     # load mastermix labware
-    mm_rack = ctx.load_labware(
+    mm_rack = robot.load_labware(
         MM_LW_DICT[MM_LABWARE], '11',
         MM_LABWARE)
 
@@ -430,12 +430,12 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # load elution labware
     if 'plate' in ELUTION_LABWARE:
-        source_racks = ctx.load_labware(
+        source_racks = robot.load_labware(
             EL_LW_DICT[ELUTION_LABWARE], '1',
             'RNA elution labware')
     else:
         source_racks = [
-            ctx.load_labware(EL_LW_DICT[ELUTION_LABWARE], slot,
+            robot.load_labware(EL_LW_DICT[ELUTION_LABWARE], slot,
                             'RNA elution labware ' + str(i+1))
             for i, slot in enumerate(['4', '1', '5', '2'])
     ]
@@ -457,7 +457,7 @@ def run(ctx: protocol_api.ProtocolContext):
     if TRANSFER_MASTERMIX:
         transfer_mastermix(mm_tube, dests, p300, p20, tips300, tips20)
         if TRANSFER_SAMPLES:
-            ctx.pause(f"Please, check that all wells have received the right ammount of mastermix")
+            robot.pause(f"Please, check that all wells have received the right ammount of mastermix")
 
     # transfer samples to corresponding locations
     if TRANSFER_SAMPLES:

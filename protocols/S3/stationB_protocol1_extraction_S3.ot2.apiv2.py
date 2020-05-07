@@ -289,7 +289,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # confirm door is close
     robot.comment(f"Please, close the door")
-    if not ctx.is_simulating():
+    if not robot.is_simulating():
         confirm_door_is_closed()
 
     # load labware and modules
@@ -298,12 +298,12 @@ def run(ctx: protocol_api.ProtocolContext):
         raise Exception('Invalid ELUTION_LABWARE. Must be one of the \
     following:\nopentrons aluminum biorad plate\nopentrons aluminum nest plate')
 
-    elution_plate = ctx.load_labware(
+    elution_plate = robot.load_labware(
         ELUTION_LW_DICT[ELUTION_LABWARE], '1',
         'elution plate')
 
     ## MAGNETIC PLATE LABWARE
-    magdeck = ctx.load_module('magdeck', '10')
+    magdeck = robot.load_module('magdeck', '10')
     magdeck.disengage()
 
     if MAGPLATE_LABWARE not in MAGPLATE_LW_DICT:
@@ -317,7 +317,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         raise Exception('Invalid WASTE_LABWARE. Must be one of the \
     following:\nnest 1 reservoir plate')
 
-    waste = ctx.load_labware(
+    waste = robot.load_labware(
         WASTE_LW_DICT[WASTE_LABWARE], '11', 'waste reservoir').wells()[0].top(-10)
 
     ## REAGENT RESERVOIR
@@ -325,19 +325,19 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         raise Exception('Invalid REAGENT_LABWARE. Must be one of the \
     following:\nnest 12 reservoir plate')
 
-    reagent_res = ctx.load_labware(
+    reagent_res = robot.load_labware(
         REAGENT_LW_DICT[REAGENT_LABWARE], '7', 'reagent reservoir')
 
     ## TIPS
     # using standard tip definition despite actually using filter tips
     # so that the tips can accommodate ~220µl per transfer for efficiency
     tips300 = [
-        ctx.load_labware(
+        robot.load_labware(
             'opentrons_96_tiprack_300ul', slot, '200µl filter tiprack')
         for slot in ['2', '3', '5', '6', '9','4']
     ]
     tips1000 = [
-        ctx.load_labware('opentrons_96_filtertiprack_1000ul', slot,
+        robot.load_labware('opentrons_96_filtertiprack_1000ul', slot,
                          '1000µl filter tiprack')
         for slot in ['8']
     ]
@@ -352,8 +352,8 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     wash_sets = [reagent_res.wells()[i:i+2] for i in [5, 7, 9]]
 
     # pipettes
-    m300 = ctx.load_instrument('p300_multi_gen2', 'left', tip_racks=tips300)
-    p1000 = ctx.load_instrument('p1000_single_gen2', 'right',
+    m300 = robot.load_instrument('p300_multi_gen2', 'left', tip_racks=tips300)
+    p1000 = robot.load_instrument('p1000_single_gen2', 'right',
                                 tip_racks=tips1000)
 
     m300.flow_rate.aspirate = 150
@@ -373,15 +373,15 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         mix_beads(7, mag_samples_m,m300,tips300)
 
     # incubate off the magnet
-    ctx.delay(minutes=10, msg='Incubating off magnet for 5 minutes.')
+    robot.delay(minutes=10, msg='Incubating off magnet for 5 minutes.')
 
     ## First incubate on magnet.
     magdeck.engage(height_from_base=22)
-    ctx.delay(minutes=5, msg='Incubating on magnet for 5 minutes.')
+    robot.delay(minutes=5, msg='Incubating on magnet for 5 minutes.')
 
     # remove supernatant with P1000
     remove_supernatant(mag_samples_s,waste,p1000,tips1000)
-    ctx.pause(f"Please, empty trash")
+    robot.pause(f"Please, empty trash")
 
     # 3x washes
     wash(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)

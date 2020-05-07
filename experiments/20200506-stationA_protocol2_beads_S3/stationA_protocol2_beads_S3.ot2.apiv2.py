@@ -242,7 +242,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     for bd_tube,dests in zip(dipersion_reactive,dest_sets):
         # prepare beads
-        prepare_beads(beads, bd_tube, p1000, tips1000)
+        prepare_beads(beads, [bd_tube], p1000, tips1000)
         # transfer
         transfer_beads(bd_tube, dests, p1000, tips1000)
 

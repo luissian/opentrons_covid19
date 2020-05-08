@@ -80,17 +80,18 @@ def check_door():
     return gpio.read_window_switches()
 
 def confirm_door_is_closed():
-    #Check if door is opened
-    if check_door() == False:
-        #Set light color to red and pause
-        gpio.set_button_light(1,0,0)
-        robot.pause()
-        voice_notification('close_door')
-        time.sleep(5)
-        confirm_door_is_closed()
-    else:
-        #Set light color to green
-        gpio.set_button_light(0,1,0)
+    if not robot.is_simulating():
+        #Check if door is opened
+        if check_door() == False:
+            #Set light color to red and pause
+            gpio.set_button_light(1,0,0)
+            robot.pause()
+            voice_notification('close_door')
+            time.sleep(5)
+            confirm_door_is_closed()
+        else:
+            #Set light color to green
+            gpio.set_button_light(0,1,0)
 
 def finish_run():
     voice_notification('finish')
@@ -159,8 +160,7 @@ def pick_up(pip,tiprack):
         voice_notification('replace_tipracks')
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
 resuming.')
-        if not robot.is_simulating():
-            confirm_door_is_closed()
+        confirm_door_is_closed()
         pip.reset_tipracks()
         tip_log['count'][pip] = 0
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
@@ -199,8 +199,7 @@ def run(ctx: protocol_api.ProtocolContext):
     robot = ctx
     # confirm door is closed
     robot.comment(f"Please, close the door")
-    if not robot.is_simulating():
-        confirm_door_is_closed()
+    confirm_door_is_closed()
 
     # Begin run
     voice_notification('start')

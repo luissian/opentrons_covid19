@@ -64,6 +64,7 @@ VOICE_FILES_DICT = {
     'finish': './data/sounds/finished_process.mp3',
     'close_door': './data/sounds/close_door.mp3',
     'replace_tipracks': './data/sounds/replace_tipracks.mp3',
+    'empty_trash': './data/sounds/empty_trash.mp3'
 }
 
 # Function definitions

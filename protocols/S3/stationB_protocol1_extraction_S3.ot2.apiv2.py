@@ -102,6 +102,7 @@ VOICE_FILES_DICT = {
     'finish': './data/sounds/finished_process.mp3',
     'close_door': './data/sounds/close_door.mp3',
     'replace_tipracks': './data/sounds/replace_tipracks.mp3',
+    'empty_trash': './data/sounds/empty_trash.mp3'
 }
 
 # Function definitions
@@ -407,7 +408,8 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     # remove supernatant with P1000
     remove_supernatant(mag_samples_s,waste,p1000,tips1000)
 
-    # ADD dound effect empty trash
+    # empty trash
+    voice_notification('empty_trash')
     robot.pause(f"Please, empty trash")
     confirm_door_is_closed()
 

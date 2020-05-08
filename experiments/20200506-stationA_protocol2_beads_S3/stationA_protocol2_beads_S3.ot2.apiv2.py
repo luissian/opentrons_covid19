@@ -190,14 +190,14 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # confirm door is closed
     robot.comment(f"Please, close the door")
-    if not ctx.is_simulating():
+    if not robot.is_simulating():
         confirm_door_is_closed()
 
-    tips1000 = [ctx.load_labware('opentrons_96_filtertiprack_1000ul',
+    tips1000 = [robot.load_labware('opentrons_96_filtertiprack_1000ul',
                                      3, '1000µl tiprack')]
 
     # load pipette
-    p1000 = ctx.load_instrument(
+    p1000 = robot.load_instrument(
         'p1000_single_gen2', 'left', tip_racks=tips1000)
 
     # check source (elution) labware type
@@ -206,7 +206,7 @@ def run(ctx: protocol_api.ProtocolContext):
 following:\nopentrons plastic 50ml tubes')
 
     # load mastermix labware
-    beads_rack = ctx.load_labware(
+    beads_rack = robot.load_labware(
         BD_LW_DICT[BEADS_LABWARE], '8',
         BEADS_LABWARE)
 
@@ -216,7 +216,7 @@ following:\nopentrons plastic 50ml tubes')
 following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr deep generic well plate')
 
     # load pcr plate
-    wells_plate = ctx.load_labware(PL_LW_DICT[PLATE_LABWARE], 10,
+    wells_plate = robot.load_labware(PL_LW_DICT[PLATE_LABWARE], 10,
                     'sample elution well plate ')
 
     # prepare beads
@@ -242,7 +242,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     for bd_tube,dests in zip(dipersion_reactive,dest_sets):
         # prepare beads
-        prepare_beads(beads, bd_tube, p1000, tips1000)
+        prepare_beads(beads, [bd_tube], p1000, tips1000)
         # transfer
         transfer_beads(bd_tube, dests, p1000, tips1000)
 

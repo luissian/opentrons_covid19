@@ -176,14 +176,14 @@ def run(ctx: protocol_api.ProtocolContext):
     robot = ctx
     # confirm door is closed
     robot.comment(f"Please, close the door")
-    if not ctx.is_simulating():
+    if not robot.is_simulating():
         confirm_door_is_closed()
 
-    tips1000 = [ctx.load_labware('opentrons_96_filtertiprack_1000ul',
+    tips1000 = [robot.load_labware('opentrons_96_filtertiprack_1000ul',
                                      3, '1000µl tiprack')]
 
     # load pipette
-    p1000 = ctx.load_instrument(
+    p1000 = robot.load_instrument(
         'p1000_single_gen2', 'left', tip_racks=tips1000)
 
     # check source (LYSATE) labware type
@@ -192,12 +192,12 @@ def run(ctx: protocol_api.ProtocolContext):
 following:\nopentrons plastic 2ml tubes')
     # load LYSATE labware
     if 'plate' in LYSATE_LABWARE:
-        source_racks = ctx.load_labware(
+        source_racks = robot.load_labware(
             LY_LW_DICT[LYSATE_LABWARE], '1',
             'RNA LYSATE labware')
     else:
         source_racks = [
-            ctx.load_labware(LY_LW_DICT[LYSATE_LABWARE], slot,
+            robot.load_labware(LY_LW_DICT[LYSATE_LABWARE], slot,
                             'sample LYSATE labware ' + str(i+1))
             for i, slot in enumerate(['4', '1', '5', '2'])
     ]
@@ -208,7 +208,7 @@ following:\nopentrons plastic 2ml tubes')
 following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr deep generic well plate')
 
     # load pcr plate
-    wells_plate = ctx.load_labware(PL_LW_DICT[PLATE_LABWARE], 10,
+    wells_plate = robot.load_labware(PL_LW_DICT[PLATE_LABWARE], 10,
                     'sample LYSATE well plate ')
 
     # setup samples

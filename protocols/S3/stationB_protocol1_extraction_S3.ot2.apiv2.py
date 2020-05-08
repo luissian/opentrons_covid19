@@ -97,26 +97,48 @@ ELUTION_LW_DICT = {
 
 }
 
+VOICE_FILES_DICT = {
+    'start': './data/sounds/started_process.mp3',
+    'finish': './data/sounds/finished_process.mp3',
+    'close_door': './data/sounds/close_door.mp3',
+    'replace_tipracks': './data/sounds/replace_tipracks.mp3',
+    'empty_trash': './data/sounds/empty_trash.mp3'
+}
+
 # Function definitions
 def check_door():
     return gpio.read_window_switches()
 
 def confirm_door_is_closed():
-    #Check if door is opened
-    if check_door() == False:
-        #Set light color to red and pause
-        gpio.set_button_light(1,0,0)
-        robot.pause()
-        time.sleep(3)
-        confirm_door_is_closed()
-    else:
-        #Set light color to green
-        gpio.set_button_light(0,1,0)
+    if not robot.is_simulating():
+        #Check if door is opened
+        if check_door() == False:
+            #Set light color to red and pause
+            gpio.set_button_light(1,0,0)
+            robot.pause()
+            voice_notification('close_door')
+            time.sleep(5)
+            confirm_door_is_closed()
+        else:
+            #Set light color to green
+            gpio.set_button_light(0,1,0)
 
 def finish_run():
+    voice_notification('finish')
     #Set light color to blue
     gpio.set_button_light(0,0,1)
 
+def voice_notification(action):
+    if not robot.is_simulating():
+        fname = VOICE_FILES_DICT[action]
+        if os.path.isfile(fname) is True:
+                subprocess.run(
+                ['mpg123', fname],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+                )
+        else:
+            robot.comment(f"Sound file does not exist. Call the technician")
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
     global tip_log
@@ -165,8 +187,10 @@ def pick_up(pip,tiprack):
         tip_log = {}
     tip_log = retrieve_tip_info(pip,tiprack)
     if tip_log['count'][pip] == tip_log['max'][pip]:
+        voice_notification('replace_tipracks')
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
 resuming.')
+        confirm_door_is_closed()
         pip.reset_tipracks()
         tip_log['count'][pip] = 0
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
@@ -289,8 +313,10 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # confirm door is close
     robot.comment(f"Please, close the door")
-    if not robot.is_simulating():
-        confirm_door_is_closed()
+    confirm_door_is_closed()
+
+    # Begin run
+    voice_notification('start')
 
     # load labware and modules
     ## ELUTION LABWARE
@@ -381,7 +407,11 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     # remove supernatant with P1000
     remove_supernatant(mag_samples_s,waste,p1000,tips1000)
+
+    # empty trash
+    voice_notification('empty_trash')
     robot.pause(f"Please, empty trash")
+    confirm_door_is_closed()
 
     # 3x washes
     wash(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)

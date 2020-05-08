@@ -5,6 +5,7 @@ import time
 import math
 import json
 import os
+import subprocess
 
 # Metadata
 metadata = {
@@ -18,7 +19,7 @@ metadata = {
 # Warning writing any Parameters below this line.
 # It will be deleted if opentronsWeb is used.
 
-NUM_SAMPLES = 96
+NUM_SAMPLES = 2
 BUFFER_LABWARE = 'opentrons plastic 30ml tubes'
 DESTINATION_LABWARE = 'opentrons plastic 2ml tubes'
 DEST_TUBE = '2ml tubes'
@@ -79,35 +80,34 @@ def check_door():
     return gpio.read_window_switches()
 
 def confirm_door_is_closed():
-    if not robot.is_simulating():
-        #Check if door is opened
-        if check_door() == False:
-            #Set light color to red and pause
-            gpio.set_button_light(1,0,0)
-            robot.pause()
-            voice_notification('close_door')
-            time.sleep(5)
-            confirm_door_is_closed()
-        else:
-            #Set light color to green
-            gpio.set_button_light(0,1,0)
+    #Check if door is opened
+    if check_door() == False:
+        #Set light color to red and pause
+        gpio.set_button_light(1,0,0)
+        robot.pause()
+        voice_notification('close_door')
+        time.sleep(3)
+        confirm_door_is_closed()
+    else:
+        #Set light color to green
+        gpio.set_button_light(0,1,0)
 
 def finish_run():
-    voice_notification('finish')
+    if not robot.is_simulating():
+        voice_notification('finish')
     #Set light color to blue
     gpio.set_button_light(0,0,1)
 
 def voice_notification(action):
-    if not robot.is_simulating():
-        fname = VOICE_FILES_DICT[action]
-        if os.path.isfile(fname) is True:
-                subprocess.run(
-                ['mpg123', fname],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-                )
-        else:
-            robot.comment(f"Sound file does not exist. Call the technician")
+    fname = VOICE_FILES_DICT[action]
+    if os.path.isfile(fname) is True:
+            subprocess.run(
+            ['mpg123', fname],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+            )
+    else:
+        robot.comment(f"Sound file does not exist. Call the technician")
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
     global tip_log
@@ -156,10 +156,9 @@ def pick_up(pip,tiprack):
         tip_log = {}
     tip_log = retrieve_tip_info(pip,tiprack)
     if tip_log['count'][pip] == tip_log['max'][pip]:
-        voice_notification('replace_tipracks')
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
 resuming.')
-        confirm_door_is_closed()
+        voice_notification('replace_tipracks')
         pip.reset_tipracks()
         tip_log['count'][pip] = 0
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
@@ -196,17 +195,17 @@ def run(ctx: protocol_api.ProtocolContext):
     robot = ctx
     # confirm door is close
     robot.comment(f"Please, close the door")
-    confirm_door_is_closed()
-
-    # Begin run
-    voice_notification('start')
+    if not ctx.is_simulating():
+        confirm_door_is_closed()
+    if not ctx.is_simulating():
+        voice_notification('start')
 
     # define tips
-    tips1000 = [robot.load_labware('opentrons_96_filtertiprack_1000ul',
+    tips1000 = [ctx.load_labware('opentrons_96_filtertiprack_1000ul',
                                      3, '1000µl tiprack')]
 
     # define pipettes
-    p1000 = robot.load_instrument('p1000_single_gen2', 'left', tip_racks=tips1000)
+    p1000 = ctx.load_instrument('p1000_single_gen2', 'left', tip_racks=tips1000)
 
 
     # check buffer labware type
@@ -215,7 +214,7 @@ def run(ctx: protocol_api.ProtocolContext):
 following:\nopentrons plastic 50ml tubes')
 
     # load mastermix labware
-    buffer_rack = robot.load_labware(
+    buffer_rack = ctx.load_labware(
         BUFFER_LW_DICT[BUFFER_LABWARE], '10',
         BUFFER_LABWARE)
 
@@ -226,7 +225,7 @@ following:\nopentrons plastic 50ml tubes')
 
     # load elution labware
     dest_racks = [
-            robot.load_labware(DESTINATION_LW_DICT[DESTINATION_LABWARE], slot,
+            ctx.load_labware(DESTINATION_LW_DICT[DESTINATION_LABWARE], slot,
                             'Destination tubes labware ' + str(i+1))
             for i, slot in enumerate(['4', '1', '5', '2'])
     ]

@@ -1,28 +1,26 @@
-from opentrons.types import Point
 from opentrons import protocol_api
+from opentrons.types import Point
 from opentrons.drivers.rpi_drivers import gpio
 import time
 import math
 import json
 import os
 
-# Metadata
+# metadata
 metadata = {
-    'protocolName': 'S3 Station A Protocol 1 buffer Version 1',
-    'author': 'Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
+    'protocolName': 'S3 Station A Protocol 2 beads Version 1',
+    'author': 'Nick <protocols@opentrons.com>, Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
     'apiLevel': '2.3'
 }
-
 # Parameters to adapt the protocol
 # Warning writing any Parameters below this line.
 # It will be deleted if opentronsWeb is used.
 
-NUM_SAMPLES = 96
-BUFFER_LABWARE = 'opentrons plastic 30ml tubes'
-DESTINATION_LABWARE = 'opentrons plastic 2ml tubes'
-DEST_TUBE = '2ml tubes'
-VOLUME_BUFFER = 300
+NUM_SAMPLES = 33
+BEADS_LABWARE = 'opentrons plastic 30ml tubes'
+PLATE_LABWARE = 'nest deep generic well plate'
+VOLUME_BEADS = 410
 
 # End Parameters to adapt the protocol
 
@@ -40,38 +38,25 @@ tip_log['max'] = {}
 """
 NUM_SAMPLES is the number of samples, must be an integer number
 
-BUFFER_LABWARE must be one of the following:
-    opentrons plastic 50ml tubes
+BEADS_LABWARE must be one of the following:
+    opentrons plastic 50 ml tubes
     opentrons plastic 30ml tubes
 
-DESTINATION_LABWARE must be one of the following:
-    opentrons plastic 2ml tubes
-
-DEST_TUBE
-    2m tubes
+PLATE_LABWARE must be one of the following:
+    opentrons deep generic well plate
+    nest deep generic well plate
+    vwr deep generic well plate
 """
 
-
-# Constants
-BUFFER_LW_DICT = {
-    'opentrons plastic 50ml tubes': 'opentrons_6_tuberack_falcon_50ml_conical',
+BD_LW_DICT = {
+    'opentrons plastic 50 ml tubes': 'opentrons_6_tuberack_falcon_50ml_conical',
     'opentrons plastic 30ml tubes': 'opentrons_6_tuberack_generic_30ml_conical'
 }
 
-DESTINATION_LW_DICT = {
-    'opentrons plastic 2ml tubes': 'opentrons_24_tuberack_generic_2ml_screwcap',
-}
-
-DESTUBE_LW_DICT = {
-    # Radius of each possible tube
-    '2ml tubes': 4
-}
-
-VOICE_FILES_DICT = {
-    'start': './data/sounds/started_process.mp3',
-    'finish': './data/sounds/finished_process.mp3',
-    'close_door': './data/sounds/close_door.mp3',
-    'replace_tipracks': './data/sounds/replace_tipracks.mp3',
+PL_LW_DICT = {
+    'opentrons deep generic well plate': 'usascientific_96_wellplate_2.4ml_deep',
+    'nest deep generic well plate': 'nest_96_deepwellplate_2000ul',
+    'vwr deep generic well plate': 'vwr_96_deepwellplate_2000ul'
 }
 
 # Function definitions
@@ -84,7 +69,6 @@ def confirm_door_is_closed():
         #Set light color to red and pause
         gpio.set_button_light(1,0,0)
         robot.pause()
-        voice_notification('close_door')
         time.sleep(3)
         confirm_door_is_closed()
     else:
@@ -92,21 +76,8 @@ def confirm_door_is_closed():
         gpio.set_button_light(0,1,0)
 
 def finish_run():
-    if not robot.is_simulating():
-        voice_notification('finish')
     #Set light color to blue
     gpio.set_button_light(0,0,1)
-
-def voice_notification(action):
-    fname = VOICE_FILES_DICT[action]
-    if os.path.isfile(fname) is True:
-            subprocess.run(
-            ['mpg123', fname],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-            )
-    else:
-        robot.comment(f"Sound file does not exist. Call the technician")
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
     global tip_log
@@ -157,7 +128,6 @@ def pick_up(pip,tiprack):
     if tip_log['count'][pip] == tip_log['max'][pip]:
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
 resuming.')
-        voice_notification('replace_tipracks')
         pip.reset_tipracks()
         tip_log['count'][pip] = 0
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
@@ -174,77 +144,107 @@ def drop(pip):
         drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=20))
         pip.drop_tip(drop_loc,home_after=False)
 
-def transfer_buffer(bf_tube, dests, pip,tiprack):
-    max_trans_per_asp = 3  # 1000/VOLUME_BUFFER = 3
+def prepare_beads(bd_tube,eth_tubes,pip,tiprack):
+    pick_up(pip,tiprack)
+    # Mix beads
+    pip.flow_rate.aspirate = 200
+    pip.flow_rate.dispense = 1500
+    pip.mix(5,800,bd_tube.bottom(5))
+    pip.flow_rate.aspirate = 100
+    pip.flow_rate.dispense = 1000
+    # Dispense beads
+    for e in eth_tubes:
+        if not pip.hw_pipette['has_tip']:
+            pick_up(pip,tiprack)
+        pip.transfer(480, bd_tube.bottom(2),e.bottom(40),air_gap=10,new_tip='never')
+        pip.blow_out(e.bottom(40))
+        # drop(pip)
+
+def transfer_beads(beads_tube, dests, pip,tiprack):
+    max_trans_per_asp = 2  # 1000/VOLUME_BUFFER = 3
     split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
-    pick_up(pip,tiprack)
-    pip.mix(3, 800, bf_tube.bottom(2))
+    # pick_up(pip,tiprack)
+    # Mix bead tubes prior to dispensing
+    pip.flow_rate.aspirate = 800
+    pip.flow_rate.dispense = 8000
+    # pip.mix(12,800,beads_tube.bottom(15))
+    for i in range(12):
+        pip.aspirate(800, beads_tube.bottom(20))
+        pip.dispense(800, beads_tube.bottom(2))
+    pip.flow_rate.aspirate = 100
+    pip.flow_rate.dispense = 1000
     for set in dest_sets:
-        pip.aspirate(50, bf_tube.bottom(2))
-        pip.distribute(VOLUME_BUFFER, bf_tube.bottom(2), [d.bottom(10) for d in set],
+        pip.aspirate(50, beads_tube.bottom(2))
+        pip.distribute(VOLUME_BEADS, beads_tube.bottom(2), [d.bottom(10) for d in set],
                    air_gap=3, disposal_volume=0, new_tip='never')
-        pip.dispense(50,bf_tube.top(-20))
+        pip.aspirate(5,set[-1].top(-2))
+        pip.dispense(55, beads_tube.top(-30))
     drop(pip)
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):
     global robot
     robot = ctx
-    # confirm door is close
+
+    # confirm door is closed
     robot.comment(f"Please, close the door")
     if not robot.is_simulating():
         confirm_door_is_closed()
-        voice_notification('start')
 
-    # define tips
     tips1000 = [robot.load_labware('opentrons_96_filtertiprack_1000ul',
                                      3, '1000µl tiprack')]
 
-    # define pipettes
-    p1000 = robot.load_instrument('p1000_single_gen2', 'left', tip_racks=tips1000)
+    # load pipette
+    p1000 = robot.load_instrument(
+        'p1000_single_gen2', 'left', tip_racks=tips1000)
 
-
-    # check buffer labware type
-    if BUFFER_LABWARE not in BUFFER_LW_DICT:
+    # check source (elution) labware type
+    if BEADS_LABWARE not in BD_LW_DICT:
         raise Exception('Invalid BF_LABWARE. Must be one of the \
 following:\nopentrons plastic 50ml tubes')
 
     # load mastermix labware
-    buffer_rack = robot.load_labware(
-        BUFFER_LW_DICT[BUFFER_LABWARE], '10',
-        BUFFER_LABWARE)
+    beads_rack = robot.load_labware(
+        BD_LW_DICT[BEADS_LABWARE], '8',
+        BEADS_LABWARE)
 
-    # check mastermix tube labware type
-    if DESTINATION_LABWARE not in DESTINATION_LW_DICT:
-        raise Exception('Invalid DESTINATION_LABWARE. Must be one of the \
-    following:\nopentrons plastic 2ml tubes')
+    # check plate
+    if PLATE_LABWARE not in PL_LW_DICT:
+        raise Exception('Invalid PLATE_LABWARE. Must be one of the \
+following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr deep generic well plate')
 
-    # load elution labware
-    dest_racks = [
-            robot.load_labware(DESTINATION_LW_DICT[DESTINATION_LABWARE], slot,
-                            'Destination tubes labware ' + str(i+1))
-            for i, slot in enumerate(['4', '1', '5', '2'])
-    ]
+    # load pcr plate
+    wells_plate = robot.load_labware(PL_LW_DICT[PLATE_LABWARE], 10,
+                    'sample elution well plate ')
 
-    # setup sample sources and destinations
-    bf_tubes = buffer_rack.wells()[:4]
-    number_racks = math.ceil(NUM_SAMPLES/len(dest_racks[0].wells()))
+    # prepare beads
+    # One tube for each 24 samples
+    num_tubes = math.ceil(NUM_SAMPLES/24)
+    # How many wells for each tube
+    num_wells = math.ceil(len(wells_plate.wells())/4)
+    # beads and dipersion_reactive
+    beads = beads_rack.wells()[4]
+    dipersion_reactive = beads_rack.wells()[0:4][:num_tubes]
 
-    # dest_sets is a list of lists. Each list is the destination well for each rack
-    # example: [[tube1,tube2,...tube24](first rack),[tube1,tube2(second rack),...]
+    # setup dests
+
+    # Prepare destinations, a list of destination
+    # compose of lists of 24, each 24 is for one tube until end of samples.
+    # example: [[A1,B1,C1...G3,H3],[A4,B4..G4,H4],...]
     dest_sets = [
-        [tube
-         for rack in dest_racks
-         for tube in rack.wells()
-        ][:NUM_SAMPLES][i*len(dest_racks[0].wells()):(i+1)*len(dest_racks[0].wells())]
-        for i in range(number_racks)
+        [well
+         for well in wells_plate.wells()
+        ][:NUM_SAMPLES][i*num_wells:(i+1)*num_wells]
+        for i in range(num_tubes)
         ]
 
-    # transfer buffer to tubes
-    for bf_tube,dests in zip(bf_tubes,dest_sets):
-        transfer_buffer(bf_tube, dests, p1000, tips1000)
+    for bd_tube,dests in zip(dipersion_reactive,dest_sets):
+        # prepare beads
+        prepare_beads(beads, [bd_tube], p1000, tips1000)
+        # transfer
+        transfer_beads(bd_tube, dests, p1000, tips1000)
 
     # track final used tip
     save_tip_info()

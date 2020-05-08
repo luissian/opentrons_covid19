@@ -21,7 +21,7 @@ metadata = {
 
 NUM_SAMPLES = 96
 LYSATE_LABWARE = 'opentrons plastic 2ml tubes'
-PLATE_LABWARE = 'vwr deep generic well plate'
+PLATE_LABWARE = 'nest deep generic well plate'
 VOLUME_LYSATE = 400
 BEADS = False
 
@@ -68,26 +68,46 @@ LYSTUBE_LW_DICT = {
     '2ml tubes': 4
 }
 
+VOICE_FILES_DICT = {
+    'start': './data/sounds/started_process.mp3',
+    'finish': './data/sounds/finished_process.mp3',
+    'close_door': './data/sounds/close_door.mp3',
+    'replace_tipracks': './data/sounds/replace_tipracks.mp3',
+}
 
 # Function definitions
 def check_door():
     return gpio.read_window_switches()
 
-def confirm_door_is_closed(ctx):
+def confirm_door_is_closed():
     #Check if door is opened
     if check_door() == False:
         #Set light color to red and pause
         gpio.set_button_light(1,0,0)
-        ctx.pause(f"Please, close the door")
+        robot.pause()
+        voice_notification('close_door')
         time.sleep(3)
-        confirm_door_is_closed(ctx)
+        confirm_door_is_closed()
     else:
         #Set light color to green
         gpio.set_button_light(0,1,0)
 
 def finish_run():
+    if not robot.is_simulating():
+        voice_notification('finish')
     #Set light color to blue
     gpio.set_button_light(0,0,1)
+
+def voice_notification(action):
+    fname = VOICE_FILES_DICT[action]
+    if os.path.isfile(fname) is True:
+            subprocess.run(
+            ['mpg123', fname],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+            )
+    else:
+        robot.comment(f"Sound file does not exist. Call the technician")
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
     global tip_log
@@ -138,6 +158,7 @@ def pick_up(pip,tiprack):
     if tip_log['count'][pip] == tip_log['max'][pip]:
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
 resuming.')
+        voice_notification('replace_tipracks')
         pip.reset_tipracks()
         tip_log['count'][pip] = 0
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
@@ -175,14 +196,16 @@ def run(ctx: protocol_api.ProtocolContext):
     global robot
     robot = ctx
     # confirm door is closed
-    if not ctx.is_simulating():
-        confirm_door_is_closed(ctx)
+    robot.comment(f"Please, close the door")
+    if not robot.is_simulating():
+        confirm_door_is_closed()
+        voice_notification('start')
 
-    tips1000 = [ctx.load_labware('opentrons_96_filtertiprack_1000ul',
+    tips1000 = [robot.load_labware('opentrons_96_filtertiprack_1000ul',
                                      3, '1000µl tiprack')]
 
     # load pipette
-    p1000 = ctx.load_instrument(
+    p1000 = robot.load_instrument(
         'p1000_single_gen2', 'left', tip_racks=tips1000)
 
     # check source (LYSATE) labware type
@@ -191,12 +214,12 @@ def run(ctx: protocol_api.ProtocolContext):
 following:\nopentrons plastic 2ml tubes')
     # load LYSATE labware
     if 'plate' in LYSATE_LABWARE:
-        source_racks = ctx.load_labware(
+        source_racks = robot.load_labware(
             LY_LW_DICT[LYSATE_LABWARE], '1',
             'RNA LYSATE labware')
     else:
         source_racks = [
-            ctx.load_labware(LY_LW_DICT[LYSATE_LABWARE], slot,
+            robot.load_labware(LY_LW_DICT[LYSATE_LABWARE], slot,
                             'sample LYSATE labware ' + str(i+1))
             for i, slot in enumerate(['4', '1', '5', '2'])
     ]
@@ -207,7 +230,7 @@ following:\nopentrons plastic 2ml tubes')
 following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr deep generic well plate')
 
     # load pcr plate
-    wells_plate = ctx.load_labware(PL_LW_DICT[PLATE_LABWARE], 10,
+    wells_plate = robot.load_labware(PL_LW_DICT[PLATE_LABWARE], 10,
                     'sample LYSATE well plate ')
 
     # setup samples

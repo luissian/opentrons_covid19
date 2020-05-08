@@ -133,25 +133,46 @@ MMTUBE_LW_DICT = {
     '2ml tubes': 4
 }
 
+VOICE_FILES_DICT = {
+    'start': './data/sounds/started_process.mp3',
+    'finish': './data/sounds/finished_process.mp3',
+    'close_door': './data/sounds/close_door.mp3',
+    'replace_tipracks': './data/sounds/replace_tipracks.mp3',
+}
+
 # Function definitions
 def check_door():
     return gpio.read_window_switches()
 
-def confirm_door_is_closed(ctx):
+def confirm_door_is_closed():
     #Check if door is opened
     if check_door() == False:
         #Set light color to red and pause
         gpio.set_button_light(1,0,0)
-        ctx.pause(f"Please, close the door")
+        robot.pause()
+        voice_notification('close_door')
         time.sleep(3)
-        confirm_door_is_closed(ctx)
+        confirm_door_is_closed()
     else:
         #Set light color to green
         gpio.set_button_light(0,1,0)
 
 def finish_run():
+    if not robot.is_simulating():
+        voice_notification('finish')
     #Set light color to blue
     gpio.set_button_light(0,0,1)
+
+def voice_notification(action):
+    fname = VOICE_FILES_DICT[action]
+    if os.path.isfile(fname) is True:
+            subprocess.run(
+            ['mpg123', fname],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+            )
+    else:
+        robot.comment(f"Sound file does not exist. Call the technician")
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/C/tip_log.json'):
     global tip_log
@@ -202,6 +223,7 @@ def pick_up(pip,tiprack):
     if tip_log['count'][pip] == tip_log['max'][pip]:
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
 resuming.')
+        voice_notification('replace_tipracks')
         pip.reset_tipracks()
         tip_log['count'][pip] = 0
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
@@ -379,22 +401,24 @@ def run(ctx: protocol_api.ProtocolContext):
     robot = ctx
 
     # confirm door is closed
-    if not ctx.is_simulating():
-        confirm_door_is_closed(ctx)
+    robot.comment(f"Please, close the door")
+    if not robot.is_simulating():
+        confirm_door_is_closed()
+        voice_notification('start')
 
     # define tips
     tips20 = [
-        ctx.load_labware('opentrons_96_filtertiprack_20ul', slot)
+        robot.load_labware('opentrons_96_filtertiprack_20ul', slot)
         for slot in ['6', '9', '8', '7']
     ]
-    tips300 = [ctx.load_labware('opentrons_96_filtertiprack_200ul', '3')]
+    tips300 = [robot.load_labware('opentrons_96_filtertiprack_200ul', '3')]
 
     # define pipettes
-    p20 = ctx.load_instrument('p20_single_gen2', 'right', tip_racks=tips20)
-    p300 = ctx.load_instrument('p300_single_gen2', 'left', tip_racks=tips300)
+    p20 = robot.load_instrument('p20_single_gen2', 'right', tip_racks=tips20)
+    p300 = robot.load_instrument('p300_single_gen2', 'left', tip_racks=tips300)
 
     # tempdeck module
-    tempdeck = ctx.load_module('tempdeck', '10')
+    tempdeck = robot.load_module('tempdeck', '10')
     tempdeck.set_temperature(4)
 
     # check mastermix labware type
@@ -403,7 +427,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
 
     # load mastermix labware
-    mm_rack = ctx.load_labware(
+    mm_rack = robot.load_labware(
         MM_LW_DICT[MM_LABWARE], '11',
         MM_LABWARE)
 
@@ -429,12 +453,12 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # load elution labware
     if 'plate' in ELUTION_LABWARE:
-        source_racks = ctx.load_labware(
+        source_racks = robot.load_labware(
             EL_LW_DICT[ELUTION_LABWARE], '1',
             'RNA elution labware')
     else:
         source_racks = [
-            ctx.load_labware(EL_LW_DICT[ELUTION_LABWARE], slot,
+            robot.load_labware(EL_LW_DICT[ELUTION_LABWARE], slot,
                             'RNA elution labware ' + str(i+1))
             for i, slot in enumerate(['4', '1', '5', '2'])
     ]
@@ -455,6 +479,8 @@ def run(ctx: protocol_api.ProtocolContext):
     # transfer mastermix
     if TRANSFER_MASTERMIX:
         transfer_mastermix(mm_tube, dests, p300, p20, tips300, tips20)
+        if TRANSFER_SAMPLES:
+            robot.pause(f"Please, check that all wells have received the right ammount of mastermix")
 
     # transfer samples to corresponding locations
     if TRANSFER_SAMPLES:

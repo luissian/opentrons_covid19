@@ -59,25 +59,46 @@ PL_LW_DICT = {
     'vwr deep generic well plate': 'vwr_96_deepwellplate_2000ul'
 }
 
+VOICE_FILES_DICT = {
+    'start': './data/sounds/started_process.mp3',
+    'finish': './data/sounds/finished_process.mp3',
+    'close_door': './data/sounds/close_door.mp3',
+    'replace_tipracks': './data/sounds/replace_tipracks.mp3',
+}
+
 # Function definitions
 def check_door():
     return gpio.read_window_switches()
 
-def confirm_door_is_closed(ctx):
+def confirm_door_is_closed():
     #Check if door is opened
     if check_door() == False:
         #Set light color to red and pause
         gpio.set_button_light(1,0,0)
-        ctx.pause(f"Please, close the door")
+        robot.pause()
+        voice_notification('close_door')
         time.sleep(3)
-        confirm_door_is_closed(ctx)
+        confirm_door_is_closed()
     else:
         #Set light color to green
         gpio.set_button_light(0,1,0)
 
 def finish_run():
+    if not robot.is_simulating():
+        voice_notification('finish')
     #Set light color to blue
     gpio.set_button_light(0,0,1)
+
+def voice_notification(action):
+    fname = VOICE_FILES_DICT[action]
+    if os.path.isfile(fname) is True:
+            subprocess.run(
+            ['mpg123', fname],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+            )
+    else:
+        robot.comment(f"Sound file does not exist. Call the technician")
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
     global tip_log
@@ -128,6 +149,7 @@ def pick_up(pip,tiprack):
     if tip_log['count'][pip] == tip_log['max'][pip]:
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
 resuming.')
+        voice_notification('replace_tipracks')
         pip.reset_tipracks()
         tip_log['count'][pip] = 0
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
@@ -158,18 +180,21 @@ def prepare_beads(bd_tube,eth_tubes,pip,tiprack):
             pick_up(pip,tiprack)
         pip.transfer(480, bd_tube.bottom(2),e.bottom(40),air_gap=10,new_tip='never')
         pip.blow_out(e.bottom(40))
-        drop(pip)
+        # drop(pip)
 
 def transfer_beads(beads_tube, dests, pip,tiprack):
     max_trans_per_asp = 2  # 1000/VOLUME_BUFFER = 3
     split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
-    pick_up(pip,tiprack)
- # Mix bead tubes prior to dispensing
-    pip.flow_rate.aspirate = 200
-    pip.flow_rate.dispense = 2000
-    pip.mix(6,800,beads_tube.bottom(15))
+    # pick_up(pip,tiprack)
+    # Mix bead tubes prior to dispensing
+    pip.flow_rate.aspirate = 800
+    pip.flow_rate.dispense = 8000
+    # pip.mix(12,800,beads_tube.bottom(15))
+    for i in range(12):
+        pip.aspirate(800, beads_tube.bottom(35))
+        pip.dispense(800, beads_tube.bottom(2))
     pip.flow_rate.aspirate = 100
     pip.flow_rate.dispense = 1000
     for set in dest_sets:
@@ -186,14 +211,16 @@ def run(ctx: protocol_api.ProtocolContext):
     robot = ctx
 
     # confirm door is closed
-    if not ctx.is_simulating():
-        confirm_door_is_closed(ctx)
+    robot.comment(f"Please, close the door")
+    if not robot.is_simulating():
+        confirm_door_is_closed()
+        voice_notification('start')
 
-    tips1000 = [ctx.load_labware('opentrons_96_filtertiprack_1000ul',
+    tips1000 = [robot.load_labware('opentrons_96_filtertiprack_1000ul',
                                      3, '1000µl tiprack')]
 
     # load pipette
-    p1000 = ctx.load_instrument(
+    p1000 = robot.load_instrument(
         'p1000_single_gen2', 'left', tip_racks=tips1000)
 
     # check source (elution) labware type
@@ -202,7 +229,7 @@ def run(ctx: protocol_api.ProtocolContext):
 following:\nopentrons plastic 50ml tubes')
 
     # load mastermix labware
-    beads_rack = ctx.load_labware(
+    beads_rack = robot.load_labware(
         BD_LW_DICT[BEADS_LABWARE], '8',
         BEADS_LABWARE)
 
@@ -212,7 +239,7 @@ following:\nopentrons plastic 50ml tubes')
 following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr deep generic well plate')
 
     # load pcr plate
-    wells_plate = ctx.load_labware(PL_LW_DICT[PLATE_LABWARE], 10,
+    wells_plate = robot.load_labware(PL_LW_DICT[PLATE_LABWARE], 10,
                     'sample elution well plate ')
 
     # prepare beads
@@ -220,11 +247,9 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     num_tubes = math.ceil(NUM_SAMPLES/24)
     # How many wells for each tube
     num_wells = math.ceil(len(wells_plate.wells())/4)
-    # beads and ethanol
+    # beads and dipersion_reactive
     beads = beads_rack.wells()[4]
-    ethanol = beads_rack.wells()[0:4][:num_tubes]
-
-    prepare_beads(beads,ethanol,p1000,tips1000)
+    dipersion_reactive = beads_rack.wells()[0:4][:num_tubes]
 
     # setup dests
 
@@ -238,8 +263,10 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         for i in range(num_tubes)
         ]
 
-    # transfer
-    for bd_tube,dests in zip(ethanol,dest_sets):
+    for bd_tube,dests in zip(dipersion_reactive,dest_sets):
+        # prepare beads
+        prepare_beads(beads, [bd_tube], p1000, tips1000)
+        # transfer
         transfer_beads(bd_tube, dests, p1000, tips1000)
 
     # track final used tip

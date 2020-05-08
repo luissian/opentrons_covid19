@@ -77,28 +77,28 @@ def confirm_door_is_closed():
         gpio.set_button_light(1,0,0)
         robot.pause()
         voice_notification('close_door')
-        time.sleep(3)
+        time.sleep(5)
         confirm_door_is_closed()
     else:
         #Set light color to green
         gpio.set_button_light(0,1,0)
 
 def finish_run():
-    if not robot.is_simulating():
-        voice_notification('finish')
+    voice_notification('finish')
     #Set light color to blue
     gpio.set_button_light(0,0,1)
 
 def voice_notification(action):
-    fname = VOICE_FILES_DICT[action]
-    if os.path.isfile(fname) is True:
-            subprocess.run(
-            ['mpg123', fname],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-            )
-    else:
-        robot.comment(f"Sound file does not exist. Call the technician")
+    if not robot.is_simulating():
+        fname = VOICE_FILES_DICT[action]
+        if os.path.isfile(fname) is True:
+                subprocess.run(
+                ['mpg123', fname],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+                )
+        else:
+            robot.comment(f"Sound file does not exist. Call the technician")
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
     global tip_log
@@ -147,9 +147,11 @@ def pick_up(pip,tiprack):
         tip_log = {}
     tip_log = retrieve_tip_info(pip,tiprack)
     if tip_log['count'][pip] == tip_log['max'][pip]:
+        voice_notification('replace_tipracks')
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
 resuming.')
-        voice_notification('replace_tipracks')
+        if not robot.is_simulating():
+            confirm_door_is_closed()
         pip.reset_tipracks()
         tip_log['count'][pip] = 0
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
@@ -214,7 +216,9 @@ def run(ctx: protocol_api.ProtocolContext):
     robot.comment(f"Please, close the door")
     if not robot.is_simulating():
         confirm_door_is_closed()
-        voice_notification('start')
+
+    # Begin run
+    voice_notification('start')
 
     tips1000 = [robot.load_labware('opentrons_96_filtertiprack_1000ul',
                                      3, '1000µl tiprack')]

@@ -403,7 +403,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     ## First incubate on magnet.
     magdeck.engage(height_from_base=22)
-    robot.delay(minutes=5, msg='Incubating on magnet for 5 minutes.')
+    robot.delay(minutes=7, msg='Incubating on magnet for 7 minutes.')
 
     # remove supernatant with P1000
     remove_supernatant(mag_samples_s,waste,p1000,tips1000)

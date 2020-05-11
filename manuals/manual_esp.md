@@ -82,6 +82,26 @@ La ventana de la aplicación se divide en 3 secciones verticales:
 
 ## Conectar un robot
 
+En la aplicación hacemos click en la primera opción del menú lateral de la izquierda: `Robot`. Veremos que en el panel del medio se muestran los diferentes robots disponibles para operar. Si haces click en cualquiera de ellos verás en el panel lateral de la derecha información y opciones de configuración para dicho robot, como la opción de encender las luces internas con el botón `Lights`.
+
+**Nota**: Enceder las luces es recomendable para localizar fácilmente el robot que vas a utilizar. También son de ayuda a la hora de colocar y sacar el material de la cabina.
+
+**Nota**: Los robots tipo **C** no tienen luces internas.
+
+![opentrons_app_mainrobot.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_mainrobot.jpg?raw=true)
+
+Para poder operar el robot, tendemos que dar la orden de conectarnos a él. Para ello, haz click en la pequeña palanca a la dereha del nombre del robot en el panel de en medio o en el botón `Connect` en el panel de la derecha tras haber seleccionado el robot en el del medio.
+
+ ![opentrons_app_connectedrobot.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_connectedrobot.jpg?raw=true)
+
+ Un baner verde en la parte superior del tercer panel nos confirmará a qué robot nos hemos conectado con éxito.
+
+ **Nota**: Solo puedes estar conectado a un robot al mismo tiempo. Los demás seguirán ejecutando sus órdenes aunque te desconectes de ellos, pero cualquier configuración hecha en un robot corre el riesgo de perderse si te desconectas antes de ejecutar una orden, por lo que es recomendable que en caso de desconexión vuelvas a empezar la configuración de tu protocolo desde el principio.
+
+ **Nota**: Si te conectas a un robot que está en funcionamiento, el baner superior en color amarillo te lo indicará cuando te conectes. Mientras está en funcionamiento no podrás darle nuevas órdenes, solo ver su información y seguir la ejecución actual como veremos más adelante.
+
+ **Nota**: Aunque desde ambos PCs puedes conectarte a todos los robots (estén o no en tu misma sala), nunca debes operar un robot fuera de tu campo visual. No sabes qué hay dentro de la cabina o si hay alguien manipulándolo en ese momento. Asegúrate siempre a qué robot estás conectando antes de hacer nada.
+
 ## Cargar un protocolo
 
 ## Calibrar un protocolo

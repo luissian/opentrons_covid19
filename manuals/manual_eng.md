@@ -82,6 +82,26 @@ The app interface is divided in 3 vertical sections:
 
 ## Connecting to a robot
 
+Click on the first option displayed in the left menu inside the app: `Robot`. The list of available robots to connect to will be displayed in the middle panel. Click on any of them to see the robot info in the right panel, along with some configuration options. like the option to turn on/off the lights with the button `Lights`.
+
+**Note**: Turning on the lights is a good practice to confirm the robot you are going to use. It also helps when seting up or removing the labware inside the hood before and after a run.
+
+**Note**: Type **C** robots does not have lights.
+
+![opentrons_app_mainrobot.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_mainrobot.jpg?raw=true)
+
+In order to operate a robot, we need to connect to it. You can do it either by activating the little slider button at the right of its name in the middle panel or by clicking on the `Connect``button in the right panel after selecting the robot in the middle one.
+
+ ![opentrons_app_connectedrobot.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_connectedrobot.jpg?raw=true)
+
+ A green banner at the top will confirm you are sucessfully connecte to a robot and its name.
+
+ **Note**: You can only be connected to one robot at the same time. All the robots will continue executing their given orders after disconnected, but any configuration done in a robot might get lost if disconnected before starting the run, so it is recommended that in case of disconnetion you start configurating your experiment again.
+
+ **Note**: If you connect to a robot that is already running a protocol, it will be notified with a yellow banner at the top. While a protocol is running you can not execute new orders on the robot, only monitor the exetution and display robot info and configuration.
+
+ **Note**: Although you can connect to all robots from the two PCs, it is highly remmended not to operate a robot which is not in your sight. You do not know what or who might be inside the hood. Always double check which orobot you are connecte to before giving an order.
+
 ## Loading a protocol
 
 ## Calibrating a protocol

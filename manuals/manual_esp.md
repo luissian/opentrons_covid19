@@ -104,6 +104,24 @@ Para poder operar el robot, tendemos que dar la orden de conectarnos a él. Para
 
 ## Cargar un protocolo
 
+Esta es la segunda opción del panel de la izquierda: `Protocol`. Cuando accedas a esta ventana, en el panel de la derecha verás el protocolo que se encuentra actualmente cargado en el robot de la última ejecución.
+
+![opentrons_app_mainprotocol.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_mainprotocol.jpg?raw=true)
+
+Si quieres cargar un nuevo protocolo, tan solo busca el archivo `.py` correspondiente y arrástralo al panel del medio o haz click en el botón `Open` del mismo panel y selecciona el archivo deseado.
+
+En el panel de la derecha podemos ver el nombre del protocolo, versión, autores y versión de la API requerida, seguido de las pipetas y módulos que debe haber instalados en el robot, y finalmente una lista del labware que se necesitará.
+
+**Nota**: Si las pipetas y módulos requeridos no correpsonden con las presentes en el robot o las que esperas para el protocolo (cruz roja junto a su numbre en lugar de un check negro), asegúrate de que estás cargando el protocolo correcto en el robot deseado e inténtalo de nuevo.
+
+**Nota**: Si el módulo requerido aparece como no detectado (círculo vacío donde debería estar un check negro), revisa que el robot al que estás conectado tiene el módulo instalado, que el módulo está conectado a la corriente y al robot, y que el módulo está encendido.
+
+**Nota**: Si quieres reejecutar el mismo protocolo que ya estaba cargado en el robot, no necesitas volver a cargarlo o calibrarlo.
+
+**Nota**: La codificación de los nombres del labware se puede consultar en la tabla de inventario de los robots, o puedes consultarlo en nuestra web.
+
+**Nota**: Aunque el robot pida menos cajas de puntas de las esperadas, ignóralo, siempre hay que poner tantas como se ha diseñado en el protocolo para máximo número de muestras. No te preocupes de rellenar cajas que queden a medias, el robot seguirá usando las cajas que quedan a medias hasta que termine contodas y entonces parará a pedirte que repongas las cajas vacías por nuevas.
+
 ## Calibrar un protocolo
 
 ## Ejecutar un protocolo

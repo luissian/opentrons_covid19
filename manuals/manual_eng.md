@@ -104,6 +104,22 @@ In order to operate a robot, we need to connect to it. You can do it either by a
 
 ## Loading a protocol
 
+Click on the second option of the left menu: `Protocol`. In this window you can see which protocol is already loaded in the robot from the previous run in the right panel.
+
+![opentrons_app_mainprotocol.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_mainprotocol.jpg?raw=true)
+
+To load a new protocol, drag and drop the corresponding `.py` file in the middle panel or click on the button `Open` in the same panel and look for the desired file.
+
+In the right panel we can check tne name of the loaded protocol, version, authors and API version required, followed by the pipettes and modules needed to be installed for the protocol, and finally a list of the labware to use.
+
+**Note**: If the pipettes and modules of the robot do not match the reuirements (you will se a red cross next to their names where a black check should be), make sure you are connected to the right robot and loading the right file and try again.
+
+**Note**: If the required module is not detected (empty circle where a black check should appear), check in the robot that the module is connecte to both power and the robot, and that the module is on.
+
+**Note**: The labware names displayed by the app can be search in our inventary table to discover what they mean, or use our website.
+
+**Note**: The robot may ask for less tips than than expected, but ignore it. Always put as many tip boxes as demanded for the protocol at maximum capacity. In case not all of them are spend, the robot will continue with the half-empied boxes in the next run. Once it run out of tips, the execution will stop and it will ask you to replace the empty tip boxes for new ones.
+
 ## Calibrating a protocol
 
 ## Running a protocol

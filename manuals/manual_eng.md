@@ -54,6 +54,32 @@ Finally, for robot configurations **B** and **C** we will have to power on the m
 
 ## Starting up Opentrons app
 
+The PCs located in the romms of the robots have a common user logging which grants you all the programs needed to operate the robots. Log into the computer followingn the instrctions provided by your administrator or contact support.
+
+Once you are logged in, look for the icon of Opentrons app and open it.
+
+![opentrons_app_icon.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_icon.jpg?raw=true)
+
+The app starts in developper mode, which provides some extra features we need for the correct execution of our protocols, but makes the interface a less user-friendly. Close the debug mode of the app and we are ready to go on.
+
+![close_debug_mode.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/close_debug_mode.jpg?raw=true)
+
+The app interface is divided in 3 vertical sections:
+
+![opentrons_app_mainwindow.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_mainwindow.jpg?raw=true)
+
+- Left you have a menu to navigate between the windows robot, protocol, calibration and run.
+
+![opentrons_app_leftmenu.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_leftmenu.jpg?raw=true)
+
+- In the middle panel we have the orders we can execute in the robot from the active window.
+
+![opentrons_app_middlemenu.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_middlemenu.jpg?raw=true)
+
+- To the right we have the largest panel, which shows information for the user and different configuration and interative options. As the previous panel, it contents depen on the active window.
+
+![opentrons_app_rightmenu.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_rightmenu.jpg?raw=true)
+
 ## Connecting to a robot
 
 ## Loading a protocol

@@ -54,6 +54,32 @@ Finalmente, en el caso de los robots tipo **B** y **C** tendremos que encender l
 
 ## Encender la aplicación de Opentrons
 
+Los PCs instalados en las mismas salas que los robots tienen un usuario común que permite acceder al equipo con todos los programas que necesitarás. Logueate siguiendo las instrucciones que te habrá proporcionado el administrador o ponte en contacto con soporte.
+
+Una vez en el escritorio del equipo, busca el logo de la aplicación Opentrons y ábrela.
+
+![opentrons_app_icon.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_icon.jpg?raw=true)
+
+La aplicación se abre en modo desarrollador, ya que de otra forma no tendríamos acceso a algunas características necesarias para el correcto funcionamiento de nustros robots, pero a cambio produce efectos en la interfaz que la pueden hacer menos amigable. Cierra el modo debug de la aplicación y podemos continuar.
+
+![close_debug_mode.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/close_debug_mode.jpg?raw=true)
+
+La ventana de la aplicación se divide en 3 secciones verticales:
+
+![opentrons_app_mainwindow.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_mainwindow.jpg?raw=true)
+
+- A la izquierda del todo tenemos un menú que nos permite cambiar entre las ventanas de robot, protocolo, calibración y ejecución.
+
+![opentrons_app_leftmenu.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_leftmenu.jpg?raw=true)
+
+- En el panel del medio tenemos las posibles órdenes que podemos dar al robot desde la ventana en la que nos encontramos.
+
+![opentrons_app_middlemenu.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_middlemenu.jpg?raw=true)
+
+- En el panel de la derecha, el más grande de los tres, se presenta la información para el usuario así como opciones de configuración e interacción con el robot. Como la anterior, depende de la ventana en la que nos encontremos el contenido de este panel variará.
+
+![opentrons_app_rightmenu.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_rightmenu.jpg?raw=true)
+
 ## Conectar un robot
 
 ## Cargar un protocolo

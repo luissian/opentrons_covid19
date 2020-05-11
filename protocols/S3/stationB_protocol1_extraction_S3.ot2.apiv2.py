@@ -290,7 +290,7 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
     ## Incubation steps
     robot.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
     magdeck.engage(height_from_base=22)
-    robot.delay(seconds=120, msg='Incubating on magnet for 60 seconds.')
+    robot.delay(seconds=120, msg='Incubating on magnet for 120 seconds.')
 
     aspire_default_speed = pip.flow_rate.aspirate
     pip.flow_rate.aspirate = 50
@@ -399,7 +399,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         mix_beads(7, mag_samples_m,m300,tips300)
 
     # incubate off the magnet
-    robot.delay(minutes=10, msg='Incubating off magnet for 5 minutes.')
+    robot.delay(minutes=10, msg='Incubating off magnet for 10 minutes.')
 
     ## First incubate on magnet.
     magdeck.engage(height_from_base=22)

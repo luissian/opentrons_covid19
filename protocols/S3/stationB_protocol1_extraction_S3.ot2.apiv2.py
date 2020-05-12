@@ -4,7 +4,7 @@ from opentrons.drivers.rpi_drivers import gpio
 import time
 import math
 import os
-from os import subprocess
+import subprocess
 import json
 
 # metadata

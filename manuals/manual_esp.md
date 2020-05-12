@@ -124,4 +124,59 @@ En el panel de la derecha podemos ver el nombre del protocolo, versión, autores
 
 ## Calibrar un protocolo
 
+En la tercera opción del menú del panel de la izquierda, `Calibrate`, podremos ajustar la posición del brazo del robot y sus movimientos para que se mueva por la cabina correctamente y reconozca el labware al milímetro.
+
+![opentrons_app_maincalibrate.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_maincalibrate.jpg?raw=true)
+
+**Solo es necesario calibrar un protocolo si:**
+- es la primera vez que se ejecuta ese protocolo en este robot
+- se han modificado las opciones labware utilizado respecto a ejecuciones previas
+- se ha observado que el robot empieza a fallar a la hora de coger puntas, golpea o roza el labware al moverse, o no baja hasta la altura correcta dentro de los pocillos/tubos para realizar su programa.
+
+**Nota**: Si tras calibrar el protocolo varias veces el brazo y las pipetas siguieran rozando o golpeando el labware al moverse por la cabina, realiza una calibración del deck. Si esto tampoco solucionara el problema, contaca a soporte.
+
+**No es necesario realizar una calibración si:**
+- estás volviendo a ejecutar el mismo protocolo que se ha ejecutado previamente en el robot.
+- el único cambio en el protocolo ha sido el número de muestras.
+
+En el panel central se muestra una lista del labware requerido para ejecutar el protocolo. Para que aparezca todo el labware y poder calibrarlo de una sola vez, es recomendable calibrarlo para una ejecución con el máximo número de muestras y con todos los pasos a posibles realizar.
+
+Hay que iniciar la calibración con la cabina vacía (a exepción de los módulos requeridos, uqe tienen que estar conectados y encendidos) y las pipetas sin puntas, y es necesario que el deck haya sido calibrado previamente.
+
+Al iniciar la calibración se empezará por las pipetas. Te pedirá paso a paso que quites el cubo de basura de las puntas y pongas una punta en las pipetas, y él solo tocará unos sensores normalemente ocultos bajo el cubo para comprobar el movimiento y posicionamiento de las puntas. Una vez termine el proceso para ambas pipetas, vuelve a poner cuidadosamente el cubo para cubrir los sonsores.
+
+![opentrons_calibration_metalpins.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_calibration_metalpins.jpg?raw=true)
+
+**Nota**: Los sensores son unas plaquitas de metal muy delicadas y sensibles. Ten mucho cuidado al quitar y poner el cubo de basura o podrías dañarlos.
+
+**Nota**: En caso de que uno de los sensores resulte dañado o el posicionamiento de la pipeta sea incorrecto debido a una mala calibración del deck, el brazo del robot no se detendrá y podrá causar daños. Si esto ocurre, apaga el robot rápidamente pulsadno el botón de apagado situado al fondo de la parte inferior del panel laterla izquierdo del robot.
+
+**Nota**: En caso de que haya habido una colisión o los sensores no hayan funcionado o hayan resultado dañados, ponte en contacto con soporte.
+
+**Nota**: Cuando el protocolo solo necesita una pipeta, el proceso de calibrado puede entrar en bucle y pedirte varias veces que calibres la misma pipeta. Si esto ocurre, una vez hayas terminado de calibrar la pipeta y aparezca el botón `Next pipette` no pulses en él. En su lugar pulsa en el primer tiprack en el panel del medio para continuar con la calibración.
+
+Una vez acabes de calibrar las pipetas y pases al primer labware, las puntas, te aparecerá una plantilla con la colocación en el deck de los módulos (si los hubiera) y del labware. Es hora de colocarlo todo tal y como se indica en la plantilla, pero todo vacío. Sigue las instrucciones de la sección `Colocar el labware en la cabina` de este manual para hacerlo correctamente. Solo estamos calibrando por el momento y si hubiera líquidos se podría salpicar, manchar o contaminar el labware y la cabina.
+
+![opentrons_calibration_labwarelayout.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_calibration_labwarelayout.jpg?raw=true)
+
+Ahora vamos a comenzar a calibrar las cajas de puntas. El robot desplazará la pipeta correspondiente sobre la punta superior izquierda de cada caja, y usando los controles de la aplicación debe colocarse la pipeta centrada sobre la punta y a ras de su parte superior (a la altura donde acaba la punta debe comenzar la pipeta). Cuando estemos en posición probaremos a coger la punta con la pipeta y si la ha cogido correctamente ese tiprack estará calibrado. Si falla habrá que repetir el proceso hasta que lo haga correctamente.
+
+![opentrons_calibration_controls.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_calibration_controls.jpg?raw=true)
+
+**Nota**: La pipeta monocanal de 1000µl puede hacer sacudidas extrañasal recoger la punta. Esto es un comportamiento que no depende del robot sino de la aplicación, y puede desactivarse dentro de la aplicacción en la ventana `Robot`, en la sección `PIPETTES & MODULES` del panel central. Selecciona el botón `SETTINGS` correspondiente a la pipeta y habrá un tickbox con la opción de `shaking` que se puede desactivar.
+
+**Nota**: Las pipetas multicanal no pueden calibrarse usando solo una punta, tienes que mirar toda la primera fila de puntas y asegurarte de que no solo una pipeta está centrada y a la altura correcta, sino que de media todas lo están.
+
+Finalmente calibraremos el resto del labware. La pipeta monocanal de la derecha habrá cogido una punta del último tiprack calibrado y la usará para este paso. Uno por uno, la pipeta se desplazará al primer pocillo o tubo de cada labware y deberemos calibrarla usando los controles de la aplicación. El extremo inferior de la punta deberá quedar centrada en el pocillo o tubo y a la altura que este comienza en su parte superior.
+
+**Nota**: Cuanto más larga sea la punta, más imprecisa será la calibración, ya que hay mayores posibilidades de que la punta esté ligeramente desviada o la pipeta la haya cogido algo torcida. Se especialmente cuidadoso su utilizas la pipeta monocanal de 1000µl.
+
+**Nota**: No se pueden usar pipetas multicanal para calibrar labware.
+
+Cuando hayamos terminado de calibrar el labware, la pipeta devolverá la punta a su posición y estaremos listos para ejecutar el protocolo.
+
+## Colocar el labware en la cabina
+
 ## Ejecutar un protocolo
+
+## Limpieza del robot

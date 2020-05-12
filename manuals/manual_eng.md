@@ -122,4 +122,8 @@ In the right panel we can check tne name of the loaded protocol, version, author
 
 ## Calibrating a protocol
 
+## Labware setup inside the hood
+
 ## Running a protocol
+
+## Cleaning the robot

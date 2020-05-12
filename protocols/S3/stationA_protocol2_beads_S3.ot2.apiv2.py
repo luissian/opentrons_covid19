@@ -3,8 +3,9 @@ from opentrons.types import Point
 from opentrons.drivers.rpi_drivers import gpio
 import time
 import math
-import json
 import os
+from os import subprocess
+import json
 
 # metadata
 metadata = {

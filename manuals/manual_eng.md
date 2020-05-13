@@ -192,4 +192,44 @@ In order to set up the labware into the hood, follow the instructions provided b
 
 ## Running a protocol
 
+The last option of the left panel menu, `Run`, allow us to give the execution order to the robot and monitor its progress. In this window we can see a chronometer showing the execution time and the buttons `START`, `PAUSE`, `RESUME`, `CANCEL RUN` and `RESET RUN`, depending on the execution status:
+
+- `START`:
+
+This order starts the tun of the uploaded protocol. Make sure that the loaded protocol is the right one, that you are connected to the correct robot, that the labware is setup and without lids on, that reuired modules are on and pipettes with no tips attached before clicking on the button.
+
+ ![opentrons_run_start.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_run_start.jpg?raw=true)
+
+ - `PAUSE`:
+
+ pause the run in progress. It can take a few seconds to pause, as it has to wait until the current order is completed before pausing.
+
+ **Note**: In case the robot finds a recuperable execution error, like door is open, tips are over or trash is full, the execution will pause as if the button `PAUSE` was cliked on. This status is notified to the user both verbally and via text in the log. Once the problem is fixed, click on `RESUME` to resume the run.
+
+ ![opentrons_run_pause.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_run_pause.jpg?raw=true)
+
+ - `RESUME`:
+
+ Resume execution after pausing.
+
+ ![opentrons_run_pauserestart.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_run_pauserestart.jpg?raw=true)
+
+- `CANCEL RUN`:
+
+Abort run in progress. This order requires confirmation and all progress will be lost.
+
+**Note**: After cancelling a run, the robot will erase all information about the run, so it is reommended to refill al tips before running anything again.
+
+![opentrons_run_cancelrunconfirmation.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_run_cancelrunconfirmation.jpg?raw=true)
+
+- `RESET RUN`:
+
+Afeter finishing a run the robot will stop. The top baner colour and message will show if the run ended successfully (green), if it is paused (yellow) or got aborted or critical error (red). In order to run the same protocol again it is not needed to upload the same protocol file, but just click on this button and the robot will prepare everything for a new run using the same protocol file.
+
+![opentrons_run_resetrun.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_run_resetrun.jpg?raw=true)
+
+A log of the process will be displayed at all times in the right panel of this window. While running, the log will scroll down and marking in blue the current step , in grey the already completed steps and in black the remaining ones.
+
+**Note**: This log is generated during a simulation prior the actual run, so it can be slightly different from the reality of the run or display the steps at a different speed, so its information has to be taken carefully.
+
 ## Cleaning the robot

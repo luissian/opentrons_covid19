@@ -206,7 +206,9 @@ Esta orden iniciará la ejecución del protocolo cargado. Asegúrate de que el p
 
 Detiene temporalmente la ejecución del protocolo. Puede tardar unos segundos en hacer efecto, ya que tendrá que terminar la orden en curso antes de detenerse.
 
-**Nota**: En caso de que el robot encuentre un error subsanable, como por ejemplo apertura de la puerta, falta de puuntas o basura llena, detendrá la ejecución como si el botón pausa (`PAUSE`) se hubiera pulsado. Esta situación se notifica al operador tanto por texto en el log como con un mensaje sonoro. Una vez el problema ha sido resuelto, pulsando el botón reanudar (`RESUME`) retomará la ejecución.
+**Nota**: En caso de que el robot encuentre un error subsanable, como por ejemplo apertura de la puerta, falta de puntas o basura llena, detendrá la ejecución como si el botón pausa (`PAUSE`) se hubiera pulsado. Esta situación se notifica al operador tanto por texto en el log como con un mensaje sonoro. Una vez el problema ha sido resuelto, pulsando el botón reanudar (`RESUME`) retomará la ejecución.
+
+![opentrons_run_pause.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_run_pause.jpg?raw=true)
 
 - Reanudar (`RESUME`):
 
@@ -220,15 +222,15 @@ Aborta la ejecución del protocolo. Esta orden requiere confirmación y no es re
 
 **Nota**: Tras una cancelación, el robot borrará toda información sobre la ejecución fallida, por lo que es recomendable recargar todas las puntas antes de volver a ejecutar.
 
-![opentrons_run_cancelrun.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_run_cancelrun.jpg?raw=true)
+![opentrons_run_cancelrunconfirmation.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_run_cancelrunconfirmation.jpg?raw=true)
 
 - Resetear protocolo (`RESET RUN`):
 
-Después de terminar una ejecución el robot se detendrá. El color del baner superior y su mensaje nos indicarán si terminó con éxito (verde), quedo pausada (amarillo) o fue abortada por el usuario o un error irrecuperable (rojo). Para ejecutar de neuvo el mismo protocolo no es necesario volver a subir el protocolo, basta con pulsar este botón y preparará el robot para una nueva ejecución del mismo protocolo.
+Después de terminar una ejecución el robot se detendrá. El color del baner superior y su mensaje nos indicarán si terminó con éxito (verde), quedo pausada (amarillo) o fue abortada por el usuario o un error irrecuperable (rojo). Para ejecutar de nuevo el mismo protocolo no es necesario volver a subir el protocolo, basta con pulsar este botón y preparará el robot para una nueva ejecución del mismo protocolo.
 
 ![opentrons_run_resetrun.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_run_resetrun.jpg?raw=true)
 
-En todo momento, en el panel de la derecha veremos un log de los pasos del protocolo. Cuando esté en ejecución, el log irá acanzando y resaltará en azul la orden que se encuentra realizando el robot en ese momento, en gris las ya realizadas y en negro las que quedan para terminar la ejecución.
+En todo momento, en el panel de la derecha de esta ventana veremos un log de los pasos del protocolo. Cuando esté en ejecución, el log irá acanzando y resaltará en azul la orden que se encuentra realizando el robot en ese momento, en gris las ya realizadas y en negro las que quedan para terminar la ejecución.
 
 **Nota**: Este log corresponde con una simulación previa a la ejecución, por lo que puede ser ligeramente diferente de la realidad o ir a una velocidad distinta a la de ejecución real, por lo que debe tomarse con cautela su información.
 

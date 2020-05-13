@@ -94,9 +94,11 @@ Click on the first option displayed in the left menu inside the app: `Robot`. Th
 
 In order to operate a robot, we need to connect to it. You can do it either by activating the little slider button at the right of its name in the middle panel or by clicking on the `Connect``button in the right panel after selecting the robot in the middle one.
 
- ![opentrons_app_connectedrobot.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_connectedrobot.jpg?raw=true)
+ ![opentrons_app_connecttorobot.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_connecttorobot.jpg?raw=true)
 
  A green banner at the top will confirm you are sucessfully connecte to a robot and its name.
+
+  ![opentrons_app_connectedrobot.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_connectedrobot.jpg?raw=true)
 
  **Note**: You can only be connected to one robot at the same time. All the robots will continue executing their given orders after disconnected, but any configuration done in a robot might get lost if disconnected before starting the run, so it is recommended that in case of disconnetion you start configurating your experiment again.
 

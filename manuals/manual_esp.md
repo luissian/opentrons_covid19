@@ -94,9 +94,11 @@ En la aplicación hacemos click en la primera opción del menú lateral de la iz
 
 Para poder operar el robot, tendemos que dar la orden de conectarnos a él. Para ello, haz click en la pequeña palanca a la dereha del nombre del robot en el panel de en medio o en el botón `Connect` en el panel de la derecha tras haber seleccionado el robot en el del medio.
 
- ![opentrons_app_connectedrobot.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_connectedrobot.jpg?raw=true)
+ ![opentrons_app_connecttorobot.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_connecttorobot.jpg?raw=true)
 
  Un baner verde en la parte superior del tercer panel nos confirmará a qué robot nos hemos conectado con éxito.
+
+ ![opentrons_app_connectedrobot.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_connectedrobot.jpg?raw=true)
 
  **Nota**: Solo puedes estar conectado a un robot al mismo tiempo. Los demás seguirán ejecutando sus órdenes aunque te desconectes de ellos, pero cualquier configuración hecha en un robot corre el riesgo de perderse si te desconectas antes de ejecutar una orden, por lo que es recomendable que en caso de desconexión vuelvas a empezar la configuración de tu protocolo desde el principio.
 

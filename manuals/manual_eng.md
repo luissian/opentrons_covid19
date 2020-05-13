@@ -122,6 +122,57 @@ In the right panel we can check tne name of the loaded protocol, version, author
 
 ## Calibrating a protocol
 
+The third option of the menu on the left, `Calibrate`, allows us to adjust the arm position and its movement inside the hood so the robot can do it preciselly and match the labware.
+
+![opentrons_app_maincalibrate.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_maincalibrate.jpg?raw=true)
+
+**Protocol calibration is only needed when:**
+- it is the first time this protocol is being executed in this robot
+- the labware options have been modified since previous executions of the protocol in this robot
+- it has been observed that the robot arm fails to pick up tips, hits the labware when moving or is not able to reach the desired depth inside the tubes/wells.
+
+**Note**: If after calibrate a protocol several times the arm and pipettes still hit the labware when moving inside the hood, perform a deck calibration. If the problem persists, get support.
+
+**Protocol calbration is not needed when**:
+- the same protocol prevously run in this robot is going to be run again.
+- the only changes from previous execution in this robot are related to the number of samples.
+
+The middle panel will show a list of the required labwared for running the protocol. In order to calibrate all the labware at onece, it is recommended to run the protocol for the maximum of samples and all the steps.
+
+Calibration must be started with an ampty hood (but modules, as they have to remain and be plugged and turned on) and the pipettes without tips attached, and deck calibration has to have been previously executed.
+
+Calibration will start with the pipettes. It will guide you step by step to remove the trash for the tips and attach a new tip to the pipettes, and the arm will move to touch the sensors usually coveretd by the trash in order to check the movement and poitioingn of the tips. Once both pipettes have been calibrated, carefully put back the trash in its place to cever the sensors.
+
+![opentrons_calibration_metalpins.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_calibration_metalpins.jpg?raw=true)
+
+**Note**: Sensors are tiny delicate metal pins. Be very careful when removing or setting the trash, or they could be damaged.
+
+**Note**: In case one of the sensors gets damaged or the pipette start position is incorrect due to a bad deck calibration, the arm will move not-stop in a straight line and might cause serious damage. In case this happens, wuickly power off the robot by pushing the power button in the rear bottom of the left side panel.
+
+**Note**: In case of collition or sensors not working, please contact support.
+
+**Note**: If the procol needs only one pipette, the calibration process can go into a loop and ask several times to calibrate the same only pipette. In this case, once you have successfully calibrated the pipette and the button `Next pipette` shows up, do not click on it. Instead, click on the first tiprack option in the middel panel to move to the next step.
+
+Once pipette calibration is complete and you start calibrating the first labware, the tipracks, the app will show a layout of how to set up modules (if they are required) and labware inside the hood. Follow the instructions to set up the labware as shown, but do not put liquids yet, only empty labware. Follow the instructions of the section `Colocar el labware en la cabina` in this manual to do it right. For the moment, we are only calibrating and liquids would become a hazard, potentially splitting and contaminating both labware and deck.
+
+![opentrons_calibration_labwarelayout.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_calibration_labwarelayout.jpg?raw=true)
+
+Now lets move to calibrate tipracks. The robot will move the corresponding pipette above the top-left tip of each tiprack,and using the contols in the app you must move the lower end of the pipette to the height of the top end of the tip and centered into it. When it is in the right position, it will try to attach the tip and if it achives it the tiprack will be calibrated. If it fails to do it, repeat the process until it is done correctly.
+
+![opentrons_calibration_controls.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_calibration_controls.jpg?raw=true)
+
+**Note**: The 1000µl pipette can shake several times when picking up a new tip. This behaviour does not depend on the robot but the app, and can be disabled inside the app in the window `Robot`, in the section `PIPETTES & MODULES` of the middle panel. Click on `SETTINGS` next to the pipette and there is a checkbox saying `shaking` that can be disabled.
+
+**Note**: Multichannel pipettes can not be calibrated with only one tip, you have to use all the column and make sure that not only one is centered and at the right height, but also the average of them are in the correct position.
+
+Finally the rest of the labware will be calibrated. The monocanal pipette on the right will keep a tip from tiprack calibration and will use it in this step. One by one, the pipette wil move to above the first well/tube of each labware and we will calibrate it using the controls in the app. The lower end of the tip must be at the same height as as the top edge of the well/tube and centered into it.
+
+**Note**: The longer the tip is, the less precise the calibratin will be as there are more chances of the tip being bended or the pipette having picked up the tip lightly uncentered. Be particullary careful when calibrating with the 1000µl pipette.
+
+**Note**: Multichannel pipettes can not be used to calibrate labware.
+
+Once labware calibration is over, the pipette will return the tip and we are ready to run the protocol.
+
 ## Labware setup inside the hood
 
 ## Running a protocol

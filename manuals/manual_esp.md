@@ -130,7 +130,7 @@ En la tercera opción del menú del panel de la izquierda, `Calibrate`, podremos
 
 **Solo es necesario calibrar un protocolo si:**
 - es la primera vez que se ejecuta ese protocolo en este robot
-- se han modificado las opciones labware utilizado respecto a ejecuciones previas
+- se han modificado las opciones labware utilizado respecto a ejecuciones previas del protocolo en este robot
 - se ha observado que el robot empieza a fallar a la hora de coger puntas, golpea o roza el labware al moverse, o no baja hasta la altura correcta dentro de los pocillos/tubos para realizar su programa.
 
 **Nota**: Si tras calibrar el protocolo varias veces el brazo y las pipetas siguieran rozando o golpeando el labware al moverse por la cabina, realiza una calibración del deck. Si esto tampoco solucionara el problema, contaca a soporte.
@@ -141,7 +141,7 @@ En la tercera opción del menú del panel de la izquierda, `Calibrate`, podremos
 
 En el panel central se muestra una lista del labware requerido para ejecutar el protocolo. Para que aparezca todo el labware y poder calibrarlo de una sola vez, es recomendable calibrarlo para una ejecución con el máximo número de muestras y con todos los pasos a posibles realizar.
 
-Hay que iniciar la calibración con la cabina vacía (a exepción de los módulos requeridos, uqe tienen que estar conectados y encendidos) y las pipetas sin puntas, y es necesario que el deck haya sido calibrado previamente.
+Hay que iniciar la calibración con la cabina vacía (a exepción de los módulos requeridos, que tienen que estar conectados y encendidos) y las pipetas sin puntas, y es necesario que el deck haya sido calibrado previamente.
 
 Al iniciar la calibración se empezará por las pipetas. Te pedirá paso a paso que quites el cubo de basura de las puntas y pongas una punta en las pipetas, y él solo tocará unos sensores normalemente ocultos bajo el cubo para comprobar el movimiento y posicionamiento de las puntas. Una vez termine el proceso para ambas pipetas, vuelve a poner cuidadosamente el cubo para cubrir los sonsores.
 
@@ -149,7 +149,7 @@ Al iniciar la calibración se empezará por las pipetas. Te pedirá paso a paso 
 
 **Nota**: Los sensores son unas plaquitas de metal muy delicadas y sensibles. Ten mucho cuidado al quitar y poner el cubo de basura o podrías dañarlos.
 
-**Nota**: En caso de que uno de los sensores resulte dañado o el posicionamiento de la pipeta sea incorrecto debido a una mala calibración del deck, el brazo del robot no se detendrá y podrá causar daños. Si esto ocurre, apaga el robot rápidamente pulsadno el botón de apagado situado al fondo de la parte inferior del panel laterla izquierdo del robot.
+**Nota**: En caso de que uno de los sensores resulte dañado o el posicionamiento de la pipeta sea incorrecto debido a una mala calibración del deck, el brazo del robot no se detendrá y podrá causar daños. Si esto ocurre, apaga el robot rápidamente pulsando el botón de apagado situado al fondo de la parte inferior del panel laterla izquierdo del robot.
 
 **Nota**: En caso de que haya habido una colisión o los sensores no hayan funcionado o hayan resultado dañados, ponte en contacto con soporte.
 
@@ -163,7 +163,7 @@ Ahora vamos a comenzar a calibrar las cajas de puntas. El robot desplazará la p
 
 ![opentrons_calibration_controls.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_calibration_controls.jpg?raw=true)
 
-**Nota**: La pipeta monocanal de 1000µl puede hacer sacudidas extrañasal recoger la punta. Esto es un comportamiento que no depende del robot sino de la aplicación, y puede desactivarse dentro de la aplicacción en la ventana `Robot`, en la sección `PIPETTES & MODULES` del panel central. Selecciona el botón `SETTINGS` correspondiente a la pipeta y habrá un tickbox con la opción de `shaking` que se puede desactivar.
+**Nota**: La pipeta monocanal de 1000µl puede hacer sacudidas extrañas al recoger la punta. Esto es un comportamiento que no depende del robot sino de la aplicación, y puede desactivarse dentro de la aplicacción en la ventana `Robot`, en la sección `PIPETTES & MODULES` del panel central. Selecciona el botón `SETTINGS` correspondiente a la pipeta y habrá un checkbox con la opción de `shaking` que se puede desactivar.
 
 **Nota**: Las pipetas multicanal no pueden calibrarse usando solo una punta, tienes que mirar toda la primera fila de puntas y asegurarte de que no solo una pipeta está centrada y a la altura correcta, sino que de media todas lo están.
 

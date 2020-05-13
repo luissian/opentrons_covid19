@@ -14,11 +14,11 @@ The robots are distributed in 2 different locations:
 
 - **Extraction Room**: Located in Orientación Diagnóstica, here are robots **A1, A2, B1, B2, B3 and B4** in the same room with a PC to control them.
 
-![extraction_room_setup.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/extraction_room_setup.jpg?raw=true)
+![extraction_room_setup.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/extraction_room_setup.jpg?raw=true)
 
 - **PCR prep Room**: Inside Virus Respiratorios we find robots **C1 y C2** paired with another PC for their control.
 
-![pcrprep_room_setup.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/pcrprep_room_setup.jpg?raw=true)
+![pcrprep_room_setup.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/pcrprep_room_setup.jpg?raw=true)
 
 ## Powering on the robots
 
@@ -26,18 +26,18 @@ Before starting the robot, please make sure there are no tips attached to any pi
 
 To power on the robot, press the power button located at the rear of the left lateral panel, just above where the power cable is plugged.
 
-![robot_power_button.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/robot_power_button.jpg?raw=true)
+![robot_power_button.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/robot_power_button.jpg?raw=true)
 
 The robot will produce some mechanical noises and it si possible the arem moves home several times. The front led button will blink blue during the startup process.
 
 Once the noise is over and the arm stops moving, the front led will glow blue permanently signalling the robot is ready to take orders.
 
-![robot_front_led.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/robot_front_led.jpg?raw=true)
+![robot_front_led.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/robot_front_led.jpg?raw=true)
 
 Finally, for robot configurations **B** and **C** we will have to power on the magdeck and tempdeck, respectively. Press the power button at the rear of each module, next to wher its power cord is plugged. A white light will glow and once the module stops making noises it will be ready to use.
 
-![tempdeck_power_button.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/tempdeck_power_button.jpg?raw=true)
-![magdeck_power_button.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/magdeck_power_button.jpg?raw=true)
+![tempdeck_power_button.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/tempdeck_power_button.jpg?raw=true)
+![magdeck_power_button.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/magdeck_power_button.jpg?raw=true)
 
 **Note**: The unit **A2** has no blue led in the front button, so it will not show that the robot is booting up neither it is ready to be used. As a consecuence, we will need to check its status through the app as we will explain later.
 
@@ -45,8 +45,8 @@ Finally, for robot configurations **B** and **C** we will have to power on the m
 
 **It smells like something is burning or I see smoke**: Quickly power off the robot or module where the smoke comes from by pushing the power button at the rear of the left side panel. Check that electric plugs are correctly plugged matching the marks inside the male conector with the marks in the female one. If one of the pins has become black or everything was already correctly connected, do not power off the robot and contact support.
 
-![power_connector_frontal_male.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/power_connector_frontal_male.jpg?raw=true)
-![power_connector_frontal_female.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/power_connector_frontal_female.jpg?raw=true)
+![power_connector_frontal_male.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/power_connector_frontal_male.jpg?raw=true)
+![power_connector_frontal_female.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/power_connector_frontal_female.jpg?raw=true)
 
 **I forgot to remove the tip from the pippete before powering on and ...**: Quickly power off the robot by pushing the power button at the rear of the left side panel. Once it has stopped, clean any liquid that can have been split and contact support to evaluate potential damage or discalibration caused by the colition.
 
@@ -58,29 +58,29 @@ The PCs located in the romms of the robots have a common user logging which gran
 
 Once you are logged in, look for the icon of Opentrons app and open it.
 
-![opentrons_app_icon.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_icon.jpg?raw=true)
+![opentrons_app_icon.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/opentrons_app_icon.jpg?raw=true)
 
 The app starts in developper mode, which provides some extra features we need for the correct execution of our protocols, but makes the interface a less user-friendly. Close the debug mode of the app and we are ready to go on.
 
 Close any update mesagges, too. Each update needs to be tested before installing, as they will also update the robots and can modify their behaviour.
 
-![close_debug_mode.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/close_debug_mode.jpg?raw=true)
+![close_debug_mode.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/close_debug_mode.jpg?raw=true)
 
 The app interface is divided in 3 vertical sections:
 
-![opentrons_app_mainwindow.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_mainwindow.jpg?raw=true)
+![opentrons_app_mainwindow.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/opentrons_app_mainwindow.jpg?raw=true)
 
 - Left you have a menu to navigate between the windows robot, protocol, calibration and run.
 
-![opentrons_app_leftmenu.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_leftmenu.jpg?raw=true)
+![opentrons_app_leftmenu.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/opentrons_app_leftmenu.jpg?raw=true)
 
 - In the middle panel we have the orders we can execute in the robot from the active window.
 
-![opentrons_app_middlemenu.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_middlemenu.jpg?raw=true)
+![opentrons_app_middlemenu.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/opentrons_app_middlemenu.jpg?raw=true)
 
 - To the right we have the largest panel, which shows information for the user and different configuration and interative options. As the previous panel, it contents depen on the active window.
 
-![opentrons_app_rightmenu.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_rightmenu.jpg?raw=true)
+![opentrons_app_rightmenu.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/opentrons_app_rightmenu.jpg?raw=true)
 
 ## Connecting to a robot
 
@@ -90,15 +90,15 @@ Click on the first option displayed in the left menu inside the app: `Robot`. Th
 
 **Note**: Type **C** robots does not have lights.
 
-![opentrons_app_mainrobot.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_mainrobot.jpg?raw=true)
+![opentrons_app_mainrobot.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/opentrons_app_mainrobot.jpg?raw=true)
 
 In order to operate a robot, we need to connect to it. You can do it either by activating the little slider button at the right of its name in the middle panel or by clicking on the `Connect``button in the right panel after selecting the robot in the middle one.
 
- ![opentrons_app_connecttorobot.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_connecttorobot.jpg?raw=true)
+ ![opentrons_app_connecttorobot.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/opentrons_app_connecttorobot.jpg?raw=true)
 
  A green banner at the top will confirm you are sucessfully connecte to a robot and its name.
 
-  ![opentrons_app_connectedrobot.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_connectedrobot.jpg?raw=true)
+  ![opentrons_app_connectedrobot.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/opentrons_app_connectedrobot.jpg?raw=true)
 
  **Note**: You can only be connected to one robot at the same time. All the robots will continue executing their given orders after disconnected, but any configuration done in a robot might get lost if disconnected before starting the run, so it is recommended that in case of disconnetion you start configurating your experiment again.
 
@@ -110,7 +110,7 @@ In order to operate a robot, we need to connect to it. You can do it either by a
 
 Click on the second option of the left menu: `Protocol`. In this window you can see which protocol is already loaded in the robot from the previous run in the right panel.
 
-![opentrons_app_mainprotocol.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_mainprotocol.jpg?raw=true)
+![opentrons_app_mainprotocol.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/opentrons_app_mainprotocol.jpg?raw=true)
 
 To load a new protocol, drag and drop the corresponding `.py` file in the middle panel or click on the button `Open` in the same panel and look for the desired file.
 
@@ -128,7 +128,7 @@ In the right panel we can check tne name of the loaded protocol, version, author
 
 The third option of the menu on the left, `Calibrate`, allows us to adjust the arm position and its movement inside the hood so the robot can do it preciselly and match the labware.
 
-![opentrons_app_maincalibrate.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_app_maincalibrate.jpg?raw=true)
+![opentrons_app_maincalibrate.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/opentrons_app_maincalibrate.jpg?raw=true)
 
 **Protocol calibration is only needed when:**
 - it is the first time this protocol is being executed in this robot
@@ -147,7 +147,7 @@ Calibration must be started with an ampty hood (but modules, as they have to rem
 
 Calibration will start with the pipettes. It will guide you step by step to remove the trash for the tips and attach a new tip to the pipettes, and the arm will move to touch the sensors usually coveretd by the trash in order to check the movement and poitioingn of the tips. Once both pipettes have been calibrated, carefully put back the trash in its place to cever the sensors.
 
-![opentrons_calibration_metalpins.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_calibration_metalpins.jpg?raw=true)
+![opentrons_calibration_metalpins.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/opentrons_calibration_metalpins.jpg?raw=true)
 
 **Note**: Sensors are tiny delicate metal pins. Be very careful when removing or setting the trash, or they could be damaged.
 
@@ -159,11 +159,11 @@ Calibration will start with the pipettes. It will guide you step by step to remo
 
 Once pipette calibration is complete and you start calibrating the first labware, the tipracks, the app will show a layout of how to set up modules (if they are required) and labware inside the hood. Follow the instructions to set up the labware as shown, but do not put liquids yet, only empty labware. Follow the instructions of the section `Colocar el labware en la cabina` in this manual to do it right. For the moment, we are only calibrating and liquids would become a hazard, potentially splitting and contaminating both labware and deck.
 
-![opentrons_calibration_labwarelayout.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_calibration_labwarelayout.jpg?raw=true)
+![opentrons_calibration_labwarelayout.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/opentrons_calibration_labwarelayout.jpg?raw=true)
 
 Now lets move to calibrate tipracks. The robot will move the corresponding pipette above the top-left tip of each tiprack,and using the contols in the app you must move the lower end of the pipette to the height of the top end of the tip and centered into it. When it is in the right position, it will try to attach the tip and if it achives it the tiprack will be calibrated. If it fails to do it, repeat the process until it is done correctly.
 
-![opentrons_calibration_controls.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_calibration_controls.jpg?raw=true)
+![opentrons_calibration_controls.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/opentrons_calibration_controls.jpg?raw=true)
 
 **Note**: The 1000µl pipette can shake several times when picking up a new tip. This behaviour does not depend on the robot but the app, and can be disabled inside the app in the window `Robot`, in the section `PIPETTES & MODULES` of the middle panel. Click on `SETTINGS` next to the pipette and there is a checkbox saying `shaking` that can be disabled.
 
@@ -185,11 +185,11 @@ In order to set up the labware into the hood, follow the instructions provided b
 - If possible, put the tubes and boxes with their lid on, and open them only before starting the run.
 - When building an Opentrons' rack, make sure the marked corner of the stand matches with the marked corner of the rack. That marked corner will go on the top-left of the deck slot.
 
-![opentrons_labware_opentronsrack.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_labware_opentronsrack.jpg?raw=true)
+![opentrons_labware_opentronsrack.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/opentrons_labware_opentronsrack.jpg?raw=true)
 
 - When putting a piece of labware in a deck slot, always put first the bottom-right corner into the metal hooks. Then the piece should easily fall into position.
 
-![opentrons_labware_deckslot.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_labware_deckslot.jpg?raw=true)
+![opentrons_labware_deckslot.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/opentrons_labware_deckslot.jpg?raw=true)
 
 - Make sure the tubes are in the right position in their racks.
 - Set up all the tip boxes as if the protocol was going to be executed for the maximum number of samples and steps.
@@ -202,7 +202,7 @@ The last option of the left panel menu, `Run`, allow us to give the execution or
 
 This order starts the tun of the uploaded protocol. Make sure that the loaded protocol is the right one, that you are connected to the correct robot, that the labware is setup and without lids on, that reuired modules are on and pipettes with no tips attached before clicking on the button.
 
- ![opentrons_run_start.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_run_start.jpg?raw=true)
+ ![opentrons_run_start.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/opentrons_run_start.jpg?raw=true)
 
  - `PAUSE`:
 
@@ -210,13 +210,13 @@ This order starts the tun of the uploaded protocol. Make sure that the loaded pr
 
  **Note**: In case the robot finds a recuperable execution error, like door is open, tips are over or trash is full, the execution will pause as if the button `PAUSE` was cliked on. This status is notified to the user both verbally and via text in the log. Once the problem is fixed, click on `RESUME` to resume the run.
 
- ![opentrons_run_pause.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_run_pause.jpg?raw=true)
+ ![opentrons_run_pause.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/opentrons_run_pause.jpg?raw=true)
 
  - `RESUME`:
 
  Resume execution after pausing.
 
- ![opentrons_run_pauserestart.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_run_pauserestart.jpg?raw=true)
+ ![opentrons_run_pauserestart.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/opentrons_run_pauserestart.jpg?raw=true)
 
 - `CANCEL RUN`:
 
@@ -224,13 +224,13 @@ Abort run in progress. This order requires confirmation and all progress will be
 
 **Note**: After cancelling a run, the robot will erase all information about the run, so it is reommended to refill al tips before running anything again.
 
-![opentrons_run_cancelrunconfirmation.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_run_cancelrunconfirmation.jpg?raw=true)
+![opentrons_run_cancelrunconfirmation.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/opentrons_run_cancelrunconfirmation.jpg?raw=true)
 
 - `RESET RUN`:
 
 Afeter finishing a run the robot will stop. The top baner colour and message will show if the run ended successfully (green), if it is paused (yellow) or got aborted or critical error (red). In order to run the same protocol again it is not needed to upload the same protocol file, but just click on this button and the robot will prepare everything for a new run using the same protocol file.
 
-![opentrons_run_resetrun.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_run_resetrun.jpg?raw=true)
+![opentrons_run_resetrun.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/opentrons_run_resetrun.jpg?raw=true)
 
 A log of the process will be displayed at all times in the right panel of this window. While running, the log will scroll down and marking in blue the current step , in grey the already completed steps and in black the remaining ones.
 

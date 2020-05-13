@@ -62,6 +62,8 @@ Once you are logged in, look for the icon of Opentrons app and open it.
 
 The app starts in developper mode, which provides some extra features we need for the correct execution of our protocols, but makes the interface a less user-friendly. Close the debug mode of the app and we are ready to go on.
 
+Close any update mesagges, too. Each update needs to be tested before installing, as they will also update the robots and can modify their behaviour.
+
 ![close_debug_mode.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/close_debug_mode.jpg?raw=true)
 
 The app interface is divided in 3 vertical sections:

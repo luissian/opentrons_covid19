@@ -62,6 +62,8 @@ Una vez en el escritorio del equipo, busca el logo de la aplicación Opentrons y
 
 La aplicación se abre en modo desarrollador, ya que de otra forma no tendríamos acceso a algunas características necesarias para el correcto funcionamiento de nustros robots, pero a cambio produce efectos en la interfaz que la pueden hacer menos amigable. Cierra el modo debug de la aplicación y podemos continuar.
 
+Cierra también las peticiones de actualización. Cada actualización debe ser testada a fondo antes de ser instalada, ya que también actualizará los robots y puede modificar su funcionamiento.
+
 ![close_debug_mode.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/close_debug_mode.jpg?raw=true)
 
 La ventana de la aplicación se divide en 3 secciones verticales:

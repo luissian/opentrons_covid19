@@ -177,7 +177,7 @@ Cuando hayamos terminado de calibrar el labware, la pipeta devolverá la punta a
 
 ## Colocar el labware en la cabina
 
-Para colocar el labware dentro de la cabina, sigue las instrucciones de cada protocolo siguiendo las siguientes recomendaciones:
+Para colocar el labware dentro de la cabina, sigue las instrucciones que te han sido porporcionadas por el administrador para cada protocolo siguiendo las siguientes recomendaciones:
 - Asegúrate de que el robot está detenido.
 - Empieza siempre a colocar labware por las casillas del fondo (10 y 11), luego la tercera fila (7, 8 y 9), el medio (4, 5 y 6) y termina con la fila frontal (1, 2 y 3).
 - Coloca los botes y cajas tapados siempre que sea posible, y ábrelos solo en el momento antes de la ejecución.
@@ -190,7 +190,7 @@ Para colocar el labware dentro de la cabina, sigue las instrucciones de cada pro
 ![opentrons_labware_deckslot.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_labware_deckslot.jpg?raw=true)
 
 - Asegurate de que colocas los tubos correspondientes en sus posiciones correctas.
-- Coloca todas las cajas de puntas como si el protocolo se fuera a ejecutar para el máximo de muestras.
+- Coloca todas las cajas de puntas como si el protocolo se fuera a ejecutar para el máximo de muestras y pasos.
 
 ## Ejecutar un protocolo
 

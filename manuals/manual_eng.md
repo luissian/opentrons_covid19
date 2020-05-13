@@ -175,6 +175,21 @@ Once labware calibration is over, the pipette will return the tip and we are rea
 
 ## Labware setup inside the hood
 
+In order to set up the labware into the hood, follow the instructions provided by the aministrator for each protocol and also these guidelines:
+- Make sure the robot is stopped.
+- Always beging setting up the labware in the rear row (10 and 11), followed by the third row (7, 8 and 9), the middle one (4, 5 and 6) amd finally the front row (1, 2 and 3).
+- If possible, put the tubes and boxes with their lid on, and open them only before starting the run.
+- When building an Opentrons' rack, make sure the marked corner of the stand matches with the marked corner of the rack. That marked corner will go on the top-left of the deck slot.
+
+![opentrons_labware_opentronsrack.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_labware_opentronsrack.jpg?raw=true)
+
+- When putting a piece of labware in a deck slot, always put first the bottom-right corner into the metal hooks. Then the piece should easily fall into position.
+
+![opentrons_labware_deckslot.jpg](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/opentrons_labware_deckslot.jpg?raw=true)
+
+- Make sure the tubes are in the right position in their racks.
+- Set up all the tip boxes as if the protocol was going to be executed for the maximum number of samples and steps.
+
 ## Running a protocol
 
 ## Cleaning the robot

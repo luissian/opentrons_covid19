@@ -128,6 +128,9 @@ def voice_notification(action):
         else:
             robot.comment(f"Sound file does not exist. Call the technician")
 
+def reset_tipcount():
+    open('/data/A/tip_log.json', 'w').close()
+
 def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
     global tip_log
     if not tip_log['count'] or pip not in tip_log['count']:
@@ -215,6 +218,11 @@ def transfer_samples(sources, dests, pip, tiprack):
 def run(ctx: protocol_api.ProtocolContext):
     global robot
     robot = ctx
+
+    # check if tipcount is being reset
+    if RESET_TIPCOUNT:
+        reset_tipcount()
+
     # confirm door is closed
     robot.comment(f"Please, close the door")
     confirm_door_is_closed()

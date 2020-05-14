@@ -493,4 +493,7 @@ def run(ctx: protocol_api.ProtocolContext):
         # transfer negative control to position NUM_SAMPLES-2
         p20.transfer(7, mm_rack.wells()[4].bottom(1), dests[NUM_SAMPLES-2].bottom(2), air_gap=2, new_tip='always')
 
+    # track final used tip
+    save_tip_info()
+
     finish_run()

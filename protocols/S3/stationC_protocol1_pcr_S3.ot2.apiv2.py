@@ -319,7 +319,7 @@ def homogenize_mm(mm_tube, pip, tiprack, times=5):
     # blow out before dropping tip
     pip.blow_out(mm_tube.top(-2))
     if VOLUME_MMIX < 20:
-        p300.drop_tip(home_after=False)
+        drop(p300)
 
 def prepare_mastermix(mm_rack, p300, p20,tiprack300,tiprack20):
     # setup mastermix coordinates
@@ -500,7 +500,7 @@ def run(ctx: protocol_api.ProtocolContext):
     if PREPARE_MASTERMIX:
         mm_tube = prepare_mastermix(mm_rack, p300, p20,tips300,tips20)
         if TRANSFER_MASTERMIX:
-            p300.drop_tip(home_after=False)
+            drop(p300)
     else:
         mm_tube = mm_rack.wells()[0]
         if TRANSFER_MASTERMIX:

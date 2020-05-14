@@ -150,7 +150,7 @@ if LANGUAGE_DICT[LANGUAGE] == 'eng':
         'replace_tipracks': './data/sounds/replace_tipracks.mp3',
         'empty_trash': './data/sounds/empty_trash.mp3'
     }
-elif LANGUAGE_DICT[LANGUAGE] == 'esp'::
+elif LANGUAGE_DICT[LANGUAGE] == 'esp':
     VOICE_FILES_DICT = {
         'start': './data/sounds/started_process_esp.mp3',
         'finish': './data/sounds/finished_process_esp.mp3',

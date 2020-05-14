@@ -26,6 +26,7 @@ PCR_LABWARE = 'opentrons aluminum nest plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 PREPARE_MASTERMIX = False
 MM_TYPE = 'MM1'
+VOLUME_ELUTION = 7
 TRANSFER_MASTERMIX = True
 TRANSFER_SAMPLES = True
 LANGUAGE = 'esp'
@@ -414,7 +415,7 @@ def transfer_samples(sources, dests, pip,tiprack):
             continue
 
         pick_up(pip,tiprack)
-        pip.transfer(7, s.bottom(height), d.bottom(2), air_gap=2, new_tip='never')
+        pip.transfer(VOLUME_ELUTION, s.bottom(height), d.bottom(2), air_gap=2, new_tip='never')
         #p20.mix(1, 10, d.bottom(2))
         #p20.blow_out(d.top(-2))
         pip.aspirate(1, d.top(-2))
@@ -517,7 +518,7 @@ def run(ctx: protocol_api.ProtocolContext):
         transfer_samples(sources, dests, p20,tips20)
         # transfer negative control to position NUM_SAMPLES-2
         pick_up(p20, tips20)
-        p20.transfer(7, mm_rack.wells()[4].bottom(1), dests[NUM_SAMPLES-2].bottom(2), air_gap=2, new_tip='never')
+        p20.transfer(VOLUME_ELUTION, mm_rack.wells()[4].bottom(1), dests[NUM_SAMPLES-2].bottom(2), air_gap=2, new_tip='never')
         drop(p20)
 
     # track final used tip

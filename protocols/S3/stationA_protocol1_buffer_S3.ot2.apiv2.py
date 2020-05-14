@@ -24,6 +24,8 @@ BUFFER_LABWARE = 'opentrons plastic 30ml tubes'
 DESTINATION_LABWARE = 'opentrons plastic 2ml tubes'
 DEST_TUBE = '2ml tubes'
 VOLUME_BUFFER = 300
+LANGUAGE = 'esp'
+RESET_TIPCOUNT = False
 
 # End Parameters to adapt the protocol
 
@@ -68,12 +70,27 @@ DESTUBE_LW_DICT = {
     '2ml tubes': 4
 }
 
-VOICE_FILES_DICT = {
-    'start': './data/sounds/started_process.mp3',
-    'finish': './data/sounds/finished_process.mp3',
-    'close_door': './data/sounds/close_door.mp3',
-    'replace_tipracks': './data/sounds/replace_tipracks.mp3',
+LANGUAGE_DICT = {
+    'esp': 'esp',
+    'eng': 'eng'
 }
+
+if LANGUAGE_DICT[LANGUAGE] == 'eng':
+    VOICE_FILES_DICT = {
+        'start': './data/sounds/started_process.mp3',
+        'finish': './data/sounds/finished_process.mp3',
+        'close_door': './data/sounds/close_door.mp3',
+        'replace_tipracks': './data/sounds/replace_tipracks.mp3',
+        'empty_trash': './data/sounds/empty_trash.mp3'
+    }
+elif LANGUAGE_DICT[LANGUAGE] == 'esp'::
+    VOICE_FILES_DICT = {
+        'start': './data/sounds/started_process_esp.mp3',
+        'finish': './data/sounds/finished_process_esp.mp3',
+        'close_door': './data/sounds/close_door_esp.mp3',
+        'replace_tipracks': './data/sounds/replace_tipracks_esp.mp3',
+        'empty_trash': './data/sounds/empty_trash_esp.mp3'
+    }
 
 # Function definitions
 def check_door():

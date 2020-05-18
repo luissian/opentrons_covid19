@@ -207,6 +207,8 @@ def prepare_beads(bd_tube,eth_tubes,pip,tiprack):
         # drop(pip)
 
 def transfer_beads(beads_tube, dests, pip,tiprack):
+    if not pip.hw_pipette['has_tip']:
+        pick_up(pip,tiprack)
     max_trans_per_asp = 2  # 1000/VOLUME_BUFFER = 3
     split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]

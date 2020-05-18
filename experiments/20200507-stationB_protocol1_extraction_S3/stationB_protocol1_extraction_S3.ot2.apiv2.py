@@ -158,7 +158,9 @@ def voice_notification(action):
             robot.comment(f"Sound file does not exist. Call the technician")
 
 def reset_tipcount():
-    os.remove('/data/B/tip_log.json', 'w')
+    file_path = '/data/B/tip_log.json'
+    if os.path.isfile(file_path):
+        os.remove(file_path)
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
     global tip_log

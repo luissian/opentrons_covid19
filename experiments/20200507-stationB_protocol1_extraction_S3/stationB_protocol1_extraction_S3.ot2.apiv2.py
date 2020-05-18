@@ -39,7 +39,7 @@ WASTE_LABWARE = 'nest 1 reservoir plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 DISPENSE_BEADS = False
 LANGUAGE = 'esp'
-RESET_TIPCOUNT = False
+RESET_TIPCOUNT = True
 
 # End Parameters to adapt the protocol
 

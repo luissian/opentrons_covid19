@@ -239,11 +239,6 @@ def save_tip_info(file_path = '/data/C/tip_log.json'):
             json.dump(data, outfile)
 
 def pick_up(pip,tiprack):
-    ## retrieve tip_log
-    global tip_log
-    if not tip_log:
-        tip_log = {}
-    tip_log = retrieve_tip_info(pip,tiprack)
     if tip_log['count'][pip] == tip_log['max'][pip]:
         voice_notification('replace_tipracks')
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
@@ -424,6 +419,9 @@ def transfer_samples(sources, dests, pip,tiprack):
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):
     global robot
+    global tip_log
+
+    # Set robot as global var
     robot = ctx
 
     # check if tipcount is being reset
@@ -447,6 +445,10 @@ def run(ctx: protocol_api.ProtocolContext):
     # define pipettes
     p20 = robot.load_instrument('p20_single_gen2', 'right', tip_racks=tips20)
     p300 = robot.load_instrument('p300_single_gen2', 'left', tip_racks=tips300)
+
+    ## retrieve tip_log
+    retrieve_tip_info(p20,tips20)
+    retrieve_tip_info(p300,tips300)
 
     # tempdeck module
     tempdeck = robot.load_module('tempdeck', '10')

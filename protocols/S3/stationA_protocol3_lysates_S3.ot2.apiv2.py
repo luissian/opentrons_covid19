@@ -264,7 +264,17 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     # setup samples
     #sources, dests = get_source_dest_coordinates(LYSATE_LABWARE, source_racks, wells_plate)
-    sources = [tube for s in source_racks for tube in s.wells()][:NUM_SAMPLES]
+    #sources = [tube for s in source_racks for tube in s.wells()][:NUM_SAMPLES]
+    sources = []
+    for i in range(0,24,4):
+        for rack in source_racks[:2]:
+            sources = sources + rack.wells()[i:i+4]
+
+    for i in range(0,24,4):
+        for rack in source_racks[2:5]:
+            sources = sources + rack.wells()[i:i+4]
+
+    sources = sources[:NUM_SAMPLES]
     dests = wells_plate.wells()[:NUM_SAMPLES]
 
     # transfer

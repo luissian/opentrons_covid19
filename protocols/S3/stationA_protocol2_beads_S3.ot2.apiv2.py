@@ -22,6 +22,7 @@ NUM_SAMPLES = 96
 BEADS_LABWARE = 'opentrons plastic 30ml tubes'
 PLATE_LABWARE = 'nest deep generic well plate'
 VOLUME_BEADS = 410
+DILUTE_BEADS = True
 LANGUAGE = 'esp'
 RESET_TIPCOUNT = False
 
@@ -293,7 +294,8 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     for bd_tube,dests in zip(dipersion_reactive,dest_sets):
         # prepare beads
-        prepare_beads(beads, [bd_tube], p1000, tips1000)
+        if DILUTE_BEADS:
+            prepare_beads(beads, [bd_tube], p1000, tips1000)
         # transfer
         transfer_beads(bd_tube, dests, p1000, tips1000)
 

@@ -415,6 +415,9 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     p1000.flow_rate.dispense = 1000
     p1000.flow_rate.blow_out = 1000
 
+    # start with magdeck off
+    magdeck.disengage()
+
     if(DISPENSE_BEADS):
         # premix, transfer, and mix magnetic beads with sample
         ## bead dests depending on number of samples

@@ -33,7 +33,7 @@ LANGUAGE = 'esp'
 RESET_TIPCOUNT = False
 
 # End Parameters to adapt the protocol
-ACTION = "StationB-protocol1-extraction"
+ACTION = "StationC-protocol1-pcr"
 PROTOCOL_ID = "0000-AA"
 
 ## global vars

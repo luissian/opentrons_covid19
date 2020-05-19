@@ -164,11 +164,6 @@ def save_tip_info(file_path = '/data/A/tip_log.json'):
             json.dump(data, outfile)
 
 def pick_up(pip,tiprack):
-    ## retrieve tip_log
-    global tip_log
-    if not tip_log:
-        tip_log = {}
-    tip_log = retrieve_tip_info(pip,tiprack)
     if tip_log['count'][pip] == tip_log['max'][pip]:
         voice_notification('replace_tipracks')
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
@@ -253,6 +248,8 @@ def run(ctx: protocol_api.ProtocolContext):
     # load pipette
     p1000 = robot.load_instrument(
         'p1000_single_gen2', 'left', tip_racks=tips1000)
+    # Retrieve tip log
+    retrieve_tip_info(p1000,tips1000)
 
     # check source (elution) labware type
     if BEADS_LABWARE not in BD_LW_DICT:

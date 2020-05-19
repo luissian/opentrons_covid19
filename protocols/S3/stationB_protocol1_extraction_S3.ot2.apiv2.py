@@ -203,11 +203,6 @@ def save_tip_info(file_path = '/data/B/tip_log.json'):
             json.dump(data, outfile)
 
 def pick_up(pip,tiprack):
-    ## retrieve tip_log
-    global tip_log
-    if not tip_log:
-        tip_log = {}
-    tip_log = retrieve_tip_info(pip,tiprack)
     if tip_log['count'][pip] == tip_log['max'][pip]:
         voice_notification('replace_tipracks')
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
@@ -407,6 +402,10 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     m300 = robot.load_instrument('p300_multi_gen2', 'left', tip_racks=tips300)
     p1000 = robot.load_instrument('p1000_single_gen2', 'right',
                                 tip_racks=tips1000)
+
+    ## retrieve tip_log
+    retrieve_tip_info(p1000,tips1000)
+    retrieve_tip_info(m300,tips300)
 
     m300.flow_rate.aspirate = 150
     m300.flow_rate.dispense = 300

@@ -267,7 +267,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         robot.pause(f"Is it at the top of the well?")
         p1000.aspirate(VOLUME_LYSATE, position.bottom(2))
         p1000.move_to(position.top())
-        robot.pause(f"Did it aspirated correctly?")
+        robot.pause(f"Did it aspirate correctly?")
         p1000.dispense(VOLUME_LYSATE, position.top(-2))
         p1000.move_to(position.top())
         robot.pause(f"Did it dispense all the liquid?")

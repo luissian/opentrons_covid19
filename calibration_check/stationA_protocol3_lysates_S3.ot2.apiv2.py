@@ -7,23 +7,24 @@ import os
 import subprocess
 import json
 
-# Metadata
+# metadata
 metadata = {
-    'protocolName': 'Calibration check for S3 Station A Protocol 1 buffer Version 1',
-    'author': 'Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
+    'protocolName': 'S3 Station A Protocol 3 lysates Version 1',
+    'author': 'Nick <protocols@opentrons.com>, Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
     'apiLevel': '2.3'
 }
+
 
 # Parameters to adapt the protocol
 # Warning writing any Parameters below this line.
 # It will be deleted if opentronsWeb is used.
 
 NUM_SAMPLES = 96
-BUFFER_LABWARE = 'opentrons plastic 30ml tubes'
-DESTINATION_LABWARE = 'opentrons plastic 2ml tubes'
-DEST_TUBE = '2ml tubes'
-VOLUME_BUFFER = 300
+LYSATE_LABWARE = 'opentrons plastic 2ml tubes'
+PLATE_LABWARE = 'nest deep generic well plate'
+VOLUME_LYSATE = 400
+BEADS = False
 LANGUAGE = 'esp'
 RESET_TIPCOUNT = False
 
@@ -40,32 +41,32 @@ tip_log['count'] = {}
 tip_log['tips'] = {}
 tip_log['max'] = {}
 
+
+# End Parameters to adapt the protocol
+
 """
 NUM_SAMPLES is the number of samples, must be an integer number
 
-BUFFER_LABWARE must be one of the following:
-    opentrons plastic 50ml tubes
-    opentrons plastic 30ml tubes
-
-DESTINATION_LABWARE must be one of the following:
+LYSATE_LABWARE must be one of the following:
     opentrons plastic 2ml tubes
 
-DEST_TUBE
-    2m tubes
+PLATE_LABWARE must be one of the following:
+    opentrons deep generic well plate
+    nest deep generic well plate
+    vwr deep generic well plate
 """
 
-
-# Constants
-BUFFER_LW_DICT = {
-    'opentrons plastic 50ml tubes': 'opentrons_6_tuberack_falcon_50ml_conical',
-    'opentrons plastic 30ml tubes': 'opentrons_6_tuberack_generic_30ml_conical'
+LY_LW_DICT = {
+    'opentrons plastic 2ml tubes': 'opentrons_24_tuberack_generic_2ml_screwcap'
 }
 
-DESTINATION_LW_DICT = {
-    'opentrons plastic 2ml tubes': 'opentrons_24_tuberack_generic_2ml_screwcap',
+PL_LW_DICT = {
+    'opentrons deep generic well plate': 'usascientific_96_wellplate_2.4ml_deep',
+    'nest deep generic well plate': 'nest_96_deepwellplate_2000ul',
+    'vwr deep generic well plate': 'vwr_96_deepwellplate_2000ul'
 }
 
-DESTUBE_LW_DICT = {
+LYSTUBE_LW_DICT = {
     # Radius of each possible tube
     '2ml tubes': 4
 }
@@ -197,19 +198,21 @@ def drop(pip):
         drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=20))
         pip.drop_tip(drop_loc,home_after=False)
 
-def transfer_buffer(bf_tube, dests, pip,tiprack):
-    max_trans_per_asp = 3  # 1000/VOLUME_BUFFER = 3
-    split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
-    dest_sets = [dests[split_ind[i]:split_ind[i+1]]
-             for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
-    pick_up(pip,tiprack)
-    pip.mix(3, 800, bf_tube.bottom(2))
-    for set in dest_sets:
-        pip.aspirate(50, bf_tube.bottom(2))
-        pip.distribute(VOLUME_BUFFER, bf_tube.bottom(2), [d.bottom(10) for d in set],
-                   air_gap=3, disposal_volume=0, new_tip='never')
-        pip.dispense(50,bf_tube.top(-20))
-    drop(pip)
+def transfer_samples(sources, dests, pip, tiprack):
+    # height for aspiration has to be different depending if you ar useing tubes or wells
+    if 'strip' in LYSATE_LABWARE or 'plate' in LYSATE_LABWARE:
+        height = 1.5
+    else:
+        height = 2
+    # transfer
+    for s, d in zip(sources, dests):
+        pick_up(pip,tiprack)
+        pip.transfer(VOLUME_LYSATE, s.bottom(height), d.bottom(15), air_gap=20, new_tip='never')
+        if BEADS:
+            pip.mix(3,400,d.bottom(4))
+        #pip.blow_out(d.top(-2))
+        pip.aspirate(50, d.top(-2))
+        drop(pip)
 
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):
@@ -220,61 +223,58 @@ def run(ctx: protocol_api.ProtocolContext):
     if RESET_TIPCOUNT:
         reset_tipcount()
 
-    # define tips
+    # load tips
     tips1000 = [robot.load_labware('opentrons_96_filtertiprack_1000ul',
                                      3, '1000µl tiprack')]
 
-    # define pipettes
-    p1000 = robot.load_instrument('p1000_single_gen2', 'left', tip_racks=tips1000)
+    # load pipette
+    p1000 = robot.load_instrument(
+        'p1000_single_gen2', 'left', tip_racks=tips1000)
 
-
-    # check buffer labware type
-    if BUFFER_LABWARE not in BUFFER_LW_DICT:
-        raise Exception('Invalid BF_LABWARE. Must be one of the \
-following:\nopentrons plastic 50ml tubes')
-
-    # load mastermix labware
-    buffer_rack = robot.load_labware(
-        BUFFER_LW_DICT[BUFFER_LABWARE], '10',
-        BUFFER_LABWARE)
-
-    # check mastermix tube labware type
-    if DESTINATION_LABWARE not in DESTINATION_LW_DICT:
-        raise Exception('Invalid DESTINATION_LABWARE. Must be one of the \
-    following:\nopentrons plastic 2ml tubes')
-
-    # load elution labware
-    dest_racks = [
-            robot.load_labware(DESTINATION_LW_DICT[DESTINATION_LABWARE], slot,
-                            'Destination tubes labware ' + str(i+1))
+    # check source (LYSATE) labware type
+    if LYSATE_LABWARE not in LY_LW_DICT:
+        raise Exception('Invalid LYSATE_LABWARE. Must be one of the \
+following:\nopentrons plastic 2ml tubes')
+    # load LYSATE labware
+    if 'plate' in LYSATE_LABWARE:
+        source_racks = robot.load_labware(
+            LY_LW_DICT[LYSATE_LABWARE], '1',
+            'RNA LYSATE labware')
+    else:
+        source_racks = [
+            robot.load_labware(LY_LW_DICT[LYSATE_LABWARE], slot,
+                            'sample LYSATE labware ' + str(i+1))
             for i, slot in enumerate(['4', '1', '5', '2'])
     ]
 
-    # setup sample sources and destinations
-    bf_tubes = buffer_rack.wells()[:4]
-    number_racks = math.ceil(NUM_SAMPLES/len(dest_racks[0].wells()))
-    dests = [
-        tube
-        for rack in dest_racks
-        for tube in rack.wells()
-    ]
+    # check plate
+    if PLATE_LABWARE not in PL_LW_DICT:
+        raise Exception('Invalid PLATE_LABWARE. Must be one of the \
+following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr deep generic well plate')
+
+    # load pcr plate
+    wells_plate = robot.load_labware(PL_LW_DICT[PLATE_LABWARE], 10,
+                    'sample LYSATE well plate ')
+
+    # setup sources and dests
+    sources = [tube for s in source_racks for tube in s.wells()]
+    dests = wells_plate.wells()
 
     # check top-left and bottom-right well of each labware with each pipette which uses them
     pick_up(p1000, tips1000)
-    for position in [bf_tubes[0], bf_tubes[-1]]:
+    for position in [sources[0], sources[23], sources[24], sources[47], sources[48], sources[71], sources[72], sources[-1]]:
         p1000.move_to(position.top())
         robot.pause(f"Is it at the top of the well?")
-        p1000.aspirate(800, position.bottom(2))
+        p1000.aspirate(VOLUME_LYSATE, position.bottom(2))
         p1000.move_to(position.top())
         robot.pause(f"Did it aspirated correctly?")
-        p1000.dispense(800, position.top(-20))
+        p1000.dispense(VOLUME_LYSATE, position.top(-2))
         p1000.move_to(position.top())
         robot.pause(f"Did it dispense all the liquid?")
-    for position in [dests[0], dests[23], dests[24], dests[47], dests[48], dests[71], dests[72], dests[-1]]:
+    for position in [dests[0], dests[-1]]:
         p1000.move_to(position.top())
         robot.pause(f"Is it at the top of the well?")
     drop(p1000)
-
 
     # track final used tip
     save_tip_info()

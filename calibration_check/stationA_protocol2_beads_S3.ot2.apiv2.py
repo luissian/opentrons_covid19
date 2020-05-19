@@ -287,29 +287,29 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     p1000.flow_rate.aspirate = 200
     p1000.flow_rate.dispense = 1500
     for position in [beads]:
-        p1000.move_to(position.top)
+        p1000.move_to(position.top())
         robot.pause(f"Is it at the top of the well?")
         p1000.aspirate(800, position.bottom(2))
-        p1000.move_to(position.top)
+        p1000.move_to(position.top())
         robot.pause(f"Did it aspirated correctly?")
         p1000.dispense(800, position.bottom(5))
-        p1000.move_to(position.top)
+        p1000.move_to(position.top())
         robot.pause(f"Did it dispense all the liquid?")
     p1000.flow_rate.aspirate = 800
     p1000.flow_rate.dispense = 8000
     for position in [dipersion_reactive[0], dipersion_reactive[-1]]:
-        p1000.move_to(position.top)
+        p1000.move_to(position.top())
         robot.pause(f"Is it at the top of the well?")
         p1000.aspirate(800, position.bottom(30))
-        p1000.move_to(position.top)
+        p1000.move_to(position.top())
         robot.pause(f"Did it aspirated correctly?")
         p1000.dispense(800, position.bottom(2))
-        p1000.move_to(position.top)
+        p1000.move_to(position.top())
         robot.pause(f"Did it dispense all the liquid?")
     p1000.flow_rate.aspirate = 100
     p1000.flow_rate.dispense = 1000
     for position in [dests[0], dests[-1]]:
-        p1000.move_to(position.top)
+        p1000.move_to(position.top())
         robot.pause(f"Is it at the top of the well?")
     drop(p1000)
 

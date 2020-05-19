@@ -10,7 +10,7 @@ import json
 # metadata
 metadata = {
     'protocolName': 'S3 Station A Protocol 3 lysates Version 1',
-    'author': 'Nick <protocols@opentrons.com>, Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
+    'author': 'Sara <smonzon@isciii.es>, Miguel <mjuliam@isciii.es>',
     'source': 'Custom Protocol Request',
     'apiLevel': '2.3'
 }

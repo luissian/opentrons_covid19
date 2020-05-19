@@ -299,7 +299,7 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
         dispense_default_speed = pip.flow_rate.dispense
         pip.flow_rate.dispense = 1500
         pip.transfer(
-            50, buffer, m.bottom(1), new_tip='never', air_gap=10)
+            50, buffer.bottom(2), m.bottom(1), new_tip='never', air_gap=10)
         pip.mix(20, 200, m.bottom(1))
         pip.flow_rate.dispense = dispense_default_speed
         drop(pip)

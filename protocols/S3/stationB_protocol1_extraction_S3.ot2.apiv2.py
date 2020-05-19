@@ -77,6 +77,8 @@ ELUTION_LABWARE
 # It will be deleted if opentronsWeb is used.
 
 # End Parameters to adapt the protocol
+ACTION = "StationB-protocol1-extraction"
+PROTOCOL_ID = "0000-AA"
 
 # Constants
 REAGENT_LW_DICT = {
@@ -123,6 +125,22 @@ elif LANGUAGE_DICT[LANGUAGE] == 'esp':
     }
 
 # Function definitions
+def run_info(parameters = dict()):
+    info = {}
+    hostname = subprocess.run(
+        ['hostname'],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    ).stdout.decode('utf-8')
+
+    info["RobotID"] = hostname
+    info["executedAction"] = ACTION
+    info["ProtocolID"] = PROTOCOL_ID
+    info["parameters"] = parameters
+    # write json to file. This is going to be an api post.
+    #with open('run.json', 'w') as fp:
+        #json.dump(info, fp,indent=4)
+
 def check_door():
     return gpio.read_window_switches()
 
@@ -453,5 +471,18 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     save_tip_info()
 
     magdeck.disengage()
+
+    par = {
+        "NUM_SAMPLES" : 96,
+        "REAGENT_LABWARE" : 'nest 12 reservoir plate',
+        "MAGPLATE_LABWARE" : 'nest deep generic well plate',
+        "WASTE_LABWARE" : 'nest 1 reservoir plate',
+        "ELUTION_LABWARE" : 'opentrons aluminum nest plate',
+        "DISPENSE_BEADS" : False,
+        "LANGUAGE" : 'esp',
+        "RESET_TIPCOUNT" : False
+    }
+
+    run_info(par)
 
     finish_run()

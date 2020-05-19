@@ -108,8 +108,8 @@ def run_info(parameters = dict()):
     info["ProtocolID"] = PROTOCOL_ID
     info["parameters"] = parameters
     # write json to file. This is going to be an api post.
-    with open('run.json', 'w') as fp:
-        json.dump(info, fp,indent=4)
+    #with open('run.json', 'w') as fp:
+        #json.dump(info, fp,indent=4)
 
 
 def check_door():

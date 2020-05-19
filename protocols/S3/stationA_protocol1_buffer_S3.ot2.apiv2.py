@@ -28,6 +28,8 @@ LANGUAGE = 'esp'
 RESET_TIPCOUNT = False
 
 # End Parameters to adapt the protocol
+ACTION = "StationB-protocol1-extraction"
+PROTOCOL_ID = "0000-AA"
 
 ## global vars
 ## initialize robot object
@@ -93,6 +95,23 @@ elif LANGUAGE_DICT[LANGUAGE] == 'esp':
     }
 
 # Function definitions
+def run_info(parameters = dict()):
+    info = {}
+    hostname = subprocess.run(
+        ['hostname'],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    ).stdout.decode('utf-8')
+
+    info["RobotID"] = hostname
+    info["executedAction"] = ACTION
+    info["ProtocolID"] = PROTOCOL_ID
+    info["parameters"] = parameters
+    # write json to file. This is going to be an api post.
+    with open('run.json', 'w') as fp:
+        json.dump(info, fp,indent=4)
+
+
 def check_door():
     return gpio.read_window_switches()
 
@@ -273,5 +292,15 @@ following:\nopentrons plastic 50ml tubes')
 
     # track final used tip
     save_tip_info()
+    par = {
+        "NUM_SAMPLES" : 96,
+        "BUFFER_LABWARE" : 'opentrons plastic 30ml tubes',
+        "DESTINATION_LABWARE" : 'opentrons plastic 2ml tubes',
+        "DEST_TUBE" : '2ml tubes',
+        "VOLUME_BUFFER" : 300,
+        "LANGUAGE" : 'esp',
+        "RESET_TIPCOUNT" : False
+    }
+    run_info(par)
 
     finish_run()

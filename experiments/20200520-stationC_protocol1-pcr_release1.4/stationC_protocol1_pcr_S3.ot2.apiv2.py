@@ -487,7 +487,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # tempdeck module
     tempdeck = robot.load_module('tempdeck', '10')
-    tempdeck.set_temperature(4)
+    #tempdeck.set_temperature(4)
 
     # check mastermix labware type
     if MM_LABWARE not in MM_LW_DICT:

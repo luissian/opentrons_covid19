@@ -64,6 +64,7 @@ MAGPLATE_LABWARE must be one of the following:
     opentrons deep generic well plate
     nest deep generic well plate
     vwr deep generic well plate
+    ecogen deep generic well plate
 
 WASTE labware
     nest 1 reservoir plate
@@ -76,7 +77,15 @@ ELUTION_LABWARE
 # Warning writing any Parameters below this line.
 # It will be deleted if opentronsWeb is used.
 
-# End Parameters to adapt the protocol
+# Calculated variables
+if MAGPLATE_LABWARE == 'nest deep generic well plate':
+    MAGNET_HEIGHT = 22
+elif MAGPLATE_LABWARE == 'vwr deep generic well plate':
+    MAGNET_HEIGHT = 22
+elif MAGPLATE_LABWARE == 'ecogen deep generic well plate':
+    MAGNET_HEIGHT = 21
+else:
+    MAGNET_HEIGHT = 22
 
 # Constants
 REAGENT_LW_DICT = {
@@ -287,7 +296,7 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             pip.mix(7, 200, m.bottom(2))
             pip.flow_rate.dispense = dispense_default_speed
 
-            magdeck.engage(height_from_base=22)
+            magdeck.engage(height_from_base=MAGNET_HEIGHT)
             robot.delay(seconds=75, msg='Incubating on magnet for 75 seconds.')
 
             # remove supernatant
@@ -312,7 +321,7 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
 
     ## Incubation steps
     robot.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
-    magdeck.engage(height_from_base=22)
+    magdeck.engage(height_from_base=MAGNET_HEIGHT)
     robot.delay(seconds=120, msg='Incubating on magnet for 120 seconds.')
 
     aspire_default_speed = pip.flow_rate.aspirate
@@ -412,7 +421,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     # check magdeck height
     magdeck.disengage()
     robot.pause(f"Is the magnet down?")
-    magdeck.engage(height_from_base=22)
+    magdeck.engage(height_from_base=MAGNET_HEIGHT)
     robot.pause(f"Is the magnet at the right height?")
     magdeck.disengage()
 

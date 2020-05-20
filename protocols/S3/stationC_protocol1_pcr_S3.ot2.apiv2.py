@@ -205,7 +205,7 @@ def start_run():
     gpio.set_button_light(0,1,0)
     now = datetime.now()
     # dd/mm/YY H:M:S
-    start_time = now.strftime("%d/%m/%Y %H:%M:%S")
+    start_time = now.strftime("%Y/%m/%d %H:%M:%S")
     return start_time
 
 def finish_run():
@@ -214,7 +214,7 @@ def finish_run():
     gpio.set_button_light(0,0,1)
     now = datetime.now()
     # dd/mm/YY H:M:S
-    finish_time = now.strftime("%d/%m/%Y %H:%M:%S")
+    finish_time = now.strftime("%Y/%m/%d %H:%M:%S")
     return finish_time
 
 def voice_notification(action):

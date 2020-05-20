@@ -276,7 +276,7 @@ def mix_beads(reps, dests, pip, tiprack):
             pick_up(pip,tiprack)
         dispense_default_speed = pip.flow_rate.dispense
         pip.flow_rate.dispense = 600
-        pip.mix(reps, 200, m.bottom(2))
+        pip.mix(reps, 200, m.bottom(5))
         pip.flow_rate.dispense = dispense_default_speed
         # PENDING TO FIX THIS blow_out
         # pip.blow_out(m.top(-2))

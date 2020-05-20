@@ -86,6 +86,7 @@ REAGENT_LW_DICT = {
 MAGPLATE_LW_DICT = {
     'opentrons deep generic well plate': 'usascientific_96_wellplate_2.4ml_deep',
     'nest deep generic well plate': 'nest_96_deepwellplate_2000ul',
+    'ecogen deep generic well plate': 'ecogen_96_deepwellplate_2000ul',
     'vwr deep generic well plate': 'vwr_96_deepwellplate_2000ul'
 }
 
@@ -424,7 +425,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         p1000.move_to(position.top())
         robot.pause(f"Did it aspirate correctly?")
         p1000.dispense(800, waste)
-        p1000.move_to(waste.top())
+        p1000.move_to(waste)
         robot.pause(f"Did it dispense all the liquid?")
     drop(p1000)
     pick_up(m300, tips300)
@@ -439,23 +440,23 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     # deepwell
     m300.move_to(mag_samples_m[0].top())
     robot.pause(f"Is it at the top of the well?")
-    m300.dispense(200, reagent_res.wells()[0].bottom(5))
-    m300.move_to(reagent_res.wells()[0].top())
+    m300.dispense(200, mag_samples_m[0].bottom(5))
+    m300.move_to(mag_samples_m[0].top())
     robot.pause(f"Did it dispense all the liquid?")
-    m300.aspirate(200, reagent_res.wells()[0].bottom(1))
-    m300.move_to(reagent_res.wells()[0].top())
+    m300.aspirate(200, mag_samples_m[0].bottom(1))
+    m300.move_to(mag_samples_m[0].top())
     robot.pause(f"Did it aspirate correctly?")
     m300.move_to(mag_samples_m[-1].top())
     robot.pause(f"Is it at the top of the well?")
-    m300.dispense(200, reagent_res.wells()[-1].bottom(5))
-    m300.move_to(reagent_res.wells()[-1].top())
+    m300.dispense(200, mag_samples_m[-1].bottom(5))
+    m300.move_to(mag_samples_m[-1].top())
     robot.pause(f"Did it dispense all the liquid?")
-    m300.aspirate(200, reagent_res.wells()[-1].bottom(1))
-    m300.move_to(reagent_res.wells()[-1].top())
+    m300.aspirate(200, mag_samples_m[-1].bottom(1))
+    m300.move_to(mag_samples_m[-1].top())
     robot.pause(f"Did it aspirate correctly?")
     # waste
     m300.dispense(200, waste)
-    m300.move_to(waste.top())
+    m300.move_to(waste)
     robot.pause(f"Did it dispense all the liquid?")
     drop(m300)
     # check precission in deepwell

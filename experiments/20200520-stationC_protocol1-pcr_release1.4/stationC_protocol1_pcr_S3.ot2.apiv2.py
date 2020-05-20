@@ -20,7 +20,7 @@ metadata = {
 # Warning writing any Parameters below this line.
 # It will be deleted if opentronsWeb is used.
 
-NUM_SAMPLES = 96
+NUM_SAMPLES = 16
 MM_LABWARE = 'opentrons aluminum block'
 MMTUBE_LABWARE = '2ml tubes'
 PCR_LABWARE = 'opentrons aluminum nest plate'
@@ -28,7 +28,7 @@ ELUTION_LABWARE = 'opentrons aluminum nest plate'
 PREPARE_MASTERMIX = False
 MM_TYPE = 'MM1'
 VOLUME_ELUTION = 7
-TRANSFER_MASTERMIX = True
+TRANSFER_MASTERMIX = False
 TRANSFER_SAMPLES = True
 LANGUAGE = 'esp'
 RESET_TIPCOUNT = False
@@ -487,7 +487,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # tempdeck module
     tempdeck = robot.load_module('tempdeck', '10')
-    tempdeck.set_temperature(4)
+    #tempdeck.set_temperature(4)
 
     # check mastermix labware type
     if MM_LABWARE not in MM_LW_DICT:

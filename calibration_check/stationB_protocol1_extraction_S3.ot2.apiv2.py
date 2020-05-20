@@ -86,6 +86,7 @@ REAGENT_LW_DICT = {
 MAGPLATE_LW_DICT = {
     'opentrons deep generic well plate': 'usascientific_96_wellplate_2.4ml_deep',
     'nest deep generic well plate': 'nest_96_deepwellplate_2000ul',
+    'ecogen deep generic well plate': 'ecogen_96_deepwellplate_2000ul',
     'vwr deep generic well plate': 'vwr_96_deepwellplate_2000ul'
 }
 

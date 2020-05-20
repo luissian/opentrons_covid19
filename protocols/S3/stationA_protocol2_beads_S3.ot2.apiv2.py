@@ -6,6 +6,8 @@ import math
 import os
 import subprocess
 import json
+from datetime import datetime
+
 
 # metadata
 metadata = {
@@ -22,9 +24,13 @@ NUM_SAMPLES = 96
 BEADS_LABWARE = 'opentrons plastic 30ml tubes'
 PLATE_LABWARE = 'nest deep generic well plate'
 VOLUME_BEADS = 410
+DILUTE_BEADS = True
+LANGUAGE = 'esp'
+RESET_TIPCOUNT = False
 
 # End Parameters to adapt the protocol
-
+ACTION = "StationA-protocol2-beads"
+PROTOCOL_ID = "0000-AA"
 ## global vars
 ## initialize robot object
 robot = None
@@ -60,15 +66,47 @@ PL_LW_DICT = {
     'vwr deep generic well plate': 'vwr_96_deepwellplate_2000ul'
 }
 
-VOICE_FILES_DICT = {
-    'start': './data/sounds/started_process.mp3',
-    'finish': './data/sounds/finished_process.mp3',
-    'close_door': './data/sounds/close_door.mp3',
-    'replace_tipracks': './data/sounds/replace_tipracks.mp3',
-    'empty_trash': './data/sounds/empty_trash.mp3'
+LANGUAGE_DICT = {
+    'esp': 'esp',
+    'eng': 'eng'
 }
 
+if LANGUAGE_DICT[LANGUAGE] == 'eng':
+    VOICE_FILES_DICT = {
+        'start': './data/sounds/started_process.mp3',
+        'finish': './data/sounds/finished_process.mp3',
+        'close_door': './data/sounds/close_door.mp3',
+        'replace_tipracks': './data/sounds/replace_tipracks.mp3',
+        'empty_trash': './data/sounds/empty_trash.mp3'
+    }
+elif LANGUAGE_DICT[LANGUAGE] == 'esp':
+    VOICE_FILES_DICT = {
+        'start': './data/sounds/started_process_esp.mp3',
+        'finish': './data/sounds/finished_process_esp.mp3',
+        'close_door': './data/sounds/close_door_esp.mp3',
+        'replace_tipracks': './data/sounds/replace_tipracks_esp.mp3',
+        'empty_trash': './data/sounds/empty_trash_esp.mp3'
+    }
+
 # Function definitions
+def run_info(start, end, parameters = dict()):
+    info = {}
+    hostname = subprocess.run(
+        ['hostname'],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    ).stdout.decode('utf-8')
+
+    info["RobotID"] = hostname
+    info["executedAction"] = ACTION
+    info["ProtocolID"] = PROTOCOL_ID
+    info["StartRunTime"] = start
+    info["FinishRunTime"] = end
+    info["parameters"] = parameters
+    # write json to file. This is going to be an api post.
+    #with open('run.json', 'w') as fp:
+        #json.dump(info, fp,indent=4)
+
 def check_door():
     return gpio.read_window_switches()
 
@@ -86,10 +124,22 @@ def confirm_door_is_closed():
             #Set light color to green
             gpio.set_button_light(0,1,0)
 
+def start_run():
+    voice_notification('start')
+    gpio.set_button_light(0,1,0)
+    now = datetime.now()
+    # dd/mm/YY H:M:S
+    start_time = now.strftime("%Y/%m/%d %H:%M:%S")
+    return start_time
+
 def finish_run():
     voice_notification('finish')
     #Set light color to blue
     gpio.set_button_light(0,0,1)
+    now = datetime.now()
+    # dd/mm/YY H:M:S
+    finish_time = now.strftime("%Y/%m/%d %H:%M:%S")
+    return finish_time
 
 def voice_notification(action):
     if not robot.is_simulating():
@@ -102,6 +152,10 @@ def voice_notification(action):
                 )
         else:
             robot.comment(f"Sound file does not exist. Call the technician")
+
+def reset_tipcount(file_path = '/data/A/tip_log.json'):
+    if os.path.isfile(file_path):
+        os.remove(file_path)
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
     global tip_log
@@ -144,11 +198,6 @@ def save_tip_info(file_path = '/data/A/tip_log.json'):
             json.dump(data, outfile)
 
 def pick_up(pip,tiprack):
-    ## retrieve tip_log
-    global tip_log
-    if not tip_log:
-        tip_log = {}
-    tip_log = retrieve_tip_info(pip,tiprack)
     if tip_log['count'][pip] == tip_log['max'][pip]:
         voice_notification('replace_tipracks')
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
@@ -187,6 +236,8 @@ def prepare_beads(bd_tube,eth_tubes,pip,tiprack):
         # drop(pip)
 
 def transfer_beads(beads_tube, dests, pip,tiprack):
+    if not pip.hw_pipette['has_tip']:
+        pick_up(pip,tiprack)
     max_trans_per_asp = 2  # 1000/VOLUME_BUFFER = 3
     split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
@@ -197,7 +248,7 @@ def transfer_beads(beads_tube, dests, pip,tiprack):
     pip.flow_rate.dispense = 8000
     # pip.mix(12,800,beads_tube.bottom(15))
     for i in range(12):
-        pip.aspirate(800, beads_tube.bottom(35))
+        pip.aspirate(800, beads_tube.bottom(30))
         pip.dispense(800, beads_tube.bottom(2))
     pip.flow_rate.aspirate = 100
     pip.flow_rate.dispense = 1000
@@ -214,12 +265,16 @@ def run(ctx: protocol_api.ProtocolContext):
     global robot
     robot = ctx
 
+    # check if tipcount is being reset
+    if RESET_TIPCOUNT:
+        reset_tipcount()
+
     # confirm door is closed
     robot.comment(f"Please, close the door")
     confirm_door_is_closed()
 
     # Begin run
-    voice_notification('start')
+    start_time = start_run()
 
     tips1000 = [robot.load_labware('opentrons_96_filtertiprack_1000ul',
                                      3, '1000µl tiprack')]
@@ -227,6 +282,8 @@ def run(ctx: protocol_api.ProtocolContext):
     # load pipette
     p1000 = robot.load_instrument(
         'p1000_single_gen2', 'left', tip_racks=tips1000)
+    # Retrieve tip log
+    retrieve_tip_info(p1000,tips1000)
 
     # check source (elution) labware type
     if BEADS_LABWARE not in BD_LW_DICT:
@@ -270,11 +327,24 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     for bd_tube,dests in zip(dipersion_reactive,dest_sets):
         # prepare beads
-        prepare_beads(beads, [bd_tube], p1000, tips1000)
+        if DILUTE_BEADS:
+            prepare_beads(beads, [bd_tube], p1000, tips1000)
         # transfer
         transfer_beads(bd_tube, dests, p1000, tips1000)
 
     # track final used tip
     save_tip_info()
 
-    finish_run()
+    finish_time = finish_run()
+
+    par = {
+        "NUM_SAMPLES" : NUM_SAMPLES,
+        "BEADS_LABWARE" : BEADS_LABWARE,
+        "PLATE_LABWARE" : PLATE_LABWARE,
+        "VOLUME_BEADS" : VOLUME_BEADS,
+        "DILUTE_BEADS" : DILUTE_BEADS,
+        "LANGUAGE" : LANGUAGE,
+        "RESET_TIPCOUNT" : RESET_TIPCOUNT
+    }
+
+    run_info(start_time, finish_time, par)

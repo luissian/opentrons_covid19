@@ -6,6 +6,7 @@ import math
 import os
 import subprocess
 import json
+from datetime import datetime
 
 # Metadata
 metadata = {
@@ -26,10 +27,15 @@ PCR_LABWARE = 'opentrons aluminum nest plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 PREPARE_MASTERMIX = False
 MM_TYPE = 'MM1'
+VOLUME_ELUTION = 7
 TRANSFER_MASTERMIX = True
 TRANSFER_SAMPLES = True
+LANGUAGE = 'esp'
+RESET_TIPCOUNT = False
 
 # End Parameters to adapt the protocol
+ACTION = "StationC-protocol1-pcr"
+PROTOCOL_ID = "0000-AA"
 
 ## global vars
 ## initialize robot object
@@ -134,15 +140,49 @@ MMTUBE_LW_DICT = {
     '2ml tubes': 4
 }
 
-VOICE_FILES_DICT = {
-    'start': './data/sounds/started_process.mp3',
-    'finish': './data/sounds/finished_process.mp3',
-    'close_door': './data/sounds/close_door.mp3',
-    'replace_tipracks': './data/sounds/replace_tipracks.mp3',
-    'empty_trash': './data/sounds/empty_trash.mp3'
+LANGUAGE_DICT = {
+    'esp': 'esp',
+    'eng': 'eng'
 }
 
+if LANGUAGE_DICT[LANGUAGE] == 'eng':
+    VOICE_FILES_DICT = {
+        'start': './data/sounds/started_process.mp3',
+        'finish': './data/sounds/finished_process.mp3',
+        'close_door': './data/sounds/close_door.mp3',
+        'replace_tipracks': './data/sounds/replace_tipracks.mp3',
+        'empty_trash': './data/sounds/empty_trash.mp3'
+    }
+elif LANGUAGE_DICT[LANGUAGE] == 'esp':
+    VOICE_FILES_DICT = {
+        'start': './data/sounds/started_process_esp.mp3',
+        'finish': './data/sounds/finished_process_esp.mp3',
+        'close_door': './data/sounds/close_door_esp.mp3',
+        'replace_tipracks': './data/sounds/replace_tipracks_esp.mp3',
+        'empty_trash': './data/sounds/empty_trash_esp.mp3'
+    }
+
+
 # Function definitions
+# Function definitions
+def run_info(start,end,parameters = dict()):
+    info = {}
+    hostname = subprocess.run(
+        ['hostname'],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    ).stdout.decode('utf-8')
+
+    info["RobotID"] = hostname
+    info["executedAction"] = ACTION
+    info["ProtocolID"] = PROTOCOL_ID
+    info["StartRunTime"] = start
+    info["FinishRunTime"] = end
+    info["parameters"] = parameters
+    # write json to file. This is going to be an api post.
+    #with open('run.json', 'w') as fp:
+        #json.dump(info, fp,indent=4)
+
 def check_door():
     return gpio.read_window_switches()
 
@@ -160,10 +200,22 @@ def confirm_door_is_closed():
             #Set light color to green
             gpio.set_button_light(0,1,0)
 
+def start_run():
+    voice_notification('start')
+    gpio.set_button_light(0,1,0)
+    now = datetime.now()
+    # dd/mm/YY H:M:S
+    start_time = now.strftime("%Y/%m/%d %H:%M:%S")
+    return start_time
+
 def finish_run():
     voice_notification('finish')
     #Set light color to blue
     gpio.set_button_light(0,0,1)
+    now = datetime.now()
+    # dd/mm/YY H:M:S
+    finish_time = now.strftime("%Y/%m/%d %H:%M:%S")
+    return finish_time
 
 def voice_notification(action):
     if not robot.is_simulating():
@@ -176,6 +228,10 @@ def voice_notification(action):
                 )
         else:
             robot.comment(f"Sound file does not exist. Call the technician")
+
+def reset_tipcount(file_path = '/data/C/tip_log.json'):
+    if os.path.isfile(file_path):
+        os.remove(file_path)
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/C/tip_log.json'):
     global tip_log
@@ -218,11 +274,6 @@ def save_tip_info(file_path = '/data/C/tip_log.json'):
             json.dump(data, outfile)
 
 def pick_up(pip,tiprack):
-    ## retrieve tip_log
-    global tip_log
-    if not tip_log:
-        tip_log = {}
-    tip_log = retrieve_tip_info(pip,tiprack)
     if tip_log['count'][pip] == tip_log['max'][pip]:
         voice_notification('replace_tipracks')
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
@@ -298,7 +349,8 @@ def homogenize_mm(mm_tube, pip, tiprack, times=5):
         pip.dispense(200, mm_tube.bottom(volume_height))
     # blow out before dropping tip
     pip.blow_out(mm_tube.top(-2))
-    # p300.drop_tip(home_after=False)
+    if VOLUME_MMIX < 20:
+        drop(p300)
 
 def prepare_mastermix(mm_rack, p300, p20,tiprack300,tiprack20):
     # setup mastermix coordinates
@@ -393,7 +445,7 @@ def transfer_samples(sources, dests, pip,tiprack):
             continue
 
         pick_up(pip,tiprack)
-        pip.transfer(7, s.bottom(height), d.bottom(2), air_gap=2, new_tip='never')
+        pip.transfer(VOLUME_ELUTION, s.bottom(height), d.bottom(2), air_gap=2, new_tip='never')
         #p20.mix(1, 10, d.bottom(2))
         #p20.blow_out(d.top(-2))
         pip.aspirate(1, d.top(-2))
@@ -402,14 +454,21 @@ def transfer_samples(sources, dests, pip,tiprack):
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):
     global robot
+    global tip_log
+
+    # Set robot as global var
     robot = ctx
+
+    # check if tipcount is being reset
+    if RESET_TIPCOUNT:
+        reset_tipcount()
 
     # confirm door is closed
     robot.comment(f"Please, close the door")
     confirm_door_is_closed()
 
     # Begin run
-    voice_notification('start')
+    start_time = start_run()
 
     # define tips
     tips20 = [
@@ -421,6 +480,10 @@ def run(ctx: protocol_api.ProtocolContext):
     # define pipettes
     p20 = robot.load_instrument('p20_single_gen2', 'right', tip_racks=tips20)
     p300 = robot.load_instrument('p300_single_gen2', 'left', tip_racks=tips300)
+
+    ## retrieve tip_log
+    retrieve_tip_info(p20,tips20)
+    retrieve_tip_info(p300,tips300)
 
     # tempdeck module
     tempdeck = robot.load_module('tempdeck', '10')
@@ -475,7 +538,7 @@ def run(ctx: protocol_api.ProtocolContext):
     if PREPARE_MASTERMIX:
         mm_tube = prepare_mastermix(mm_rack, p300, p20,tips300,tips20)
         if TRANSFER_MASTERMIX:
-            p300.drop_tip(home_after=False)
+            drop(p300)
     else:
         mm_tube = mm_rack.wells()[0]
         if TRANSFER_MASTERMIX:
@@ -491,9 +554,28 @@ def run(ctx: protocol_api.ProtocolContext):
     if TRANSFER_SAMPLES:
         transfer_samples(sources, dests, p20,tips20)
         # transfer negative control to position NUM_SAMPLES-2
-        p20.transfer(7, mm_rack.wells()[4].bottom(1), dests[NUM_SAMPLES-2].bottom(2), air_gap=2, new_tip='always')
+        pick_up(p20, tips20)
+        p20.transfer(VOLUME_ELUTION, mm_rack.wells()[4].bottom(1), dests[NUM_SAMPLES-2].bottom(2), air_gap=2, new_tip='never')
+        drop(p20)
 
     # track final used tip
     save_tip_info()
 
-    finish_run()
+    finish_time = finish_run()
+
+    par = {
+        "NUM_SAMPLES" : NUM_SAMPLES,
+        "MM_LABWARE" : MM_LABWARE,
+        "MMTUBE_LABWARE" : MMTUBE_LABWARE,
+        "PCR_LABWARE" : PCR_LABWARE,
+        "ELUTION_LABWARE" : ELUTION_LABWARE,
+        "PREPARE_MASTERMIX" : PREPARE_MASTERMIX,
+        "MM_TYPE" : MM_TYPE,
+        "VOLUME_ELUTION" : VOLUME_ELUTION,
+        "TRANSFER_MASTERMIX" : TRANSFER_MASTERMIX,
+        "TRANSFER_SAMPLES" : TRANSFER_SAMPLES,
+        "LANGUAGE" : LANGUAGE,
+        "RESET_TIPCOUNT" : RESET_TIPCOUNT
+    }
+
+    run_info(start_time, finish_time, par)

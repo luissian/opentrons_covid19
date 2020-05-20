@@ -6,6 +6,8 @@ import math
 import os
 import subprocess
 import json
+from datetime import datetime
+
 
 # metadata
 metadata = {
@@ -38,6 +40,8 @@ MAGPLATE_LABWARE = 'nest deep generic well plate'
 WASTE_LABWARE = 'nest 1 reservoir plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 DISPENSE_BEADS = False
+LANGUAGE = 'esp'
+RESET_TIPCOUNT = False
 
 # End Parameters to adapt the protocol
 
@@ -62,6 +66,7 @@ MAGPLATE_LABWARE must be one of the following:
     opentrons deep generic well plate
     nest deep generic well plate
     vwr deep generic well plate
+    ecogen deep generic well plate
 
 WASTE labware
     nest 1 reservoir plate
@@ -74,7 +79,19 @@ ELUTION_LABWARE
 # Warning writing any Parameters below this line.
 # It will be deleted if opentronsWeb is used.
 
+# Calculated variables
+if MAGPLATE_LABWARE == 'nest deep generic well plate':
+    MAGNET_HEIGHT = 22
+elif MAGPLATE_LABWARE == 'vwr deep generic well plate':
+    MAGNET_HEIGHT = 22
+elif MAGPLATE_LABWARE == 'ecogen deep generic well plate':
+    MAGNET_HEIGHT = 21
+else:
+    MAGNET_HEIGHT = 22
+
 # End Parameters to adapt the protocol
+ACTION = "StationB-protocol1-extraction"
+PROTOCOL_ID = "0000-AA"
 
 # Constants
 REAGENT_LW_DICT = {
@@ -84,6 +101,7 @@ REAGENT_LW_DICT = {
 MAGPLATE_LW_DICT = {
     'opentrons deep generic well plate': 'usascientific_96_wellplate_2.4ml_deep',
     'nest deep generic well plate': 'nest_96_deepwellplate_2000ul',
+    'ecogen deep generic well plate': 'ecogen_96_deepwellplate_2000ul',
     'vwr deep generic well plate': 'vwr_96_deepwellplate_2000ul'
 }
 
@@ -98,15 +116,47 @@ ELUTION_LW_DICT = {
 
 }
 
-VOICE_FILES_DICT = {
-    'start': './data/sounds/started_process.mp3',
-    'finish': './data/sounds/finished_process.mp3',
-    'close_door': './data/sounds/close_door.mp3',
-    'replace_tipracks': './data/sounds/replace_tipracks.mp3',
-    'empty_trash': './data/sounds/empty_trash.mp3'
+LANGUAGE_DICT = {
+    'esp': 'esp',
+    'eng': 'eng'
 }
 
+if LANGUAGE_DICT[LANGUAGE] == 'eng':
+    VOICE_FILES_DICT = {
+        'start': './data/sounds/started_process.mp3',
+        'finish': './data/sounds/finished_process.mp3',
+        'close_door': './data/sounds/close_door.mp3',
+        'replace_tipracks': './data/sounds/replace_tipracks.mp3',
+        'empty_trash': './data/sounds/empty_trash.mp3'
+    }
+elif LANGUAGE_DICT[LANGUAGE] == 'esp':
+    VOICE_FILES_DICT = {
+        'start': './data/sounds/started_process_esp.mp3',
+        'finish': './data/sounds/finished_process_esp.mp3',
+        'close_door': './data/sounds/close_door_esp.mp3',
+        'replace_tipracks': './data/sounds/replace_tipracks_esp.mp3',
+        'empty_trash': './data/sounds/empty_trash_esp.mp3'
+    }
+
 # Function definitions
+def run_info(start,end,parameters = dict()):
+    info = {}
+    hostname = subprocess.run(
+        ['hostname'],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    ).stdout.decode('utf-8')
+
+    info["RobotID"] = hostname
+    info["executedAction"] = ACTION
+    info["ProtocolID"] = PROTOCOL_ID
+    info["StartRunTime"] = start
+    info["FinishRunTime"] = end
+    info["parameters"] = parameters
+    # write json to file. This is going to be an api post.
+    #with open('run.json', 'w') as fp:
+        #json.dump(info, fp,indent=4)
+
 def check_door():
     return gpio.read_window_switches()
 
@@ -124,10 +174,22 @@ def confirm_door_is_closed():
             #Set light color to green
             gpio.set_button_light(0,1,0)
 
+def start_run():
+    voice_notification('start')
+    gpio.set_button_light(0,1,0)
+    now = datetime.now()
+    # dd/mm/YY H:M:S
+    start_time = now.strftime("%Y/%m/%d %H:%M:%S")
+    return start_time
+
 def finish_run():
     voice_notification('finish')
     #Set light color to blue
     gpio.set_button_light(0,0,1)
+    now = datetime.now()
+    # dd/mm/YY H:M:S
+    finish_time = now.strftime("%Y/%m/%d %H:%M:%S")
+    return finish_time
 
 def voice_notification(action):
     if not robot.is_simulating():
@@ -140,6 +202,10 @@ def voice_notification(action):
                 )
         else:
             robot.comment(f"Sound file does not exist. Call the technician")
+
+def reset_tipcount(file_path = '/data/B/tip_log.json'):
+    if os.path.isfile(file_path):
+        os.remove(file_path)
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/B/tip_log.json'):
     global tip_log
@@ -182,11 +248,6 @@ def save_tip_info(file_path = '/data/B/tip_log.json'):
             json.dump(data, outfile)
 
 def pick_up(pip,tiprack):
-    ## retrieve tip_log
-    global tip_log
-    if not tip_log:
-        tip_log = {}
-    tip_log = retrieve_tip_info(pip,tiprack)
     if tip_log['count'][pip] == tip_log['max'][pip]:
         voice_notification('replace_tipracks')
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
@@ -215,7 +276,7 @@ def mix_beads(reps, dests, pip, tiprack):
             pick_up(pip,tiprack)
         dispense_default_speed = pip.flow_rate.dispense
         pip.flow_rate.dispense = 600
-        pip.mix(reps, 200, m.bottom(2))
+        pip.mix(reps, 200, m.bottom(5))
         pip.flow_rate.dispense = dispense_default_speed
         # PENDING TO FIX THIS blow_out
         # pip.blow_out(m.top(-2))
@@ -254,7 +315,7 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             magdeck.disengage()
             wash_chan = wash_set[i//6]
             side = 1 if i % 2 == 0 else -1
-            asp_loc = m.bottom(1)
+            asp_loc = m.bottom(1.3)
             disp_loc = m.bottom(5)
             pick_up(pip,tiprack)
             pip.transfer(
@@ -265,12 +326,13 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             pip.mix(7, 200, m.bottom(2))
             pip.flow_rate.dispense = dispense_default_speed
 
-            magdeck.engage(height_from_base=22)
+            magdeck.engage(height_from_base=MAGNET_HEIGHT)
             robot.delay(seconds=75, msg='Incubating on magnet for 75 seconds.')
 
             # remove supernatant
             aspire_default_speed = pip.flow_rate.aspirate
             pip.flow_rate.aspirate = 75
+            asp_loc = m.bottom(1.5)
             pip.transfer(200, asp_loc, waste, new_tip='never', air_gap=20)
             pip.flow_rate.aspirate = aspire_default_speed
             pip.blow_out(waste)
@@ -283,15 +345,15 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
         dispense_default_speed = pip.flow_rate.dispense
         pip.flow_rate.dispense = 1500
         pip.transfer(
-            50, buffer, m.bottom(1), new_tip='never', air_gap=10)
+            50, buffer.bottom(2), m.bottom(1), new_tip='never', air_gap=10)
         pip.mix(20, 200, m.bottom(1))
         pip.flow_rate.dispense = dispense_default_speed
         drop(pip)
 
     ## Incubation steps
     robot.delay(minutes=5, msg='Incubating off magnet for 5 minutes.')
-    magdeck.engage(height_from_base=22)
-    robot.delay(seconds=120, msg='Incubating on magnet for 60 seconds.')
+    magdeck.engage(height_from_base=MAGNET_HEIGHT)
+    robot.delay(seconds=120, msg='Incubating on magnet for 120 seconds.')
 
     aspire_default_speed = pip.flow_rate.aspirate
     pip.flow_rate.aspirate = 50
@@ -300,7 +362,7 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
         # tranfser and mix elution buffer with beads
         # side = 1 if i % 2 == 0 else -1
         # asp_loc = m.bottom(5).move(Point(x=-1*side*2))
-        asp_loc = m.bottom(1)
+        asp_loc = m.bottom(1.5)
         pick_up(pip,tipracks)
         # transfer elution to new plate
         pip.transfer(50, asp_loc, e, new_tip='never', air_gap=10)
@@ -312,12 +374,16 @@ def run(ctx: protocol_api.ProtocolContext):
     global robot
     robot = ctx
 
+    # check if tipcount is being reset
+    if RESET_TIPCOUNT:
+        reset_tipcount()
+
     # confirm door is close
     robot.comment(f"Please, close the door")
     confirm_door_is_closed()
 
     # Begin run
-    voice_notification('start')
+    start_time = start_run()
 
     # load labware and modules
     ## ELUTION LABWARE
@@ -383,12 +449,19 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     p1000 = robot.load_instrument('p1000_single_gen2', 'right',
                                 tip_racks=tips1000)
 
+    ## retrieve tip_log
+    retrieve_tip_info(p1000,tips1000)
+    retrieve_tip_info(m300,tips300)
+
     m300.flow_rate.aspirate = 150
     m300.flow_rate.dispense = 300
     m300.flow_rate.blow_out = 300
     p1000.flow_rate.aspirate = 100
     p1000.flow_rate.dispense = 1000
     p1000.flow_rate.blow_out = 1000
+
+    # start with magdeck off
+    magdeck.disengage()
 
     if(DISPENSE_BEADS):
         # premix, transfer, and mix magnetic beads with sample
@@ -400,19 +473,20 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         mix_beads(7, mag_samples_m,m300,tips300)
 
     # incubate off the magnet
-    robot.delay(minutes=10, msg='Incubating off magnet for 5 minutes.')
+    robot.delay(minutes=10, msg='Incubating off magnet for 10 minutes.')
 
     ## First incubate on magnet.
-    magdeck.engage(height_from_base=22)
-    robot.delay(minutes=5, msg='Incubating on magnet for 5 minutes.')
+    magdeck.engage(height_from_base=MAGNET_HEIGHT)
+    robot.delay(minutes=7, msg='Incubating on magnet for 7 minutes.')
 
     # remove supernatant with P1000
     remove_supernatant(mag_samples_s,waste,p1000,tips1000)
 
     # empty trash
-    voice_notification('empty_trash')
-    robot.pause(f"Please, empty trash")
-    confirm_door_is_closed()
+    if NUM_SAMPLES > 48:
+        voice_notification('empty_trash')
+        robot.pause(f"Please, empty trash")
+        confirm_door_is_closed()
 
     # 3x washes
     wash(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)
@@ -426,4 +500,17 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     magdeck.disengage()
 
-    finish_run()
+    finish_time = finish_run()
+
+    par = {
+        "NUM_SAMPLES" : NUM_SAMPLES,
+        "REAGENT_LABWARE" : REAGENT_LABWARE,
+        "MAGPLATE_LABWARE" : MAGPLATE_LABWARE,
+        "WASTE_LABWARE" : WASTE_LABWARE,
+        "ELUTION_LABWARE" : ELUTION_LABWARE,
+        "DISPENSE_BEADS" : DISPENSE_BEADS,
+        "LANGUAGE" : LANGUAGE,
+        "RESET_TIPCOUNT" : RESET_TIPCOUNT
+    }
+
+    run_info(start_time, finish_time, par)

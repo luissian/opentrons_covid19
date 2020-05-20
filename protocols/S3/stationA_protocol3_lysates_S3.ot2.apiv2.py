@@ -6,6 +6,8 @@ import math
 import os
 import subprocess
 import json
+from datetime import datetime
+
 
 # metadata
 metadata = {
@@ -25,8 +27,12 @@ LYSATE_LABWARE = 'opentrons plastic 2ml tubes'
 PLATE_LABWARE = 'nest deep generic well plate'
 VOLUME_LYSATE = 400
 BEADS = False
+LANGUAGE = 'esp'
+RESET_TIPCOUNT = False
 
 # End Parameters to adapt the protocol
+ACTION = "StationA-protocol3-lysates"
+PROTOCOL_ID = "0000-AA"
 
 ## global vars
 ## initialize robot object
@@ -69,15 +75,47 @@ LYSTUBE_LW_DICT = {
     '2ml tubes': 4
 }
 
-VOICE_FILES_DICT = {
-    'start': './data/sounds/started_process.mp3',
-    'finish': './data/sounds/finished_process.mp3',
-    'close_door': './data/sounds/close_door.mp3',
-    'replace_tipracks': './data/sounds/replace_tipracks.mp3',
-    'empty_trash': './data/sounds/empty_trash.mp3'
+LANGUAGE_DICT = {
+    'esp': 'esp',
+    'eng': 'eng'
 }
 
+if LANGUAGE_DICT[LANGUAGE] == 'eng':
+    VOICE_FILES_DICT = {
+        'start': './data/sounds/started_process.mp3',
+        'finish': './data/sounds/finished_process.mp3',
+        'close_door': './data/sounds/close_door.mp3',
+        'replace_tipracks': './data/sounds/replace_tipracks.mp3',
+        'empty_trash': './data/sounds/empty_trash.mp3'
+    }
+elif LANGUAGE_DICT[LANGUAGE] == 'esp':
+    VOICE_FILES_DICT = {
+        'start': './data/sounds/started_process_esp.mp3',
+        'finish': './data/sounds/finished_process_esp.mp3',
+        'close_door': './data/sounds/close_door_esp.mp3',
+        'replace_tipracks': './data/sounds/replace_tipracks_esp.mp3',
+        'empty_trash': './data/sounds/empty_trash_esp.mp3'
+    }
+
 # Function definitions
+def run_info(start, end, parameters = dict()):
+    info = {}
+    hostname = subprocess.run(
+        ['hostname'],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    ).stdout.decode('utf-8')
+
+    info["RobotID"] = hostname
+    info["executedAction"] = ACTION
+    info["ProtocolID"] = PROTOCOL_ID
+    info["StartRunTime"] = start
+    info["FinishRunTime"] = end
+    info["parameters"] = parameters
+    # write json to file. This is going to be an api post.
+    #with open('run.json', 'w') as fp:
+        #json.dump(info, fp,indent=4)
+
 def check_door():
     return gpio.read_window_switches()
 
@@ -95,10 +133,22 @@ def confirm_door_is_closed():
             #Set light color to green
             gpio.set_button_light(0,1,0)
 
+def start_run():
+    voice_notification('start')
+    gpio.set_button_light(0,1,0)
+    now = datetime.now()
+    # dd/mm/YY H:M:S
+    start_time = now.strftime("%Y/%m/%d %H:%M:%S")
+    return start_time
+
 def finish_run():
     voice_notification('finish')
     #Set light color to blue
     gpio.set_button_light(0,0,1)
+    now = datetime.now()
+    # dd/mm/YY H:M:S
+    finish_time = now.strftime("%Y/%m/%d %H:%M:%S")
+    return finish_time
 
 def voice_notification(action):
     if not robot.is_simulating():
@@ -111,6 +161,10 @@ def voice_notification(action):
                 )
         else:
             robot.comment(f"Sound file does not exist. Call the technician")
+
+def reset_tipcount(file_path = '/data/A/tip_log.json'):
+    if os.path.isfile(file_path):
+        os.remove(file_path)
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
     global tip_log
@@ -153,11 +207,6 @@ def save_tip_info(file_path = '/data/A/tip_log.json'):
             json.dump(data, outfile)
 
 def pick_up(pip,tiprack):
-    ## retrieve tip_log
-    global tip_log
-    if not tip_log:
-        tip_log = {}
-    tip_log = retrieve_tip_info(pip,tiprack)
     if tip_log['count'][pip] == tip_log['max'][pip]:
         voice_notification('replace_tipracks')
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
@@ -199,12 +248,17 @@ def transfer_samples(sources, dests, pip, tiprack):
 def run(ctx: protocol_api.ProtocolContext):
     global robot
     robot = ctx
+
+    # check if tipcount is being reset
+    if RESET_TIPCOUNT:
+        reset_tipcount()
+
     # confirm door is closed
     robot.comment(f"Please, close the door")
     confirm_door_is_closed()
 
     # Begin run
-    voice_notification('start')
+    start_time = start_run()
 
     tips1000 = [robot.load_labware('opentrons_96_filtertiprack_1000ul',
                                      3, '1000µl tiprack')]
@@ -212,6 +266,9 @@ def run(ctx: protocol_api.ProtocolContext):
     # load pipette
     p1000 = robot.load_instrument(
         'p1000_single_gen2', 'left', tip_racks=tips1000)
+
+    ## retrieve tip_log
+    retrieve_tip_info(p1000,tips1000)
 
     # check source (LYSATE) labware type
     if LYSATE_LABWARE not in LY_LW_DICT:
@@ -240,7 +297,17 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     # setup samples
     #sources, dests = get_source_dest_coordinates(LYSATE_LABWARE, source_racks, wells_plate)
-    sources = [tube for s in source_racks for tube in s.wells()][:NUM_SAMPLES]
+    #sources = [tube for s in source_racks for tube in s.wells()][:NUM_SAMPLES]
+    sources = []
+    for i in range(0,24,4):
+        for rack in source_racks[:2]:
+            sources = sources + rack.wells()[i:i+4]
+
+    for i in range(0,24,4):
+        for rack in source_racks[2:5]:
+            sources = sources + rack.wells()[i:i+4]
+
+    sources = sources[:NUM_SAMPLES]
     dests = wells_plate.wells()[:NUM_SAMPLES]
 
     # transfer
@@ -249,4 +316,15 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     # track final used tip
     save_tip_info()
 
-    finish_run()
+    finish_time = finish_run()
+
+    par = {
+        "NUM_SAMPLES" : NUM_SAMPLES,
+        "LYSATE_LABWARE" : LYSATE_LABWARE,
+        "PLATE_LABWARE" : PLATE_LABWARE,
+        "VOLUME_LYSATE" : VOLUME_LYSATE,
+        "BEADS" : BEADS,
+        "LANGUAGE" : LANGUAGE,
+        "RESET_TIPCOUNT" : RESET_TIPCOUNT
+    }
+    run_info(start_time, finish_time, par)

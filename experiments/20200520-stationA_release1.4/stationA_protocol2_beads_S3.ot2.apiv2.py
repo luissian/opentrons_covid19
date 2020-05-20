@@ -3,8 +3,11 @@ from opentrons.types import Point
 from opentrons.drivers.rpi_drivers import gpio
 import time
 import math
-import json
 import os
+import subprocess
+import json
+from datetime import datetime
+
 
 # metadata
 metadata = {
@@ -13,13 +16,21 @@ metadata = {
     'source': 'Custom Protocol Request',
     'apiLevel': '2.3'
 }
-
 # Parameters to adapt the protocol
-NUM_SAMPLES = 24
+# Warning writing any Parameters below this line.
+# It will be deleted if opentronsWeb is used.
+
+NUM_SAMPLES = 16
 BEADS_LABWARE = 'opentrons plastic 30ml tubes'
 PLATE_LABWARE = 'nest deep generic well plate'
 VOLUME_BEADS = 410
+DILUTE_BEADS = True
+LANGUAGE = 'esp'
+RESET_TIPCOUNT = False
 
+# End Parameters to adapt the protocol
+ACTION = "StationA-protocol2-beads"
+PROTOCOL_ID = "0000-AA"
 ## global vars
 ## initialize robot object
 robot = None
@@ -55,29 +66,101 @@ PL_LW_DICT = {
     'vwr deep generic well plate': 'vwr_96_deepwellplate_2000ul'
 }
 
+LANGUAGE_DICT = {
+    'esp': 'esp',
+    'eng': 'eng'
+}
+
+if LANGUAGE_DICT[LANGUAGE] == 'eng':
+    VOICE_FILES_DICT = {
+        'start': './data/sounds/started_process.mp3',
+        'finish': './data/sounds/finished_process.mp3',
+        'close_door': './data/sounds/close_door.mp3',
+        'replace_tipracks': './data/sounds/replace_tipracks.mp3',
+        'empty_trash': './data/sounds/empty_trash.mp3'
+    }
+elif LANGUAGE_DICT[LANGUAGE] == 'esp':
+    VOICE_FILES_DICT = {
+        'start': './data/sounds/started_process_esp.mp3',
+        'finish': './data/sounds/finished_process_esp.mp3',
+        'close_door': './data/sounds/close_door_esp.mp3',
+        'replace_tipracks': './data/sounds/replace_tipracks_esp.mp3',
+        'empty_trash': './data/sounds/empty_trash_esp.mp3'
+    }
+
 # Function definitions
+def run_info(parameters = dict(),start,end):
+    info = {}
+    hostname = subprocess.run(
+        ['hostname'],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    ).stdout.decode('utf-8')
+
+    info["RobotID"] = hostname
+    info["executedAction"] = ACTION
+    info["ProtocolID"] = PROTOCOL_ID
+    info["StartRunTime"] = start
+    info["FinishRunTime"] = end
+    info["parameters"] = parameters
+    # write json to file. This is going to be an api post.
+    #with open('run.json', 'w') as fp:
+        #json.dump(info, fp,indent=4)
+
 def check_door():
     return gpio.read_window_switches()
 
-def confirm_door_is_closed(ctx):
-    #Check if door is opened
-    if check_door() == False:
-        #Set light color to red and pause
-        gpio.set_button_light(1,0,0)
-        ctx.pause(f"Please, close the door")
-        time.sleep(3)
-        confirm_door_is_closed(ctx)
-    else:
-        #Set light color to green
-        gpio.set_button_light(0,1,0)
+def confirm_door_is_closed():
+    if not robot.is_simulating():
+        #Check if door is opened
+        if check_door() == False:
+            #Set light color to red and pause
+            gpio.set_button_light(1,0,0)
+            robot.pause()
+            voice_notification('close_door')
+            time.sleep(5)
+            confirm_door_is_closed()
+        else:
+            #Set light color to green
+            gpio.set_button_light(0,1,0)
+
+def start_run():
+    voice_notification('start')
+    gpio.set_button_light(0,1,0)
+    now = datetime.now()
+    # dd/mm/YY H:M:S
+    start_time = now.strftime("%Y/%m/%d %H:%M:%S")
+    return start_time
 
 def finish_run():
+    voice_notification('finish')
     #Set light color to blue
     gpio.set_button_light(0,0,1)
+    now = datetime.now()
+    # dd/mm/YY H:M:S
+    finish_time = now.strftime("%Y/%m/%d %H:%M:%S")
+    return finish_time
+
+def voice_notification(action):
+    if not robot.is_simulating():
+        fname = VOICE_FILES_DICT[action]
+        if os.path.isfile(fname) is True:
+                subprocess.run(
+                ['mpg123', fname],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+                )
+        else:
+            robot.comment(f"Sound file does not exist. Call the technician")
+
+def reset_tipcount(file_path = '/data/A/tip_log.json'):
+    if os.path.isfile(file_path):
+        os.remove(file_path)
 
 def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
     global tip_log
     if not tip_log['count'] or pip not in tip_log['count']:
+        tip_log['count'][pip] = 0
         if not robot.is_simulating():
             if os.path.isfile(file_path):
                 with open(file_path) as json_file:
@@ -86,12 +169,8 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
                         tip_log['count'][pip] = data['tips1000']
                     elif 'P300' in str(pip):
                         tip_log['count'][pip] = data['tips300']
-                    else:
-                        tip_log['count'][pip] = 0
-            else:
-                tip_log['count'][pip] = 0
-        else:
-            tip_log['count'][pip] = 0
+                    elif 'P20' in str(pip):
+                        tip_log['count'][pip] = data['tips20']
 
         if "8-Channel" in str(pip):
             tip_log['tips'][pip] =  [tip for rack in tipracks for tip in rack.rows()[0]]
@@ -105,25 +184,25 @@ def retrieve_tip_info(pip,tipracks,file_path = '/data/A/tip_log.json'):
 def save_tip_info(file_path = '/data/A/tip_log.json'):
     data = {}
     if not robot.is_simulating():
-        os.rename(file_path,file_path + ".bak")
+        if os.path.isfile(file_path):
+            os.rename(file_path,file_path + ".bak")
         for pip in tip_log['count']:
             if "P1000" in str(pip):
                 data['tips1000'] = tip_log['count'][pip]
             elif "P300" in str(pip):
                 data['tips300'] = tip_log['count'][pip]
+            elif "P20" in str(pip):
+                data['tips20'] = tip_log['count'][pip]
 
         with open(file_path, 'a+') as outfile:
             json.dump(data, outfile)
 
 def pick_up(pip,tiprack):
-    ## retrieve tip_log
-    global tip_log
-    if not tip_log:
-        tip_log = {}
-    tip_log = retrieve_tip_info(pip,tiprack)
     if tip_log['count'][pip] == tip_log['max'][pip]:
+        voice_notification('replace_tipracks')
         robot.pause('Replace ' + str(pip.max_volume) + 'µl tipracks before \
 resuming.')
+        confirm_door_is_closed()
         pip.reset_tipracks()
         tip_log['count'][pip] = 0
     pip.pick_up_tip(tip_log['tips'][pip][tip_log['count'][pip]])
@@ -131,10 +210,14 @@ resuming.')
 
 def drop(pip):
     global switch
-    side = 1 if switch else -1
-    drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=side*20))
-    pip.drop_tip(drop_loc,home_after=False)
-    switch = not switch
+    if "8-Channel" not in str(pip):
+        side = 1 if switch else -1
+        drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=side*20))
+        pip.drop_tip(drop_loc,home_after=False)
+        switch = not switch
+    else:
+        drop_loc = robot.loaded_labwares[12].wells()[0].top().move(Point(x=20))
+        pip.drop_tip(drop_loc,home_after=False)
 
 def prepare_beads(bd_tube,eth_tubes,pip,tiprack):
     pick_up(pip,tiprack)
@@ -150,23 +233,28 @@ def prepare_beads(bd_tube,eth_tubes,pip,tiprack):
             pick_up(pip,tiprack)
         pip.transfer(480, bd_tube.bottom(2),e.bottom(40),air_gap=10,new_tip='never')
         pip.blow_out(e.bottom(40))
-        drop(pip)
+        # drop(pip)
 
-def transfer_beads(beads_tube, dests, volume, pip,tiprack):
+def transfer_beads(beads_tube, dests, pip,tiprack):
+    if not pip.hw_pipette['has_tip']:
+        pick_up(pip,tiprack)
     max_trans_per_asp = 2  # 1000/VOLUME_BUFFER = 3
     split_ind = [ind for ind in range(0, len(dests), max_trans_per_asp)]
     dest_sets = [dests[split_ind[i]:split_ind[i+1]]
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
-    pick_up(pip,tiprack)
- # Mix bead tubes prior to dispensing
-    pip.flow_rate.aspirate = 200
-    pip.flow_rate.dispense = 2000
-    pip.mix(6,800,beads_tube.bottom(15))
+    # pick_up(pip,tiprack)
+    # Mix bead tubes prior to dispensing
+    pip.flow_rate.aspirate = 800
+    pip.flow_rate.dispense = 8000
+    # pip.mix(12,800,beads_tube.bottom(15))
+    for i in range(12):
+        pip.aspirate(800, beads_tube.bottom(30))
+        pip.dispense(800, beads_tube.bottom(2))
     pip.flow_rate.aspirate = 100
     pip.flow_rate.dispense = 1000
     for set in dest_sets:
         pip.aspirate(50, beads_tube.bottom(2))
-        pip.distribute(volume, beads_tube.bottom(2), [d.bottom(10) for d in set],
+        pip.distribute(VOLUME_BEADS, beads_tube.bottom(2), [d.bottom(10) for d in set],
                    air_gap=3, disposal_volume=0, new_tip='never')
         pip.aspirate(5,set[-1].top(-2))
         pip.dispense(55, beads_tube.top(-30))
@@ -177,16 +265,25 @@ def run(ctx: protocol_api.ProtocolContext):
     global robot
     robot = ctx
 
-    # confirm door is closed
-    if not ctx.is_simulating():
-        confirm_door_is_closed(ctx)
+    # check if tipcount is being reset
+    if RESET_TIPCOUNT:
+        reset_tipcount()
 
-    tips1000 = [ctx.load_labware('opentrons_96_filtertiprack_1000ul',
+    # confirm door is closed
+    robot.comment(f"Please, close the door")
+    confirm_door_is_closed()
+
+    # Begin run
+    start_time = start_run()
+
+    tips1000 = [robot.load_labware('opentrons_96_filtertiprack_1000ul',
                                      3, '1000µl tiprack')]
 
     # load pipette
-    p1000 = ctx.load_instrument(
+    p1000 = robot.load_instrument(
         'p1000_single_gen2', 'left', tip_racks=tips1000)
+    # Retrieve tip log
+    retrieve_tip_info(p1000,tips1000)
 
     # check source (elution) labware type
     if BEADS_LABWARE not in BD_LW_DICT:
@@ -194,7 +291,7 @@ def run(ctx: protocol_api.ProtocolContext):
 following:\nopentrons plastic 50ml tubes')
 
     # load mastermix labware
-    beads_rack = ctx.load_labware(
+    beads_rack = robot.load_labware(
         BD_LW_DICT[BEADS_LABWARE], '8',
         BEADS_LABWARE)
 
@@ -204,7 +301,7 @@ following:\nopentrons plastic 50ml tubes')
 following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr deep generic well plate')
 
     # load pcr plate
-    wells_plate = ctx.load_labware(PL_LW_DICT[PLATE_LABWARE], 10,
+    wells_plate = robot.load_labware(PL_LW_DICT[PLATE_LABWARE], 10,
                     'sample elution well plate ')
 
     # prepare beads
@@ -212,11 +309,9 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     num_tubes = math.ceil(NUM_SAMPLES/24)
     # How many wells for each tube
     num_wells = math.ceil(len(wells_plate.wells())/4)
-    # beads and ethanol
+    # beads and dipersion_reactive
     beads = beads_rack.wells()[4]
-    ethanol = beads_rack.wells()[0:4][:num_tubes]
-
-    prepare_beads(beads,ethanol,p1000,tips1000)
+    dipersion_reactive = beads_rack.wells()[0:4][:num_tubes]
 
     # setup dests
 
@@ -230,11 +325,26 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         for i in range(num_tubes)
         ]
 
-    # transfer
-    for bd_tube,dests in zip(ethanol,dest_sets):
-        transfer_beads(bd_tube, dests,VOLUME_BEADS, p1000, tips1000)
+    for bd_tube,dests in zip(dipersion_reactive,dest_sets):
+        # prepare beads
+        if DILUTE_BEADS:
+            prepare_beads(beads, [bd_tube], p1000, tips1000)
+        # transfer
+        transfer_beads(bd_tube, dests, p1000, tips1000)
 
     # track final used tip
     save_tip_info()
 
-    finish_run()
+    finish_time = finish_run()
+
+    par = {
+        "NUM_SAMPLES" : NUM_SAMPLES,
+        "BEADS_LABWARE" : BEADS_LABWARE,
+        "PLATE_LABWARE" : PLATE_LABWARE,
+        "VOLUME_BEADS" : VOLUME_BEADS,
+        "DILUTE_BEADS" : DILUTE_BEADS,
+        "LANGUAGE" : LANGUAGE,
+        "RESET_TIPCOUNT" : RESET_TIPCOUNT
+    }
+
+    run_info(par, start_time, finish_time)

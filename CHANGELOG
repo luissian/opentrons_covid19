@@ -19,11 +19,10 @@ Protocol modifications:
 - Reduced height in beads mix in protocol 2 station A, as it was taking some air sometimes. #53789ad
 - Protocol now B starts with magdeck off. #6031d94
 - Fixed issue where m300 would go too deep and not aspire correctly in elution buffer. #40410be
-- Fixed issue where m300 would not aspirate correctly in all wells in sobrenadant removal, washes an elution when magnet is engaged. Aspiration height is increase to 1.5. 
-
+- Fixed issue where m300 would not aspirate correctly in all wells in sobrenadant removal, washes an elution when magnet is engaged. Aspiration height is increase to 1.5.
 
 Bug fixes:
 - Fixed tip not dropping tip in p300 (protocol C) #9280ae8
 - Fixed correct pick up and drop tip for correct tip count for negative control (protocol C) #3483d15
 - Fixed correct drop tip for p300 (protocol C) #2e6cca7
-- Fix tip count issue when only one pipette is used. #80b9567
+- Fixed tip count issue when only one pipette is used. #80b9567

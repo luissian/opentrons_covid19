@@ -6,6 +6,8 @@ import math
 import os
 import subprocess
 import json
+from datetime import datetime
+
 
 # metadata
 metadata = {
@@ -87,6 +89,10 @@ elif MAGPLATE_LABWARE == 'ecogen deep generic well plate':
 else:
     MAGNET_HEIGHT = 22
 
+# End Parameters to adapt the protocol
+ACTION = "StationB-protocol1-extraction"
+PROTOCOL_ID = "0000-AA"
+
 # Constants
 REAGENT_LW_DICT = {
     'nest 12 reservoir plate': 'nest_12_reservoir_15ml'
@@ -167,8 +173,7 @@ def voice_notification(action):
         else:
             robot.comment(f"Sound file does not exist. Call the technician")
 
-def reset_tipcount():
-    file_path = '/data/B/tip_log.json'
+def reset_tipcount(file_path = '/data/B/tip_log.json'):
     if os.path.isfile(file_path):
         os.remove(file_path)
 
@@ -272,7 +277,7 @@ def dispense_beads(sources,dests,pip,tiprack):
 
 def remove_supernatant(sources,waste,pip,tiprack):
     for i, m in enumerate(sources):
-        loc = m.bottom(1)
+        loc = m.bottom(1.5)
         pick_up(pip,tiprack)
         pip.transfer(800, loc, waste, air_gap=100, new_tip='never')
         pip.blow_out(waste)
@@ -302,6 +307,7 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             # remove supernatant
             aspire_default_speed = pip.flow_rate.aspirate
             pip.flow_rate.aspirate = 75
+            asp_loc = m.bottom(1.5)
             pip.transfer(200, asp_loc, waste, new_tip='never', air_gap=20)
             pip.flow_rate.aspirate = aspire_default_speed
             pip.blow_out(waste)
@@ -314,7 +320,7 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
         dispense_default_speed = pip.flow_rate.dispense
         pip.flow_rate.dispense = 1500
         pip.transfer(
-            50, buffer, m.bottom(1), new_tip='never', air_gap=10)
+            50, buffer.bottom(2), m.bottom(1), new_tip='never', air_gap=10)
         pip.mix(20, 200, m.bottom(1))
         pip.flow_rate.dispense = dispense_default_speed
         drop(pip)
@@ -331,7 +337,7 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
         # tranfser and mix elution buffer with beads
         # side = 1 if i % 2 == 0 else -1
         # asp_loc = m.bottom(5).move(Point(x=-1*side*2))
-        asp_loc = m.bottom(1)
+        asp_loc = m.bottom(1.5)
         pick_up(pip,tipracks)
         # transfer elution to new plate
         pip.transfer(50, asp_loc, e, new_tip='never', air_gap=10)

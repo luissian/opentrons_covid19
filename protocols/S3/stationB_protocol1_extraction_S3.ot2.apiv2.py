@@ -302,7 +302,7 @@ def dispense_beads(sources,dests,pip,tiprack):
 
 def remove_supernatant(sources,waste,pip,tiprack):
     for i, m in enumerate(sources):
-        loc = m.bottom(1)
+        loc = m.bottom(1.5)
         pick_up(pip,tiprack)
         pip.transfer(800, loc, waste, air_gap=100, new_tip='never')
         pip.blow_out(waste)
@@ -332,6 +332,7 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             # remove supernatant
             aspire_default_speed = pip.flow_rate.aspirate
             pip.flow_rate.aspirate = 75
+            asp_loc = m.bottom(1.5)
             pip.transfer(200, asp_loc, waste, new_tip='never', air_gap=20)
             pip.flow_rate.aspirate = aspire_default_speed
             pip.blow_out(waste)
@@ -361,7 +362,7 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
         # tranfser and mix elution buffer with beads
         # side = 1 if i % 2 == 0 else -1
         # asp_loc = m.bottom(5).move(Point(x=-1*side*2))
-        asp_loc = m.bottom(1)
+        asp_loc = m.bottom(1.5)
         pick_up(pip,tipracks)
         # transfer elution to new plate
         pip.transfer(50, asp_loc, e, new_tip='never', air_gap=10)

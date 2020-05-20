@@ -95,7 +95,7 @@ elif LANGUAGE_DICT[LANGUAGE] == 'esp':
     }
 
 # Function definitions
-def run_info(parameters = dict()):
+def run_info(parameters = dict(),start,end):
     info = {}
     hostname = subprocess.run(
         ['hostname'],
@@ -106,6 +106,8 @@ def run_info(parameters = dict()):
     info["RobotID"] = hostname
     info["executedAction"] = ACTION
     info["ProtocolID"] = PROTOCOL_ID
+    info["StartRunTime"] = start
+    info["FinishRunTime"] = end
     info["parameters"] = parameters
     # write json to file. This is going to be an api post.
     #with open('run.json', 'w') as fp:
@@ -129,10 +131,22 @@ def confirm_door_is_closed():
             #Set light color to green
             gpio.set_button_light(0,1,0)
 
+def start_run():
+    voice_notification('start')
+    gpio.set_button_light(0,1,0)
+    now = datetime.now()
+    # dd/mm/YY H:M:S
+    start_time = now.strftime("%d/%m/%Y %H:%M:%S")
+    return start_time
+
 def finish_run():
     voice_notification('finish')
     #Set light color to blue
     gpio.set_button_light(0,0,1)
+    now = datetime.now()
+    # dd/mm/YY H:M:S
+    finish_time = now.strftime("%d/%m/%Y %H:%M:%S")
+    return finish_time
 
 def voice_notification(action):
     if not robot.is_simulating():
@@ -239,7 +253,7 @@ def run(ctx: protocol_api.ProtocolContext):
     confirm_door_is_closed()
 
     # Begin run
-    voice_notification('start')
+    start_time = start_run()
 
     # define tips
     tips1000 = [robot.load_labware('opentrons_96_filtertiprack_1000ul',
@@ -292,15 +306,17 @@ following:\nopentrons plastic 50ml tubes')
 
     # track final used tip
     save_tip_info()
-    par = {
-        "NUM_SAMPLES" : 96,
-        "BUFFER_LABWARE" : 'opentrons plastic 30ml tubes',
-        "DESTINATION_LABWARE" : 'opentrons plastic 2ml tubes',
-        "DEST_TUBE" : '2ml tubes',
-        "VOLUME_BUFFER" : 300,
-        "LANGUAGE" : 'esp',
-        "RESET_TIPCOUNT" : False
-    }
-    run_info(par)
 
-    finish_run()
+    finish_time = finish_run()
+
+    par = {
+        "NUM_SAMPLES" : NUM_SAMPLES,
+        "BUFFER_LABWARE" : BUFFER_LABWARE,
+        "DESTINATION_LABWARE" : DESTINATION_LABWARE,
+        "DEST_TUBE" : DEST_TUBE,
+        "VOLUME_BUFFER" : VOLUME_BUFFER,
+        "LANGUAGE" : LANGUAGE,
+        "RESET_TIPCOUNT" : RESET_TIPCOUNT
+    }
+
+    run_info(par , start_time, finish_time)

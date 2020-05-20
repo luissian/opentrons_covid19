@@ -89,7 +89,7 @@ elif LANGUAGE_DICT[LANGUAGE] == 'esp':
     }
 
 # Function definitions
-def run_info(parameters = dict(),start,end):
+def run_info(start, end, parameters = dict()):
     info = {}
     hostname = subprocess.run(
         ['hostname'],
@@ -347,4 +347,4 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         "RESET_TIPCOUNT" : RESET_TIPCOUNT
     }
 
-    run_info(par, start_time, finish_time)
+    run_info(start_time, finish_time, par)

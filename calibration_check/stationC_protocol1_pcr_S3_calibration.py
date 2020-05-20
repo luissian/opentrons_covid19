@@ -24,7 +24,7 @@ MM_LABWARE = 'opentrons aluminum block'
 MMTUBE_LABWARE = '2ml tubes'
 PCR_LABWARE = 'opentrons aluminum nest plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
-PREPARE_MASTERMIX = False
+PREPARE_MASTERMIX = True
 MM_TYPE = 'MM1'
 VOLUME_ELUTION = 7
 TRANSFER_MASTERMIX = True
@@ -445,7 +445,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # tempdeck module
     tempdeck = robot.load_module('tempdeck', '10')
-    tempdeck.set_temperature(4)
+    # tempdeck.set_temperature(4)
 
     # check mastermix labware type
     if MM_LABWARE not in MM_LW_DICT:
@@ -494,37 +494,37 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # prepare mastermix
     if PREPARE_MASTERMIX:
-        pip = p300 if mm_vol > 20 else p20
-        tiprack = tiprack300 if mm_vol > 20 else tiprack20
+        pip = p300 if VOLUME_MMIX >= 20 else p20
+        tiprack = tips300 if VOLUME_MMIX >= 20 else tips20
         pick_up(pip,tiprack)
         pip.move_to(mm_rack.wells()[0].top())
         robot.pause(f"Is it at the top of the well?")
-        pip.aspirate(mm_vol, mm_rack.wells()[0].bottom(1))
+        pip.aspirate(VOLUME_MMIX, mm_rack.wells()[0].bottom(1))
         pip.move_to(mm_rack.wells()[0].top())
         robot.pause(f"Did it aspirate correctly?")
         pip.move_to(mm_rack.wells()[-1].top())
         robot.pause(f"Is it at the top of the well?")
-        pip.dispense(mm_vol, mm_rack.wells()[-1].bottom(5))
+        pip.dispense(VOLUME_MMIX, mm_rack.wells()[-1].bottom(5))
         pip.move_to(mm_rack.wells()[-1].top())
         robot.pause(f"Did it dispense all the liquid?")
-        pip.aspirate(mm_vol, mm_rack.wells()[-1].bottom(1))
+        pip.aspirate(VOLUME_MMIX, mm_rack.wells()[-1].bottom(1))
         pip.move_to(mm_rack.wells()[-1].top())
         robot.pause(f"Did it aspirate correctly?")
         drop(pip)
 
     # transfer mastermix
     if TRANSFER_MASTERMIX:
-        pip = p300 if mm_vol > 20 else p20
-        tiprack = tiprack300 if mm_vol > 20 else tiprack20
+        pip = p300 if VOLUME_MMIX >= 20 else p20
+        tiprack = tips300 if VOLUME_MMIX >= 20 else tips20
         pick_up(pip,tiprack)
         pip.move_to(mm_rack.wells()[0].top())
         robot.pause(f"Is it at the top of the well?")
-        pip.aspirate(mm_vol, mm_rack.wells()[0].bottom(1))
+        pip.aspirate(VOLUME_MMIX, mm_rack.wells()[0].bottom(1))
         pip.move_to(mm_rack.wells()[0].top())
         robot.pause(f"Did it aspirate correctly?")
         pip.move_to(dests[0].top())
         robot.pause(f"Is it at the top of the well?")
-        pip.dispense(mm_vol, dests[0].bottom(5))
+        pip.dispense(VOLUME_MMIX, dests[0].bottom(5))
         pip.move_to(dests[0].top())
         robot.pause(f"Did it dispense all the liquid?")
         pip.move_to(dests[-1].top())
@@ -554,10 +554,10 @@ def run(ctx: protocol_api.ProtocolContext):
         p20.dispense(VOLUME_ELUTION, dests[-1].bottom(2))
         p20.move_to(dests[-1].top())
         robot.pause(f"Did it dispense all the liquid?")
-        p20.move_to(mm_rack.wells()[0].top())
+        p20.move_to(mm_rack.wells()[4].top())
         robot.pause(f"Is it at the top of the well?")
         p20.aspirate(VOLUME_ELUTION, mm_rack.wells()[4].bottom(1))
-        p20.move_to(mm_rack.wells()[0].top())
+        p20.move_to(mm_rack.wells()[4].top())
         robot.pause(f"Did it aspirate correctly?")
         p20.move_to(dests[-2].top())
         robot.pause(f"Is it at the top of the well?")

@@ -41,7 +41,7 @@ WASTE_LABWARE = 'nest 1 reservoir plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 DISPENSE_BEADS = False
 LANGUAGE = 'esp'
-RESET_TIPCOUNT = True
+RESET_TIPCOUNT = False
 
 # End Parameters to adapt the protocol
 
@@ -302,7 +302,7 @@ def dispense_beads(sources,dests,pip,tiprack):
 
 def remove_supernatant(sources,waste,pip,tiprack):
     for i, m in enumerate(sources):
-        loc = m.bottom(1.5)
+        loc = m.bottom(1)
         pick_up(pip,tiprack)
         pip.transfer(800, loc, waste, air_gap=100, new_tip='never')
         pip.blow_out(waste)
@@ -320,7 +320,7 @@ def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
             pick_up(pip,tiprack)
             pip.transfer(
                 200, wash_chan.bottom(2), m.center(), new_tip='never', air_gap=20)
-            # Mix heigh has to be m.bottom(1.3)e to bottom, it was 5 now reduced to 2, maybe should be 1?
+            # Mix heigh has to be really close to bottom, it was 5 now reduced to 2, maybe should be 1?
             dispense_default_speed = pip.flow_rate.dispense
             pip.flow_rate.dispense = 1500
             pip.mix(7, 200, m.bottom(2))
@@ -345,8 +345,8 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
         dispense_default_speed = pip.flow_rate.dispense
         pip.flow_rate.dispense = 1500
         pip.transfer(
-            50, buffer.bottom(2), m.bottom(1.3), new_tip='never', air_gap=10)
-        pip.mix(20, 200, m.bottom(1.3))
+            50, buffer.bottom(2), m.bottom(1), new_tip='never', air_gap=10)
+        pip.mix(20, 200, m.bottom(1))
         pip.flow_rate.dispense = dispense_default_speed
         drop(pip)
 

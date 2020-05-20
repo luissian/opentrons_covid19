@@ -6,6 +6,8 @@ import math
 import os
 import subprocess
 import json
+from datetime import datetime
+
 
 # metadata
 metadata = {
@@ -125,7 +127,7 @@ elif LANGUAGE_DICT[LANGUAGE] == 'esp':
     }
 
 # Function definitions
-def run_info(parameters = dict()):
+def run_info(parameters = dict(),start,end):
     info = {}
     hostname = subprocess.run(
         ['hostname'],
@@ -136,6 +138,8 @@ def run_info(parameters = dict()):
     info["RobotID"] = hostname
     info["executedAction"] = ACTION
     info["ProtocolID"] = PROTOCOL_ID
+    info["StartRunTime"] = start
+    info["FinishRunTime"] = end
     info["parameters"] = parameters
     # write json to file. This is going to be an api post.
     #with open('run.json', 'w') as fp:
@@ -158,10 +162,22 @@ def confirm_door_is_closed():
             #Set light color to green
             gpio.set_button_light(0,1,0)
 
+def start_run():
+    voice_notification('start')
+    gpio.set_button_light(0,1,0)
+    now = datetime.now()
+    # dd/mm/YY H:M:S
+    start_time = now.strftime("%d/%m/%Y %H:%M:%S")
+    return start_time
+
 def finish_run():
     voice_notification('finish')
     #Set light color to blue
     gpio.set_button_light(0,0,1)
+    now = datetime.now()
+    # dd/mm/YY H:M:S
+    finish_time = now.strftime("%d/%m/%Y %H:%M:%S")
+    return finish_time
 
 def voice_notification(action):
     if not robot.is_simulating():
@@ -354,7 +370,7 @@ def run(ctx: protocol_api.ProtocolContext):
     confirm_door_is_closed()
 
     # Begin run
-    voice_notification('start')
+    start_time = start_run()
 
     # load labware and modules
     ## ELUTION LABWARE
@@ -471,17 +487,17 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     magdeck.disengage()
 
+    finish_time = finish_run()
+
     par = {
-        "NUM_SAMPLES" : 96,
-        "REAGENT_LABWARE" : 'nest 12 reservoir plate',
-        "MAGPLATE_LABWARE" : 'nest deep generic well plate',
-        "WASTE_LABWARE" : 'nest 1 reservoir plate',
-        "ELUTION_LABWARE" : 'opentrons aluminum nest plate',
-        "DISPENSE_BEADS" : False,
-        "LANGUAGE" : 'esp',
-        "RESET_TIPCOUNT" : False
+        "NUM_SAMPLES" : NUM_SAMPLES,
+        "REAGENT_LABWARE" : REAGENT_LABWARE,
+        "MAGPLATE_LABWARE" : MAGPLATE_LABWARE,
+        "WASTE_LABWARE" : WASTE_LABWARE,
+        "ELUTION_LABWARE" : ELUTION_LABWARE,
+        "DISPENSE_BEADS" : DISPENSE_BEADS,
+        "LANGUAGE" : LANGUAGE,
+        "RESET_TIPCOUNT" : RESET_TIPCOUNT
     }
 
-    run_info(par)
-
-    finish_run()
+    run_info(par, start_time, finish_time)

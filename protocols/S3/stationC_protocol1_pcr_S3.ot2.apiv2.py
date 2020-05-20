@@ -6,6 +6,7 @@ import math
 import os
 import subprocess
 import json
+from datetime import datetime
 
 # Metadata
 metadata = {
@@ -164,7 +165,7 @@ elif LANGUAGE_DICT[LANGUAGE] == 'esp':
 
 # Function definitions
 # Function definitions
-def run_info(parameters = dict()):
+def run_info(parameters = dict(),start,end):
     info = {}
     hostname = subprocess.run(
         ['hostname'],
@@ -175,6 +176,8 @@ def run_info(parameters = dict()):
     info["RobotID"] = hostname
     info["executedAction"] = ACTION
     info["ProtocolID"] = PROTOCOL_ID
+    info["StartRunTime"] = start
+    info["FinishRunTime"] = end
     info["parameters"] = parameters
     # write json to file. This is going to be an api post.
     #with open('run.json', 'w') as fp:
@@ -197,10 +200,22 @@ def confirm_door_is_closed():
             #Set light color to green
             gpio.set_button_light(0,1,0)
 
+def start_run():
+    voice_notification('start')
+    gpio.set_button_light(0,1,0)
+    now = datetime.now()
+    # dd/mm/YY H:M:S
+    start_time = now.strftime("%d/%m/%Y %H:%M:%S")
+    return start_time
+
 def finish_run():
     voice_notification('finish')
     #Set light color to blue
     gpio.set_button_light(0,0,1)
+    now = datetime.now()
+    # dd/mm/YY H:M:S
+    finish_time = now.strftime("%d/%m/%Y %H:%M:%S")
+    return finish_time
 
 def voice_notification(action):
     if not robot.is_simulating():
@@ -453,7 +468,7 @@ def run(ctx: protocol_api.ProtocolContext):
     confirm_door_is_closed()
 
     # Begin run
-    voice_notification('start')
+    start_time = start_run()
 
     # define tips
     tips20 = [
@@ -545,21 +560,22 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # track final used tip
     save_tip_info()
+
+    finish_time = finish_run()
+
     par = {
-        "NUM_SAMPLES" : 96,
-        "MM_LABWARE" : 'opentrons aluminum block',
-        "MMTUBE_LABWARE" : '2ml tubes',
-        "PCR_LABWARE" : 'opentrons aluminum nest plate',
-        "ELUTION_LABWARE" : 'opentrons aluminum nest plate',
-        "PREPARE_MASTERMIX" : False,
-        "MM_TYPE" : 'MM1',
-        "VOLUME_ELUTION" : 7,
-        "TRANSFER_MASTERMIX" : True,
-        "TRANSFER_SAMPLES" : True,
-        "LANGUAGE" : 'esp',
-        "RESET_TIPCOUNT" : False
+        "NUM_SAMPLES" : NUM_SAMPLES,
+        "MM_LABWARE" : MM_LABWARE,
+        "MMTUBE_LABWARE" : MMTUBE_LABWARE,
+        "PCR_LABWARE" : PCR_LABWARE,
+        "ELUTION_LABWARE" : ELUTION_LABWARE,
+        "PREPARE_MASTERMIX" : PREPARE_MASTERMIX,
+        "MM_TYPE" : MM_TYPE,
+        "VOLUME_ELUTION" : VOLUME_ELUTION,
+        "TRANSFER_MASTERMIX" : TRANSFER_MASTERMIX,
+        "TRANSFER_SAMPLES" : TRANSFER_SAMPLES,
+        "LANGUAGE" : LANGUAGE,
+        "RESET_TIPCOUNT" : RESET_TIPCOUNT
     }
 
-    run_info(par)
-
-    finish_run()
+    run_info(par, start_time, finish_time)

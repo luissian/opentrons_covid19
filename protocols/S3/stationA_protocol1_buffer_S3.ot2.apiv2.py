@@ -6,6 +6,8 @@ import math
 import os
 import subprocess
 import json
+from datetime import datetime
+
 
 # Metadata
 metadata = {
@@ -320,4 +322,4 @@ following:\nopentrons plastic 50ml tubes')
         "RESET_TIPCOUNT" : RESET_TIPCOUNT
     }
 
-    run_info(par , start_time, finish_time)
+    run_info(par, start_time, finish_time)

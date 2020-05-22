@@ -350,7 +350,7 @@ def homogenize_mm(mm_tube, pip, tiprack, times=5):
     # blow out before dropping tip
     pip.blow_out(mm_tube.top(-2))
     if VOLUME_MMIX < 20:
-        drop(p300)
+        drop(pip)
 
 def prepare_mastermix(mm_rack, p300, p20,tiprack300,tiprack20):
     # setup mastermix coordinates

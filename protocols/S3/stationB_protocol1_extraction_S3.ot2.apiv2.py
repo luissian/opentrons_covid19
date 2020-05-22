@@ -75,9 +75,6 @@ ELUTION_LABWARE
     opentrons aluminum biorad plate
     opentrons aluminum nest plate
 """
-# Parameters to adapt the protocol
-# Warning writing any Parameters below this line.
-# It will be deleted if opentronsWeb is used.
 
 # Calculated variables
 if MAGPLATE_LABWARE == 'nest deep generic well plate':
@@ -89,7 +86,7 @@ elif MAGPLATE_LABWARE == 'ecogen deep generic well plate':
 else:
     MAGNET_HEIGHT = 22
 
-# End Parameters to adapt the protocol
+# Config variables
 ACTION = "StationB-protocol1-extraction"
 PROTOCOL_ID = "0000-AA"
 

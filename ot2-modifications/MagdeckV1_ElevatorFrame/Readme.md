@@ -4,7 +4,7 @@ The magnetic module V1 is too strong and attracts magnetic beads even when disen
 
 We have created a 3D printable elevator frame designed to raise the plate above the magnetic field of the magnetic module when disengaged.
 
-The printable file is "OT2 Magedck V1 Elevator Frame.stl", in this same folder, and can be also found in Tinkercad. It is licensed under Atribution 3.0 (CC-BY 3.0).
+The printable file is [OT2 Magedck V1 Elevator Frame](https://www.tinkercad.com/things/9f8oLel816s-ot2-magedck-v1-elevator-frame), you can find the .stl in this same folder, and can be also found in Tinkercad. It is licensed under Atribution 3.0 (CC-BY 3.0).
 
 ![Real picture](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/ot2-modifications/MagdeckV1_ElevatorFrame/OT2_MagdeckV1_ElevatorFrame_picture.jpg?raw=true)
 

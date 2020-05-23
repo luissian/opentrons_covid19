@@ -21,7 +21,7 @@ dns-search=
 method=auto
 ```
 
-This configuration will prepare your robots to get a dynamic IP address that must be set to fixed one by reserving it in your network DHCP server. If you wanted to set a manual address, change the `[ipv4]` field as we did in the [wifi setup file](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/doc/S3/01_OT2_installation.md):
+This configuration will prepare your robots to get a dynamic IP address that must be set to fixed one by reserving it in your network DHCP server. If you wanted to set a manual address, change the `[ipv4]` field as we did in the [wifi setup file](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/doc/S3/01_OT2_installation.md):
 
 ```
 [ipv4]
@@ -35,7 +35,7 @@ method=manual
 
 3) The easiest way to tidy up the cable without drilling or cutting is by passing it through the left corner of the plastic cover, where there is already an aperture to pass the other cables. Then, take the cable down using the magnetic cable management hooks for the USB cables of the modules and take it out of the box through the bottom left hole of the rear panel.
 
-![Ethernet cable configuration](https://github.com/BU-ISCIII/opentrons_covid19/blob/master/img/ethernet_cable_configuration.jpg?raw=true)
+![Ethernet cable configuration](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/img/ethernet_cable_configuration.jpg?raw=true)
 
 4) Plug the cable and restart the robot. Now you should be able to find the robot in your wired network. Use the DHCP server to reserve a fix IP for the robot IPs.
 

@@ -334,7 +334,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     ## retrieve tip_log
     retrieve_tip_info(p20,tips20)
-    retrieve_tip_info(p300,tips300)
+    retrieve_tip_info(m20,tipsm20)
 
     # tempdeck module
     tempdeck = robot.load_module('tempdeck', '10')

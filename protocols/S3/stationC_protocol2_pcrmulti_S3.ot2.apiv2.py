@@ -248,21 +248,39 @@ def drop(pip):
         pip.drop_tip(drop_loc,home_after=False)
 
 def get_source_dest_coordinates(source_racks, pcr_plate):
-    num_cols = math.ceil(NUM_SAMPLES/8)
+    # Keep floor
+    num_cols = math.floor(NUM_SAMPLES/8)
+    # Keep the remaining samples
+    num_samples_m = (num_cols*8)
+    remainder = math.remainder(NUM_SAMPLES,8)
+
     if 'strip' in ELUTION_LABWARE:
-        sources = [
-            col
+        if NUM_SAMPLES > 8:
+            sources_m = [
+                col
+                for i, rack in enumerate(source_racks)
+                for col in [
+                    rack.columns()[c] if i < 2 else rack.columns()[c+1]
+                    for c in [0, 5, 10]
+                ]
+            ][:num_cols]
+
+        sources_s = [
+            well
             for i, rack in enumerate(source_racks)
             for col in [
                 rack.columns()[c] if i < 2 else rack.columns()[c+1]
                 for c in [0, 5, 10]
             ]
-        ][:NUM_SAMPLES]
+            for well in col
+        ][num_samples_m:remainder]
 
     elif 'plate' in ELUTION_LABWARE:
         sources = source_racks.rows()[:num_cols]
-    dests = pcr_plate.rows()[:num_cols]
-    return sources, dests
+
+    dests_m = pcr_plate.rows()[:num_cols]
+    dests_s = pcr_plate.wells()[num_samples_m:remainder]
+    return sources_m, sources_s, dests_m, dests_s
 
 def transfer_samples(sources, dests, pip,tiprack):
     # height for aspiration has to be different depending if you ar using tubes or wells
@@ -348,10 +366,12 @@ def run(ctx: protocol_api.ProtocolContext):
     ]
 
     # setup sample sources and destinations
-    sources, dests = get_source_dest_coordinates(source_racks, pcr_plate)
+    sources_m, sources_s, dests_m, dests_s = get_source_dest_coordinates(source_racks, pcr_plate)
 
     # transfer samples to corresponding locations
-    transfer_samples_m(sources, dests, m20,tipsm20)
+    if NUM_SAMPLES > 8:
+        transfer_samples(sources_m,dests_m,m20,tipsm20)
+    transfer_samples(sources_s, dests_s, p20,tips20)
 
     # transfer negative control to position NUM_SAMPLES-2
     pick_up(p20, tips20)

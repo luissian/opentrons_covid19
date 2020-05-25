@@ -22,6 +22,7 @@ metadata = {
 
 NUM_SAMPLES = 96
 PCR_LABWARE = 'opentrons aluminum nest plate'
+MM_LABWARE = 'opentrons aluminum block'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 VOLUME_ELUTION = 7
 LANGUAGE = 'esp'
@@ -44,6 +45,11 @@ tip_log['max'] = {}
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number
+
+MM_LABWARE must be one of the following:
+    opentrons plastic block
+    pentrons aluminum block
+    covidwarriors aluminum block
 
 PCR_LABWARE must be one of the following:
     opentrons aluminum biorad plate
@@ -70,6 +76,12 @@ ELUTION_LABWARE must be one of the following:
 """
 
 # Constants
+MM_LW_DICT = {
+    'opentrons plastic block': 'opentrons_24_tuberack_generic_2ml_screwcap',
+    'opentrons aluminum block': 'opentrons_24_aluminumblock_generic_2ml_screwcap',
+    'covidwarriors aluminum block': 'covidwarriors_aluminumblock_24_screwcap_2000ul'
+}
+
 PCR_LW_DICT = {
     'opentrons aluminum biorad plate': 'opentrons_96_aluminumblock_biorad_wellplate_200ul',
     'opentrons aluminum nest plate': 'opentrons_96_aluminumblock_nest_wellplate_100ul',
@@ -251,8 +263,8 @@ def get_source_dest_coordinates(source_racks, pcr_plate):
     # Keep floor
     num_cols = math.floor(NUM_SAMPLES/8)
     # Keep the remaining samples
-    num_samples_m = (num_cols*8)
-    remainder = math.remainder(NUM_SAMPLES,8)
+    num_samples_m = int(num_cols*8)
+    remainder = int(math.remainder(NUM_SAMPLES,8))
 
     if 'strip' in ELUTION_LABWARE:
         if NUM_SAMPLES > 8:
@@ -276,9 +288,10 @@ def get_source_dest_coordinates(source_racks, pcr_plate):
         ][num_samples_m:remainder]
 
     elif 'plate' in ELUTION_LABWARE:
-        sources = source_racks.rows()[:num_cols]
+        sources_m = source_racks.rows()[0][:num_cols]
+        sources_s = source_racks.wells()[num_samples_m:remainder]
 
-    dests_m = pcr_plate.rows()[:num_cols]
+    dests_m = pcr_plate.rows()[0][:num_cols]
     dests_s = pcr_plate.wells()[num_samples_m:remainder]
     return sources_m, sources_s, dests_m, dests_s
 
@@ -291,8 +304,8 @@ def transfer_samples(sources, dests, pip,tiprack):
     # transfer
     for s, d in zip(sources, dests):
         # Skip for negative control, position NUM_SAMPLES-2
-        if s == sources[NUM_SAMPLES-2]:
-            continue
+        #if s == sources[NUM_SAMPLES-2]:
+        #    continue
 
         pick_up(pip,tiprack)
         pip.transfer(VOLUME_ELUTION, s.bottom(height), d.bottom(2), air_gap=2, new_tip='never')
@@ -327,6 +340,16 @@ def run(ctx: protocol_api.ProtocolContext):
     tipsm20 = [
         robot.load_labware('opentrons_96_filtertiprack_20ul', 3)
     ]
+
+    if MM_LABWARE not in MM_LW_DICT:
+        raise Exception('Invalid MM_LABWARE. Must be one of the following:\n' + '\n'.join(list(MM_LW_DICT.keys())))
+
+
+    # load mastermix labware
+    mm_rack = robot.load_labware(
+        MM_LW_DICT[MM_LABWARE], '11',
+        MM_LABWARE)
+
 
     # define pipettes
     p20 = robot.load_instrument('p20_single_gen2', 'right', tip_racks=tips20)
@@ -375,6 +398,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # transfer negative control to position NUM_SAMPLES-2
     pick_up(p20, tips20)
+    dests = pcr_plate.wells()[:NUM_SAMPLES]
     p20.transfer(VOLUME_ELUTION, mm_rack.wells()[4].bottom(1), dests[NUM_SAMPLES-2].bottom(2), air_gap=2, new_tip='never')
     drop(p20)
 
@@ -385,6 +409,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     par = {
         "NUM_SAMPLES" : NUM_SAMPLES,
+        "MM_LABWARE" : MM_LABWARE,
         "PCR_LABWARE" : PCR_LABWARE,
         "ELUTION_LABWARE" : ELUTION_LABWARE,
         "VOLUME_ELUTION" : VOLUME_ELUTION,

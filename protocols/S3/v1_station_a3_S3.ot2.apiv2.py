@@ -32,7 +32,7 @@ RESET_TIPCOUNT = False
 
 # End Parameters to adapt the protocol
 ACTION = "StationA-protocol3-lysates"
-PROTOCOL_ID = "0020-AA"
+
 
 ## global vars
 ## initialize robot object
@@ -103,7 +103,7 @@ def run_info(start, end):
     info = {}
 
 
-    URL = "localhost:8001/api/robots/createUsage"
+    # URL = "localhost:8001/api/robots/createUsage"
 
     '''
     hostname = subprocess.run(
@@ -114,8 +114,8 @@ def run_info(start, end):
 
     info["RobotID"] = hostname
     '''
-    #info["RobotID"] = os.uname()[1]
-    info["RobotID"] = 'S3-A1'
+    info["RobotID"] = os.uname()[1]
+    #info["RobotID"] = 'S3-A1'
     info["executedAction"] = ACTION
     info["ProtocolID"] = PROTOCOL_ID
     info["StartRunTime"] = start

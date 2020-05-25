@@ -264,7 +264,6 @@ def get_source_dest_coordinates(source_racks, pcr_plate):
     num_cols = math.floor(NUM_SAMPLES/8)
     # Keep the remaining samples
     num_samples_m = int(num_cols*8)
-    remainder = int(math.remainder(NUM_SAMPLES,8))
 
     if 'strip' in ELUTION_LABWARE:
         if NUM_SAMPLES > 8:
@@ -285,14 +284,14 @@ def get_source_dest_coordinates(source_racks, pcr_plate):
                 for c in [0, 5, 10]
             ]
             for well in col
-        ][num_samples_m:remainder]
+        ][num_samples_m:NUM_SAMPLES]
 
     elif 'plate' in ELUTION_LABWARE:
         sources_m = source_racks.rows()[0][:num_cols]
-        sources_s = source_racks.wells()[num_samples_m:remainder]
+        sources_s = source_racks.wells()[num_samples_m:NUM_SAMPLES]
 
     dests_m = pcr_plate.rows()[0][:num_cols]
-    dests_s = pcr_plate.wells()[num_samples_m:remainder]
+    dests_s = pcr_plate.wells()[num_samples_m:NUM_SAMPLES]
     return sources_m, sources_s, dests_m, dests_s
 
 def transfer_samples(sources, dests, pip,tiprack):

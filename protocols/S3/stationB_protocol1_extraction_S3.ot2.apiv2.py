@@ -306,7 +306,7 @@ def remove_supernatant(sources,waste,pip,tiprack):
         pip.blow_out(waste)
         drop(pip)
 
-def wash_reuse(wash_sets,dests,waste,magdeck,pip,tiprack,rip,tipreuse):
+def wash_reuse(wash_sets,dests,waste,magdeck,pip,tiprack,tipreuse):
     for wash_set in wash_sets:
         # transfer wash
         pick_up(pip,tiprack)
@@ -319,23 +319,35 @@ def wash_reuse(wash_sets,dests,waste,magdeck,pip,tiprack,rip,tipreuse):
         # mix beads with wash
         tips_loc = 0
         for i, m in enumerate(dests):
+            if tips_loc == 0:
+                if  wash_set != 0:
+                    drop(pip)
+                    pip.pick_up_tip(tipreuse[0].rows()[0][tips_loc])
+            else:
+                 pip.pick_up_tip(tipreuse[0].rows()[0][tips_loc])
+
             dispense_default_speed = pip.flow_rate.dispense
             pip.flow_rate.dispense = 1500
             pip.mix(7, 200, m.bottom(2))
             pip.flow_rate.dispense = dispense_default_speed
+            pip.return_tip(tipreuse[0].rows()[0][tips_loc], home_after=False)
+            tips_loc += 1
 
-            magdeck.engage(height_from_base=MAGNET_HEIGHT)
-            robot.delay(seconds=75, msg='Incubating on magnet for 75 seconds.')
+        magdeck.engage(height_from_base=MAGNET_HEIGHT)
+        robot.delay(seconds=75, msg='Incubating on magnet for 75 seconds.')
 
         # remove supernatant
         tips_loc = 0
         for i, m in enumerate(dests):
+            pip.pick_up_tip(tipreuse[0].rows()[0][tips_loc])
             aspire_default_speed = pip.flow_rate.aspirate
             pip.flow_rate.aspirate = 75
             asp_loc = m.bottom(1.5)
             pip.transfer(200, asp_loc, waste, new_tip='never', air_gap=20)
             pip.flow_rate.aspirate = aspire_default_speed
             pip.blow_out(waste)
+            pip.return_tip(tipreuse[0].rows()[0][tips_loc], home_after=False)
+            tips_loc += 1
 
 def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
     for wash_set in wash_sets:
@@ -475,7 +487,6 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     # pipettes
     m300 = robot.load_instrument('p300_multi_gen2', 'left', tip_racks=tips300)
-    r300 = robot.load_instrument('p300_multi_gen2', 'left', tip_racks=tipsreuse)
     p1000 = robot.load_instrument('p1000_single_gen2', 'right',
                                 tip_racks=tips1000)
 
@@ -520,7 +531,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     # 3x washes
     if REUSE_TIPS == True:
-        wash_reuse(wash_sets,mag_samples_m,waste,magdeck,m300,tips300,r300,tipsreuse)
+        wash_reuse(wash_sets,mag_samples_m,waste,magdeck,m300,tips300,tipsreuse)
     else:
         wash(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)
 

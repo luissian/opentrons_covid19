@@ -103,12 +103,13 @@ elif LANGUAGE_DICT[LANGUAGE] == 'esp':
 # Function definitions
 
 def write_to_error_log (info, reason):
-    sub_folder_date = datetime.now().strftime("%Y_%m_%d")
-    folder_date = os.path.join('/data', sub_folder_date)
-    file_name = datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + '.json'
-    folder_file_name = os.path.join(folder_date, file_name)
+    date = datetime.now().strftime("%Y_%m_%d")
+    folder_date = os.path.join('/data', date)
+    time_now = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+    json_file = time_now + '.json'
+    folder_file_name = os.path.join(folder_date, json_file)
     folder_error_log = os.path.join(folder_date,'error.log')
-    if not os.isdir(folder_date):
+    if not os.path.exists(folder_date):
         try:
             os.makedirs(folder_date)
         except:
@@ -116,8 +117,8 @@ def write_to_error_log (info, reason):
     try:
         with open (folder_file_name , 'w') as fh:
             json.dump(info, fh, indent=4)
-        with open(folder_error_log, 'w') as fh:
-            fh.write('Unable to accept the requests get error : '+ reason + '\n')
+        with open(folder_error_log, 'a') as fh:
+            fh.write( time_now +  '  Unable to accept the requests get error : '+ reason + '\n')
     except:
         return
 
@@ -360,13 +361,4 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     finish_time = finish_run()
 
-    par = {
-        "NUM_SAMPLES" : NUM_SAMPLES,
-        "LYSATE_LABWARE" : LYSATE_LABWARE,
-        "PLATE_LABWARE" : PLATE_LABWARE,
-        "VOLUME_LYSATE" : VOLUME_LYSATE,
-        "BEADS" : BEADS,
-        "LANGUAGE" : LANGUAGE,
-        "RESET_TIPCOUNT" : RESET_TIPCOUNT
-    }
-    run_info(start_time, finish_time, par)
+    run_info(start_time, finish_time)

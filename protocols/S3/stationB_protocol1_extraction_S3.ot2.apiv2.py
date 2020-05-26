@@ -480,13 +480,19 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     remove_supernatant(mag_samples_s,waste,p1000,tips1000)
 
     # empty trash
-    if NUM_SAMPLES > 48:
+    if NUM_SAMPLES > 24:
         voice_notification('empty_trash')
         robot.pause(f"Please, empty trash")
         confirm_door_is_closed()
 
     # 3x washes
     wash(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)
+
+    # empty trash
+    if NUM_SAMPLES > 72:
+        voice_notification('empty_trash')
+        robot.pause(f"Please, empty trash")
+        confirm_door_is_closed()
 
     # elute samples
     magdeck.disengage()

@@ -416,6 +416,7 @@ def transfer_mastermix(mm_tube, dests, p300, p20, tiprack300, tiprack20):
     # get initial fluid height to avoid overflowing mm when aspiring
     mm_volume = VOLUME_MMIX * NUM_SAMPLES
     volume_height = get_mm_height(mm_volume)
+    dest_count = 0
     for set in dest_sets:
         # check height and if it is low enought, aim for the bottom
         if volume_height < 5:
@@ -429,7 +430,12 @@ def transfer_mastermix(mm_tube, dests, p300, p20, tiprack300, tiprack20):
         pip.distribute(VOLUME_MMIX, disp_loc, [d.bottom(2) for d in set],
                    air_gap=1, disposal_volume=0, new_tip='never')
         pip.blow_out(disp_loc)
-    drop(pip)
+        dest_count += 1
+        if (dest_count % 3 == 0) and pip == p20:
+            drop(pip)
+            pick_up(pip,tiprack)
+    if pip.hw_pipette['has_tip']:
+        drop(pip)
 
 def transfer_samples(sources, dests, pip,tiprack):
     # height for aspiration has to be different depending if you ar useing tubes or wells

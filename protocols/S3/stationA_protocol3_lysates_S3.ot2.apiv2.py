@@ -58,6 +58,7 @@ PLATE_LABWARE must be one of the following:
     opentrons deep generic well plate
     nest deep generic well plate
     vwr deep generic well plate
+    ecogen deep generic well plate
 """
 
 LY_LW_DICT = {
@@ -67,6 +68,7 @@ LY_LW_DICT = {
 PL_LW_DICT = {
     'opentrons deep generic well plate': 'usascientific_96_wellplate_2.4ml_deep',
     'nest deep generic well plate': 'nest_96_deepwellplate_2000ul',
+    'ecogen deep generic well plate': 'ecogen_96_deepwellplate_2000ul',
     'vwr deep generic well plate': 'vwr_96_deepwellplate_2000ul'
 }
 

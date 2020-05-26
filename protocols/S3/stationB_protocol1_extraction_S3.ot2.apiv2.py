@@ -40,6 +40,7 @@ MAGPLATE_LABWARE = 'nest deep generic well plate'
 WASTE_LABWARE = 'nest 1 reservoir plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 DISPENSE_BEADS = False
+REUSE_TIPS = True
 LANGUAGE = 'esp'
 RESET_TIPCOUNT = False
 PROTOCOL_ID = "0000-AA"
@@ -305,6 +306,36 @@ def remove_supernatant(sources,waste,pip,tiprack):
         pip.blow_out(waste)
         drop(pip)
 
+def wash_reuse(wash_sets,dests,waste,magdeck,pip,tiprack):
+    for wash_set in wash_sets:
+        for i, m in enumerate(dests):
+            # transfer and mix wash with beads
+            magdeck.disengage()
+            wash_chan = wash_set[i//6]
+            side = 1 if i % 2 == 0 else -1
+            asp_loc = m.bottom(1.3)
+            disp_loc = m.bottom(5)
+            pick_up(pip,tiprack)
+            pip.transfer(
+                200, wash_chan.bottom(2), m.center(), new_tip='never', air_gap=20)
+            # Mix heigh has to be really close to bottom, it was 5 now reduced to 2, maybe should be 1?
+            dispense_default_speed = pip.flow_rate.dispense
+            pip.flow_rate.dispense = 1500
+            pip.mix(7, 200, m.bottom(2))
+            pip.flow_rate.dispense = dispense_default_speed
+
+            magdeck.engage(height_from_base=MAGNET_HEIGHT)
+            robot.delay(seconds=75, msg='Incubating on magnet for 75 seconds.')
+
+            # remove supernatant
+            aspire_default_speed = pip.flow_rate.aspirate
+            pip.flow_rate.aspirate = 75
+            asp_loc = m.bottom(1.5)
+            pip.transfer(200, asp_loc, waste, new_tip='never', air_gap=20)
+            pip.flow_rate.aspirate = aspire_default_speed
+            pip.blow_out(waste)
+            drop(pip)
+
 def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
     for wash_set in wash_sets:
         for i, m in enumerate(dests):
@@ -486,7 +517,10 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         confirm_door_is_closed()
 
     # 3x washes
-    wash(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)
+    if REUSE_TIPS == True:
+        wash_reuse(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)
+    else:
+        wash(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)
 
     # empty trash
     if NUM_SAMPLES > 72:

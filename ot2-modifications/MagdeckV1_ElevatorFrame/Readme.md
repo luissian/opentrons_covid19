@@ -8,6 +8,10 @@ The printable file is [OT2 Magdeck V1 Elevator Frame](https://www.tinkercad.com/
 
 ![Real picture](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/ot2-modifications/MagdeckV1_ElevatorFrame/OT2_MagdeckV1_ElevatorFrame_picture.jpg?raw=true)
 
+![With deepwell plate](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/ot2-modifications/MagdeckV1_ElevatorFrame/OT2_MagdeckV1_ElevatorFrame_withdeepwellplate.jpg?raw=true)
+
+![On magdeck](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/ot2-modifications/MagdeckV1_ElevatorFrame/OT2_MagdeckV1_ElevatorFrame_onmagdeck.jpg?raw=true)
+
 ![3D](https://github.com/BU-ISCIII/opentrons_covid19/blob/develop/ot2-modifications/MagdeckV1_ElevatorFrame/OT2_MagdeckV1_ElevatorFrame_3D.jpg?raw=true)
 
 In case you want the original template, here it is:

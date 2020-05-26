@@ -5,6 +5,7 @@ import time
 import math
 import os
 import subprocess
+import requests
 import json
 from datetime import datetime
 
@@ -100,7 +101,27 @@ elif LANGUAGE_DICT[LANGUAGE] == 'esp':
     }
 
 # Function definitions
-def run_info(start, end, parameters = dict()):
+
+def write_to_error_log (info, reason):
+    sub_folder_date = datetime.now().strftime("%Y_%m_%d")
+    folder_date = os.path.join('/data', sub_folder_date)
+    file_name = datetime.now().strftime("%Y_%m_%d_%H_%M_%S") + '.json'
+    folder_file_name = os.path.join(folder_date, file_name)
+    folder_error_log = os.path.join(folder_date,'error.log')
+    if not os.isdir(folder_date):
+        try:
+            os.makedirs(folder_date)
+        except:
+            return
+    try:
+        with open (folder_file_name , 'w') as fh:
+            json.dump(info, fh, indent=4)
+        with open(folder_error_log, 'w') as fh:
+            fh.write('Unable to accept the requests get error : '+ reason + '\n')
+    except:
+        return
+
+def run_info(start, end):
     info = {}
     hostname = subprocess.run(
         ['hostname'],
@@ -113,10 +134,29 @@ def run_info(start, end, parameters = dict()):
     info["ProtocolID"] = PROTOCOL_ID
     info["StartRunTime"] = start
     info["FinishRunTime"] = end
-    info["parameters"] = parameters
-    # write json to file. This is going to be an api post.
-    #with open('run.json', 'w') as fp:
-        #json.dump(info, fp,indent=4)
+    info["parameters"] = {
+                    "NUM_SAMPLES" : NUM_SAMPLES,
+                    "LYSATE_LABWARE" : LYSATE_LABWARE,
+                    "PLATE_LABWARE" : PLATE_LABWARE,
+                    "VOLUME_LYSATE" : VOLUME_LYSATE,
+                    "BEADS" : BEADS,
+                    "LANGUAGE" : LANGUAGE,
+                    "RESET_TIPCOUNT" : RESET_TIPCOUNT}
+
+    headers = {'Content-type': 'application/json'}
+    url_https = 'https://' + URL
+    url_http = 'http://' + URL
+    try:
+        r = requests.post(url_https, data=json.dumps(info), headers=headers)
+    except:
+        try:
+            r = requests.post(url_http, data=json.dumps(info), headers=headers)
+        except:
+            write_to_error_log(info, 'Server communication error')
+            return
+    if r.status_code > 201 :
+        write_to_error_log(info, str(r.status_code))
+
 
 def check_door():
     return gpio.read_window_switches()

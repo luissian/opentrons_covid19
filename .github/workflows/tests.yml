@@ -1,7 +1,7 @@
 name: opentrons_covid CI
 # This workflow is triggered on pushes and PRs to the repository.
 # It runs the pipeline with several tests to check if everything works
-
+on: [push, pull_request]
 jobs:
   test:
     env:

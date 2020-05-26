@@ -29,10 +29,10 @@ VOLUME_LYSATE = 400
 BEADS = False
 LANGUAGE = 'esp'
 RESET_TIPCOUNT = False
+PROTOCOL_ID = "0000-AA"
 
 # End Parameters to adapt the protocol
 ACTION = "StationA-protocol3-lysates"
-PROTOCOL_ID = "0000-AA"
 
 ## global vars
 ## initialize robot object

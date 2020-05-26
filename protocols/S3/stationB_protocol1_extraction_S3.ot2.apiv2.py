@@ -42,6 +42,7 @@ ELUTION_LABWARE = 'opentrons aluminum nest plate'
 DISPENSE_BEADS = False
 LANGUAGE = 'esp'
 RESET_TIPCOUNT = False
+PROTOCOL_ID = "0000-AA"
 
 # End Parameters to adapt the protocol
 
@@ -88,7 +89,6 @@ else:
 
 # Config variables
 ACTION = "StationB-protocol1-extraction"
-PROTOCOL_ID = "0000-AA"
 
 # Constants
 REAGENT_LW_DICT = {

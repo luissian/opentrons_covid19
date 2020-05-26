@@ -27,10 +27,11 @@ VOLUME_BEADS = 410
 DILUTE_BEADS = True
 LANGUAGE = 'esp'
 RESET_TIPCOUNT = False
+PROTOCOL_ID = "0000-AA"
 
 # End Parameters to adapt the protocol
 ACTION = "StationA-protocol2-beads"
-PROTOCOL_ID = "0000-AA"
+
 ## global vars
 ## initialize robot object
 robot = None

@@ -27,10 +27,10 @@ ELUTION_LABWARE = 'opentrons aluminum nest plate'
 VOLUME_ELUTION = 7
 LANGUAGE = 'esp'
 RESET_TIPCOUNT = False
+PROTOCOL_ID = "0000-AA"
 
 # End Parameters to adapt the protocol
 ACTION = "StationC-protocol1-pcr"
-PROTOCOL_ID = "0000-AA"
 
 ## global vars
 ## initialize robot object

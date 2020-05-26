@@ -306,20 +306,19 @@ def remove_supernatant(sources,waste,pip,tiprack):
         pip.blow_out(waste)
         drop(pip)
 
-def wash_reuse(wash_sets,dests,waste,magdeck,pip,tiprack):
+def wash_reuse(wash_sets,dests,waste,magdeck,pip,tiprack,rip,tipreuse):
     for wash_set in wash_sets:
-        tips_loc = 0
+        # transfer wash
+        pick_up(pip,tiprack)
         for i, m in enumerate(dests):
-            # transfer and mix wash with beads
             magdeck.disengage()
             wash_chan = wash_set[i//6]
-            side = 1 if i % 2 == 0 else -1
-            asp_loc = m.bottom(1.3)
-            disp_loc = m.bottom(5)
-            pip.pick_up()
             pip.transfer(
-                200, wash_chan.bottom(2), m.center(), new_tip='never', air_gap=20)
-            # Mix heigh has to be really close to bottom, it was 5 now reduced to 2, maybe should be 1?
+                200, wash_chan.bottom(2), m.top(), new_tip='never', air_gap=20)
+
+        # mix beads with wash
+        tips_loc = 0
+        for i, m in enumerate(dests):
             dispense_default_speed = pip.flow_rate.dispense
             pip.flow_rate.dispense = 1500
             pip.mix(7, 200, m.bottom(2))
@@ -328,24 +327,22 @@ def wash_reuse(wash_sets,dests,waste,magdeck,pip,tiprack):
             magdeck.engage(height_from_base=MAGNET_HEIGHT)
             robot.delay(seconds=75, msg='Incubating on magnet for 75 seconds.')
 
-            # remove supernatant
+        # remove supernatant
+        tips_loc = 0
+        for i, m in enumerate(dests):
             aspire_default_speed = pip.flow_rate.aspirate
             pip.flow_rate.aspirate = 75
             asp_loc = m.bottom(1.5)
             pip.transfer(200, asp_loc, waste, new_tip='never', air_gap=20)
             pip.flow_rate.aspirate = aspire_default_speed
             pip.blow_out(waste)
-            pip.drop()
 
-def wash(wash_sets,dests,waste,magdeck,pip,tiprack,rip,tipreuse):
+def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
     for wash_set in wash_sets:
         for i, m in enumerate(dests):
             # transfer and mix wash with beads
             magdeck.disengage()
             wash_chan = wash_set[i//6]
-            side = 1 if i % 2 == 0 else -1
-            asp_loc = m.bottom(1.3)
-            disp_loc = m.bottom(5)
             pick_up(pip,tiprack)
             pip.transfer(
                 200, wash_chan.bottom(2), m.center(), new_tip='never', air_gap=20)
@@ -389,8 +386,6 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
     ## Dispense elutes in pcr plate.
     for i, (m, e) in enumerate(zip(sources, dests)):
         # tranfser and mix elution buffer with beads
-        # side = 1 if i % 2 == 0 else -1
-        # asp_loc = m.bottom(5).move(Point(x=-1*side*2))
         asp_loc = m.bottom(1.5)
         pick_up(pip,tipracks)
         # transfer elution to new plate

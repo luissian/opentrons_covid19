@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import json
 import os
+import re
 import argparse
 
 # Constants
@@ -9,9 +10,9 @@ OPENROBOTS_DELIMITATION_PARAMETERS_TAGS = ['# Parameters to adapt the protocol',
 
 def get_arguments():
 
-        parser = argparse.ArgumentParser(prog = 'common_mash_reference.py', description= 'Search for all mash files and find the representative reference')
+        parser = argparse.ArgumentParser(prog = 'run_tests.py', description= 'run opentrons_covid repo tests')
 
-        parser.add_argument('-j', '--json', dest="json", metavar="json info file", type=str, required=True, help='REQUIRED. json file with service information.')
+        parser.add_argument('-j', '--json', dest="json", metavar="json info file", type=str, required=True, help='REQUIRED. json file with parameters.')
         parser.add_argument('-t', '--template', dest="json", metavar="json info file", type=str, required=True, help='REQUIRED. Protocol template.')
         parser.add_argument('-o', '--output', type=str, required=False, help='Output file to save results')
 
@@ -87,16 +88,15 @@ def get_type_of_data (data):
 
 
 def main():
+    ## get args
+    args = get_arguments()
 
-## get args
-args = get_arguments()
+    ## load json
+    with open(args.json, 'r') as json:
+        try:
+            parameters=json.load(json)
+        except ValueError as e:
+            logger.error("json decoding has failed")
+            logger.exception(e)
 
-## load json
-with open(args.json, 'r') as json:
-    try:
-        parameters=json.load(json)
-    except ValueError as e:
-        logger.error("json decoding has failed")
-        logger.exception(e)
-
-add_parameters_in_file(args.template,args.output,parameters)
+    add_parameters_in_file(args.template,args.output,parameters)

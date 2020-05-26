@@ -1,0 +1,31 @@
+## Version 1.4
+Documentation:
+- Added user manual in spanish and english.
+- Added how to ethernet connect your robot.
+- Added how to calibrate.
+- Added ssh connection guide.
+
+New features:
+- Voice messages language optional (spanish and english)
+- Added tip count reset option.
+- Added calibration scripts checking for all protocols.
+- Now beads dilution is optional in protocol 2 station A. b2b5444
+- Now volume_elute in station C is a parameter to be included by the user.67f881f
+- Only pause for empty trash if samples > 48 in protocol B. 406c79a
+- Added json generation with run info in each protocol. This will be used for api connection with openrobots web.
+- New labware configuration for ecogen deep well, added to station A and B protocols.
+
+Protocol modifications:
+- Now incubation time in protocol B is 7 minutes.
+- Reduced height in beads mix in protocol 2 station A, as it was taking some air sometimes. 53789ad
+- Increased height in beads mix in protocol 1 station B, as it was too close to the bottom.
+- Increased height in aspirates on on the plate above the magdeck, as it was sometimes touching the bottom.
+- Protocol now B starts with magdeck off. 6031d94
+- Fixed issue where m300 would go too deep and not aspire correctly in elution buffer. 40410be
+- Fixed issue where m300 would not aspirate correctly in all wells in supernatant removal, washes an elution when magnet is engaged. Aspiration height is increase to 1.5.
+
+Bug fixes:
+- Fixed tip not dropping tip in p300 (protocol C) 9280ae8
+- Fixed correct pick up and drop tip for correct tip count for negative control (protocol C) 3483d15
+- Fixed correct drop tip for p300 (protocol C) 2e6cca7
+- Fixed tip count issue when only one pipette is used. 80b9567

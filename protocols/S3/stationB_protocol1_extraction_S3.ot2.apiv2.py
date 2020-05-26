@@ -308,6 +308,7 @@ def remove_supernatant(sources,waste,pip,tiprack):
 
 def wash_reuse(wash_sets,dests,waste,magdeck,pip,tiprack):
     for wash_set in wash_sets:
+        tips_loc = 0
         for i, m in enumerate(dests):
             # transfer and mix wash with beads
             magdeck.disengage()
@@ -315,7 +316,7 @@ def wash_reuse(wash_sets,dests,waste,magdeck,pip,tiprack):
             side = 1 if i % 2 == 0 else -1
             asp_loc = m.bottom(1.3)
             disp_loc = m.bottom(5)
-            pick_up(pip,tiprack)
+            pip.pick_up()
             pip.transfer(
                 200, wash_chan.bottom(2), m.center(), new_tip='never', air_gap=20)
             # Mix heigh has to be really close to bottom, it was 5 now reduced to 2, maybe should be 1?
@@ -334,9 +335,9 @@ def wash_reuse(wash_sets,dests,waste,magdeck,pip,tiprack):
             pip.transfer(200, asp_loc, waste, new_tip='never', air_gap=20)
             pip.flow_rate.aspirate = aspire_default_speed
             pip.blow_out(waste)
-            drop(pip)
+            pip.drop()
 
-def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
+def wash(wash_sets,dests,waste,magdeck,pip,tiprack,rip,tipreuse):
     for wash_set in wash_sets:
         for i, m in enumerate(dests):
             # transfer and mix wash with beads
@@ -455,12 +456,17 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     tips300 = [
         robot.load_labware(
             'opentrons_96_tiprack_300ul', slot, '200µl filter tiprack')
-        for slot in ['2', '3', '5', '6', '9','4']
+        for slot in ['2', '3', '4', '5', '6']
+    ]
+    tipsreuse = [
+        robot.load_labware(
+            'opentrons_96_tiprack_300ul', slot, '200µl filter tiprack')
+        for slot in ['8']
     ]
     tips1000 = [
         robot.load_labware('opentrons_96_filtertiprack_1000ul', slot,
                          '1000µl filter tiprack')
-        for slot in ['8']
+        for slot in ['9']
     ]
 
     # reagents and samples
@@ -474,6 +480,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     # pipettes
     m300 = robot.load_instrument('p300_multi_gen2', 'left', tip_racks=tips300)
+    r300 = robot.load_instrument('p300_multi_gen2', 'left', tip_racks=tipsreuse)
     p1000 = robot.load_instrument('p1000_single_gen2', 'right',
                                 tip_racks=tips1000)
 
@@ -518,7 +525,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     # 3x washes
     if REUSE_TIPS == True:
-        wash_reuse(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)
+        wash_reuse(wash_sets,mag_samples_m,waste,magdeck,m300,tips300,r300,tipsreuse)
     else:
         wash(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)
 

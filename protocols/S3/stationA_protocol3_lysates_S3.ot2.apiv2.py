@@ -29,10 +29,10 @@ VOLUME_LYSATE = 400
 BEADS = False
 LANGUAGE = 'esp'
 RESET_TIPCOUNT = False
-
+PROTOCOL_ID = "0000-AA"
 # End Parameters to adapt the protocol
 ACTION = "StationA-protocol3-lysates"
-PROTOCOL_ID = "0000-AA"
+
 
 ## global vars
 ## initialize robot object
@@ -50,10 +50,8 @@ tip_log['max'] = {}
 
 """
 NUM_SAMPLES is the number of samples, must be an integer number
-
 LYSATE_LABWARE must be one of the following:
     opentrons plastic 2ml tubes
-
 PLATE_LABWARE must be one of the following:
     opentrons deep generic well plate
     nest deep generic well plate
@@ -98,23 +96,41 @@ elif LANGUAGE_DICT[LANGUAGE] == 'esp':
     }
 
 # Function definitions
-def run_info(start, end, parameters = dict()):
+def run_info(start, end):
     info = {}
-    hostname = subprocess.run(
-        ['hostname'],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    ).stdout.decode('utf-8')
 
-    info["RobotID"] = hostname
+    par = {
+        "NUM_SAMPLES" : NUM_SAMPLES,
+        "LYSATE_LABWARE" : LYSATE_LABWARE,
+        "PLATE_LABWARE" : PLATE_LABWARE,
+        "VOLUME_LYSATE" : VOLUME_LYSATE,
+        "BEADS" : BEADS,
+        "LANGUAGE" : LANGUAGE,
+        "RESET_TIPCOUNT" : RESET_TIPCOUNT
+    }
+    info["RobotID"] = os.uname()[1]
     info["executedAction"] = ACTION
     info["ProtocolID"] = PROTOCOL_ID
     info["StartRunTime"] = start
     info["FinishRunTime"] = end
     info["parameters"] = parameters
-    # write json to file. This is going to be an api post.
-    #with open('run.json', 'w') as fp:
-        #json.dump(info, fp,indent=4)
+
+    headers = {'Content-type': 'application/json'}
+    url_https = 'https://' + URL
+    url_http = 'http://' + URL
+    try:
+        r = requests.post(url_https, data=json.dumps(info), headers=headers)
+    except:
+        try:
+            r = requests.post(url_http, data=json.dumps(info), headers=headers)
+        except:
+            print('No communication to server')
+            # write information to log
+            return
+    if r.status_code > 201 :
+        print('format error  \n\n\n')
+        # write info dictionary to log
+
 
 def check_door():
     return gpio.read_window_switches()
@@ -318,13 +334,5 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     finish_time = finish_run()
 
-    par = {
-        "NUM_SAMPLES" : NUM_SAMPLES,
-        "LYSATE_LABWARE" : LYSATE_LABWARE,
-        "PLATE_LABWARE" : PLATE_LABWARE,
-        "VOLUME_LYSATE" : VOLUME_LYSATE,
-        "BEADS" : BEADS,
-        "LANGUAGE" : LANGUAGE,
-        "RESET_TIPCOUNT" : RESET_TIPCOUNT
-    }
-    run_info(start_time, finish_time, par)
+
+    run_info(start_time, finish_time)

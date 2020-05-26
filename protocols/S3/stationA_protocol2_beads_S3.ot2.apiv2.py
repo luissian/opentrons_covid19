@@ -247,10 +247,10 @@ def transfer_beads(beads_tube, dests, pip,tiprack):
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
     # pick_up(pip,tiprack)
     # Mix bead tubes prior to dispensing
-    pip.flow_rate.aspirate = 800
-    pip.flow_rate.dispense = 8000
+    pip.flow_rate.aspirate = 1000
+    pip.flow_rate.dispense = 10000
     # pip.mix(12,800,beads_tube.bottom(15))
-    for i in range(12):
+    for i in range(15):
         pip.aspirate(800, beads_tube.bottom(30))
         pip.dispense(800, beads_tube.bottom(2))
     pip.flow_rate.aspirate = 100

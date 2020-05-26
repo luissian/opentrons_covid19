@@ -18,7 +18,10 @@ jobs:
       - name: Create test script
         run: |
           echo "testing"
-          python ${GITHUB_WORKSPACE}/tests/run_tests.py -j ${GITHUB_WORKSPACE}/tests/par_tests/stationA_prot1_comb1_pars.json -t ${GITHUB_WORKSPACE}/protocols/S3/stationA_protocol1_buffer_S3.ot2.apiv2.py -o /tmp/tmp_test.py
+          python ${GITHUB_WORKSPACE}/tests/run_tests.py \
+            -j ${GITHUB_WORKSPACE}/tests/par_tests/stationA_prot1_comb1_pars.json \
+            -t ${GITHUB_WORKSPACE}/protocols/S3/stationA_protocol1_buffer_S3.ot2.apiv2.py \
+            -o /tmp/tmp_test.py
       - name: Simulate script
         run: |
           opentrons_simulate -L ${GITHUB_WORKSPACE}/labware /tmp/tmp_test.py

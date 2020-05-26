@@ -9,16 +9,15 @@ OPENROBOTS_DELIMITATION_PARAMETERS_TAGS = ['# Parameters to adapt the protocol',
                     '# End Parameters to adapt the protocol']
 
 def get_arguments():
+    parser = argparse.ArgumentParser(prog = 'run_tests.py', description= 'run opentrons_covid repo tests')
 
-        parser = argparse.ArgumentParser(prog = 'run_tests.py', description= 'run opentrons_covid repo tests')
+    parser.add_argument('-j', '--json', dest="json", metavar="json info file", type=str, required=True, help='REQUIRED. json file with parameters.')
+    parser.add_argument('-t', '--template', dest="template", metavar="json info file", type=str, required=True, help='REQUIRED. Protocol template.')
+    parser.add_argument('-o', '--output', type=str, required=False, help='Output file to save results')
 
-        parser.add_argument('-j', '--json', dest="json", metavar="json info file", type=str, required=True, help='REQUIRED. json file with parameters.')
-        parser.add_argument('-t', '--template', dest="json", metavar="json info file", type=str, required=True, help='REQUIRED. Protocol template.')
-        parser.add_argument('-o', '--output', type=str, required=False, help='Output file to save results')
+    arguments = parser.parse_args()
 
-        arguments = parser.parse_args()
-
-        return arguments
+    return arguments
 
 def add_parameters_in_file (in_file, out_file, parameters):
     '''
@@ -53,8 +52,7 @@ def add_parameters_in_file (in_file, out_file, parameters):
                     for key in sorted(parameters):
                         type_of_data = get_type_of_data(parameters[key])
                         if type_of_data == 'boolean' or type_of_data == 'integer':
-
-                            out_fh.write(key + ' = '+ parameters[key]+ '\n')
+                            out_fh.write(key + ' = '+ str(parameters[key]) + '\n')
                         else:
                             out_fh.write(key + ' = \''+ parameters[key]+ '\'\n')
                     parameters_added = True
@@ -86,17 +84,23 @@ def get_type_of_data (data):
     except:
         return 'string'
 
-
 def main():
     ## get args
     args = get_arguments()
+    print(args)
 
     ## load json
-    with open(args.json, 'r') as json:
+    with open(args.json, 'r') as file:
         try:
-            parameters=json.load(json)
+            parameters=json.load(file)
         except ValueError as e:
-            logger.error("json decoding has failed")
-            logger.exception(e)
+            print("json decoding has failed")
+            print(e)
 
     add_parameters_in_file(args.template,args.output,parameters)
+
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception as e:
+        print(e)

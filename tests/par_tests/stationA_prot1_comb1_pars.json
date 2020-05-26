@@ -5,5 +5,5 @@
   "DEST_TUBE" : "2ml tubes",
   "VOLUME_BUFFER" : 300,
   "LANGUAGE" : "esp",
-  "RESET_TIPCOUNT" : False
+  "RESET_TIPCOUNT" : "False"
 }

@@ -476,10 +476,7 @@ def run(ctx: protocol_api.ProtocolContext):
     start_time = start_run()
 
     # define tips
-    tips20 = [
-        robot.load_labware('opentrons_96_filtertiprack_20ul', slot)
-        for slot in ['6', '9', '8', '7']
-    ]
+    tips20 = [robot.load_labware('opentrons_96_filtertiprack_20ul', '6')]
     tips300 = [robot.load_labware('opentrons_96_filtertiprack_200ul', '3')]
 
     # define pipettes

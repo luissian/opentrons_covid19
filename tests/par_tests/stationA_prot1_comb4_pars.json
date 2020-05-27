@@ -4,7 +4,7 @@
   "DESTINATION_LABWARE" : "opentrons plastic 2ml tubes",
   "DEST_TUBE" : "2ml tubes",
   "VOLUME_BUFFER" : 300,
-  "LANGUAGE" : "esp",
+  "LANGUAGE" : "eng",
   "RESET_TIPCOUNT" : "False",
-  "PROTOCOL_ID" : "0000-test" 
+  "PROTOCOL_ID" : "0000-test"
 }

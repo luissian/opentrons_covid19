@@ -351,7 +351,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # define pipettes
     p20 = robot.load_instrument('p20_single_gen2', 'right', tip_racks=tips20)
-    m20 = robot.load_instrument('p20_multi_gen2', 'left', tip_racks=tips20)
+    m20 = robot.load_instrument('p20_multi_gen2', 'left', tip_racks=tipsm20)
 
     ## retrieve tip_log
     retrieve_tip_info(p20,tips20)

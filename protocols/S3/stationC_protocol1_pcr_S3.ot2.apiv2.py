@@ -53,7 +53,7 @@ NUM_SAMPLES is the number of samples, must be an integer number
 
 MM_LABWARE must be one of the following:
     opentrons plastic block
-    pentrons aluminum block
+    opentrons aluminum block
     covidwarriors aluminum block
 
 MMTUBE_LABWARE must be one of the following:

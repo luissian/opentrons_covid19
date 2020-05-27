@@ -4,7 +4,7 @@
   "MMTUBE_LABWARE" : "2ml tubes",
   "PCR_LABWARE" : "opentrons aluminum nest plate",
   "ELUTION_LABWARE" : "opentrons aluminum nest plate",
-  "PREPARE_MASTERMIX" : "False",
+  "PREPARE_MASTERMIX" : "True",
   "MM_TYPE" : "MM1",
   "VOLUME_ELUTION" : 7,
   "TRANSFER_MASTERMIX" : "True",

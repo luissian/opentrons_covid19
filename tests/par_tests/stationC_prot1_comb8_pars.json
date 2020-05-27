@@ -3,7 +3,7 @@
   "MM_LABWARE" : "covidwarriors aluminum block",
   "MMTUBE_LABWARE" : "2ml tubes",
   "PCR_LABWARE" : "opentrons aluminum nest plate",
-  "ELUTION_LABWARE" : "opentrons aluminum nest plate",
+  "ELUTION_LABWARE" : "opentrons aluminum strip alpha",
   "PREPARE_MASTERMIX" : "False",
   "MM_TYPE" : "MM1",
   "VOLUME_ELUTION" : 7,

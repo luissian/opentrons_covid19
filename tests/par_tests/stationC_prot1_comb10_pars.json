@@ -7,7 +7,7 @@
   "PREPARE_MASTERMIX" : "False",
   "MM_TYPE" : "MM1",
   "VOLUME_ELUTION" : 7,
-  "TRANSFER_MASTERMIX" : "True",
+  "TRANSFER_MASTERMIX" : "False",
   "TRANSFER_SAMPLES" : "True",
   "LANGUAGE" : "esp",
   "RESET_TIPCOUNT" : "False",

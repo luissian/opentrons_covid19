@@ -2,7 +2,7 @@
   "NUM_SAMPLES" : 96,
   "MM_LABWARE" : "covidwarriors aluminum block",
   "MMTUBE_LABWARE" : "2ml tubes",
-  "PCR_LABWARE" : "opentrons aluminum nest plate",
+  "PCR_LABWARE" : "opentrons aluminum biorad plate",
   "ELUTION_LABWARE" : "opentrons aluminum nest plate",
   "PREPARE_MASTERMIX" : "False",
   "MM_TYPE" : "MM1",

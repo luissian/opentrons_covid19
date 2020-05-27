@@ -40,6 +40,7 @@ MAGPLATE_LABWARE = 'nest deep generic well plate'
 WASTE_LABWARE = 'nest 1 reservoir plate'
 ELUTION_LABWARE = 'opentrons aluminum nest plate'
 DISPENSE_BEADS = False
+REUSE_TIPS = True
 LANGUAGE = 'esp'
 RESET_TIPCOUNT = False
 PROTOCOL_ID = "0000-AA"
@@ -305,15 +306,55 @@ def remove_supernatant(sources,waste,pip,tiprack):
         pip.blow_out(waste)
         drop(pip)
 
+def wash_reuse(wash_sets,dests,waste,magdeck,pip,tiprack,tipreuse):
+    for wash_set in wash_sets:
+        # transfer wash
+        pick_up(pip,tiprack)
+        for i, m in enumerate(dests):
+            magdeck.disengage()
+            wash_chan = wash_set[i//6]
+            pip.transfer(
+                200, wash_chan.bottom(2), m.top(), new_tip='never', air_gap=20)
+
+        # mix beads with wash
+        tips_loc = 0
+        for i, m in enumerate(dests):
+            if tips_loc == 0:
+                if  wash_set != 0:
+                    drop(pip)
+                    pip.pick_up_tip(tipreuse[0].rows()[0][tips_loc])
+            else:
+                 pip.pick_up_tip(tipreuse[0].rows()[0][tips_loc])
+
+            dispense_default_speed = pip.flow_rate.dispense
+            pip.flow_rate.dispense = 1500
+            pip.mix(7, 200, m.bottom(2))
+            pip.flow_rate.dispense = dispense_default_speed
+            pip.return_tip(home_after=False)
+            tips_loc += 1
+
+        magdeck.engage(height_from_base=MAGNET_HEIGHT)
+        robot.delay(seconds=75, msg='Incubating on magnet for 75 seconds.')
+
+        # remove supernatant
+        tips_loc = 0
+        for i, m in enumerate(dests):
+            pip.pick_up_tip(tipreuse[0].rows()[0][tips_loc])
+            aspire_default_speed = pip.flow_rate.aspirate
+            pip.flow_rate.aspirate = 75
+            asp_loc = m.bottom(1.5)
+            pip.transfer(200, asp_loc, waste, new_tip='never', air_gap=20)
+            pip.flow_rate.aspirate = aspire_default_speed
+            pip.blow_out(waste)
+            pip.return_tip(home_after=False)
+            tips_loc += 1
+
 def wash(wash_sets,dests,waste,magdeck,pip,tiprack):
     for wash_set in wash_sets:
         for i, m in enumerate(dests):
             # transfer and mix wash with beads
             magdeck.disengage()
             wash_chan = wash_set[i//6]
-            side = 1 if i % 2 == 0 else -1
-            asp_loc = m.bottom(1.3)
-            disp_loc = m.bottom(5)
             pick_up(pip,tiprack)
             pip.transfer(
                 200, wash_chan.bottom(2), m.center(), new_tip='never', air_gap=20)
@@ -357,8 +398,6 @@ def elute_samples(sources,dests,buffer,magdeck,pip,tipracks):
     ## Dispense elutes in pcr plate.
     for i, (m, e) in enumerate(zip(sources, dests)):
         # tranfser and mix elution buffer with beads
-        # side = 1 if i % 2 == 0 else -1
-        # asp_loc = m.bottom(5).move(Point(x=-1*side*2))
         asp_loc = m.bottom(1.5)
         pick_up(pip,tipracks)
         # transfer elution to new plate
@@ -424,12 +463,17 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
     tips300 = [
         robot.load_labware(
             'opentrons_96_tiprack_300ul', slot, '200µl filter tiprack')
-        for slot in ['2', '3', '5', '6', '9','4']
+        for slot in ['2', '3', '4', '5', '6']
+    ]
+    tipsreuse = [
+        robot.load_labware(
+            'opentrons_96_tiprack_300ul', slot, '200µl filter tiprack')
+        for slot in ['8']
     ]
     tips1000 = [
         robot.load_labware('opentrons_96_filtertiprack_1000ul', slot,
                          '1000µl filter tiprack')
-        for slot in ['8']
+        for slot in ['9']
     ]
 
     # reagents and samples
@@ -486,7 +530,10 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         confirm_door_is_closed()
 
     # 3x washes
-    wash(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)
+    if REUSE_TIPS == True:
+        wash_reuse(wash_sets,mag_samples_m,waste,magdeck,m300,tips300,tipsreuse)
+    else:
+        wash(wash_sets,mag_samples_m,waste,magdeck,m300,tips300)
 
     # empty trash
     if NUM_SAMPLES > 72:

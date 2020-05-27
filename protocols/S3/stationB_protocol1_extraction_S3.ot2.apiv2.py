@@ -281,7 +281,7 @@ def mix_beads(reps, dests, pip, tiprack):
         pip.aspirate(20, m.top(-2))
         drop(pip)
 
-def dispense_beads(sources,dests,pip,tiprack):
+def dispense_beads(reps,sources,dests,pip,tiprack):
     ## Mix beads prior to dispensing.
     pick_up(pip,tiprack)
     for s in sources:
@@ -296,7 +296,7 @@ def dispense_beads(sources,dests,pip,tiprack):
         drop(pip)
         pick_up(pip,tiprack)
         pip.transfer(200, dests[i//3], m.bottom(5), new_tip='never', air_gap=20)
-        mix_beads(7, dests, pip, tiprack)
+        mix_beads(reps, dests, pip, tiprack)
 
 def remove_supernatant(sources,waste,pip,tiprack):
     for i, m in enumerate(sources):
@@ -508,7 +508,7 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
         # premix, transfer, and mix magnetic beads with sample
         ## bead dests depending on number of samples
         bead_dests = bead_buffer[:math.ceil(num_cols/4)]
-        dispense_beads(bead_dests,mag_samples_m,m300,tips300)
+        dispense_beads(7,bead_dests,mag_samples_m,m300,tips300)
     else:
         # Mix bead
         mix_beads(7, mag_samples_m,m300,tips300)

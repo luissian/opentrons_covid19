@@ -8,9 +8,9 @@ jobs:
     strategy:
       matrix:
         parameters: [ "${GITHUB_WORKSPACE}/tests/par_tests/stationA_prot1_comb1_pars.json",
-                      "${GITHUB_WORKSPACE}/tests/par_tests/stationA_prot2_comb2_pars.json",
-                      "${GITHUB_WORKSPACE}/tests/par_tests/stationA_prot3_comb3_pars.json",
-                      "${GITHUB_WORKSPACE}/tests/par_tests/stationA_prot4_comb4_pars.json"
+                      "${GITHUB_WORKSPACE}/tests/par_tests/stationA_prot1_comb2_pars.json",
+                      "${GITHUB_WORKSPACE}/tests/par_tests/stationA_prot1_comb3_pars.json",
+                      "${GITHUB_WORKSPACE}/tests/par_tests/stationA_prot1_comb4_pars.json"
                     ]
     steps:
       - uses: actions/checkout@v2

@@ -122,7 +122,7 @@ def write_to_error_log (info, reason):
     except:
         return
 
-def run_info(start, end):
+def run_info(start, end, parameters = dict()):
     info = {}
     hostname = subprocess.run(
         ['hostname'],
@@ -135,14 +135,7 @@ def run_info(start, end):
     info["ProtocolID"] = PROTOCOL_ID
     info["StartRunTime"] = start
     info["FinishRunTime"] = end
-    info["parameters"] = {
-                    "NUM_SAMPLES" : NUM_SAMPLES,
-                    "LYSATE_LABWARE" : LYSATE_LABWARE,
-                    "PLATE_LABWARE" : PLATE_LABWARE,
-                    "VOLUME_LYSATE" : VOLUME_LYSATE,
-                    "BEADS" : BEADS,
-                    "LANGUAGE" : LANGUAGE,
-                    "RESET_TIPCOUNT" : RESET_TIPCOUNT}
+    info["parameters"] = parameters
 
     headers = {'Content-type': 'application/json'}
     url_https = 'https://' + URL
@@ -361,4 +354,13 @@ following:\nopentrons deep generic well plate\nnest deep generic well plate\nvwr
 
     finish_time = finish_run()
 
-    run_info(start_time, finish_time)
+    parameters = {
+                    "NUM_SAMPLES" : NUM_SAMPLES,
+                    "LYSATE_LABWARE" : LYSATE_LABWARE,
+                    "PLATE_LABWARE" : PLATE_LABWARE,
+                    "VOLUME_LYSATE" : VOLUME_LYSATE,
+                    "BEADS" : BEADS,
+                    "LANGUAGE" : LANGUAGE,
+                    "RESET_TIPCOUNT" : RESET_TIPCOUNT}
+
+    run_info(start_time, finish_time, parameters)

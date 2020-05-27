@@ -1,0 +1,15 @@
+{
+  "NUM_SAMPLES" : 96,
+  "MM_LABWARE" : "covidwarriors aluminum block",
+  "MMTUBE_LABWARE" : "2ml tubes",
+  "PCR_LABWARE" : "opentrons aluminum strip short",
+  "ELUTION_LABWARE" : "opentrons aluminum nest plate",
+  "PREPARE_MASTERMIX" : "False",
+  "MM_TYPE" : "MM1",
+  "VOLUME_ELUTION" : 7,
+  "TRANSFER_MASTERMIX" : "True",
+  "TRANSFER_SAMPLES" : "True",
+  "LANGUAGE" : "esp",
+  "RESET_TIPCOUNT" : "False",
+  "PROTOCOL_ID" : "0000-AA"
+}

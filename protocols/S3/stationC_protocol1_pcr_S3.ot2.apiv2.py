@@ -53,7 +53,7 @@ NUM_SAMPLES is the number of samples, must be an integer number
 
 MM_LABWARE must be one of the following:
     opentrons plastic block
-    pentrons aluminum block
+    opentrons aluminum block
     covidwarriors aluminum block
 
 MMTUBE_LABWARE must be one of the following:
@@ -459,7 +459,6 @@ def transfer_samples(sources, dests, pip,tiprack):
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):
     global robot
-    global tip_log
 
     # Set robot as global var
     robot = ctx
@@ -550,7 +549,8 @@ def run(ctx: protocol_api.ProtocolContext):
     if TRANSFER_MASTERMIX:
         transfer_mastermix(mm_tube, dests, p300, p20, tips300, tips20)
         if TRANSFER_SAMPLES:
-            robot.pause(f"Please, check that all wells have received the right ammount of mastermix")
+            if not robot.is_simulating():
+                robot.pause(f"Please, check that all wells have received the right ammount of mastermix")
 
     # transfer samples to corresponding locations
     if TRANSFER_SAMPLES:

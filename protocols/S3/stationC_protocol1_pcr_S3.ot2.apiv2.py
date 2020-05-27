@@ -459,7 +459,6 @@ def transfer_samples(sources, dests, pip,tiprack):
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):
     global robot
-    global tip_log
 
     # Set robot as global var
     robot = ctx

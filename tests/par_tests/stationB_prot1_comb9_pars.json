@@ -7,6 +7,6 @@
   "DISPENSE_BEADS" : "True",
   "LANGUAGE" : "eng",
   "RESET_TIPCOUNT" : "True",
-  "REUSE_TIPS" : "False",
+  "REUSE_TIPS" : "True",
   "PROTOCOL_ID" : "0000-AA"
 }

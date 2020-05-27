@@ -330,7 +330,7 @@ def wash_reuse(wash_sets,dests,waste,magdeck,pip,tiprack,tipreuse):
             pip.flow_rate.dispense = 1500
             pip.mix(7, 200, m.bottom(2))
             pip.flow_rate.dispense = dispense_default_speed
-            pip.return_tip(tipreuse[0].rows()[0][tips_loc], home_after=False)
+            pip.return_tip(home_after=False)
             tips_loc += 1
 
         magdeck.engage(height_from_base=MAGNET_HEIGHT)
@@ -346,7 +346,7 @@ def wash_reuse(wash_sets,dests,waste,magdeck,pip,tiprack,tipreuse):
             pip.transfer(200, asp_loc, waste, new_tip='never', air_gap=20)
             pip.flow_rate.aspirate = aspire_default_speed
             pip.blow_out(waste)
-            pip.return_tip(tipreuse[0].rows()[0][tips_loc], home_after=False)
+            pip.return_tip(home_after=False)
             tips_loc += 1
 
 def wash(wash_sets,dests,waste,magdeck,pip,tiprack):

@@ -1,7 +1,7 @@
 {
   "NUM_SAMPLES" : 96,
   "REAGENT_LABWARE" : "nest 12 reservoir plate",
-  "MAGPLATE_LABWARE" : "ecogen deep generic well plate",
+  "MAGPLATE_LABWARE" : "nest deep generic well plate",
   "WASTE_LABWARE" : "nest 1 reservoir plate",
   "ELUTION_LABWARE" : "opentrons aluminum biorad plate",
   "DISPENSE_BEADS" : "True",

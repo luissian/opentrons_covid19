@@ -5,6 +5,7 @@ import time
 import math
 import os
 import subprocess
+import requests
 import json
 from datetime import datetime
 
@@ -216,7 +217,7 @@ def run_info(start,end,parameters = dict()):
         if r.status_code > 201 :
             write_to_error_log(info, str(r.status_code))
 
-            
+
 def check_door():
     return gpio.read_window_switches()
 

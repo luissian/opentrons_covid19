@@ -29,7 +29,7 @@ jobs:
           echo "testing"
           python ${GITHUB_WORKSPACE}/tests/run_tests.py \
             -j ${{ matrix.parameters }} \
-            -t ${GITHUB_WORKSPACE}/protocols/S3/stationA_protocol3_lysates_S3.ot2.apiv2.py \
+            -t ${GITHUB_WORKSPACE}/protocols/S3/stationA_protocol1_buffer_S3.ot2.apiv2.py \
             -o /tmp/tmp_test.py
       - name: Simulate script
         run: |

@@ -47,7 +47,7 @@ tip_log['max'] = {}
 NUM_SAMPLES is the number of samples, must be an integer number
 
 BEADS_LABWARE must be one of the following:
-    opentrons plastic 50 ml tubes
+    opentrons plastic 50ml tubes
     opentrons plastic 30ml tubes
 
 PLATE_LABWARE must be one of the following:
@@ -58,7 +58,7 @@ PLATE_LABWARE must be one of the following:
 """
 
 BD_LW_DICT = {
-    'opentrons plastic 50 ml tubes': 'opentrons_6_tuberack_falcon_50ml_conical',
+    'opentrons plastic 50ml tubes': 'opentrons_6_tuberack_falcon_50ml_conical',
     'opentrons plastic 30ml tubes': 'opentrons_6_tuberack_generic_30ml_conical'
 }
 
@@ -290,8 +290,8 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # check source (elution) labware type
     if BEADS_LABWARE not in BD_LW_DICT:
-        raise Exception('Invalid BF_LABWARE. Must be one of the \
-following:\nopentrons plastic 50ml tubes')
+        raise Exception('Invalid BD_LABWARE. Must be one of the \
+following:\nopentrons plastic 50ml tubes\nopentrons plastic 30ml tubes')
 
     # load mastermix labware
     beads_rack = robot.load_labware(

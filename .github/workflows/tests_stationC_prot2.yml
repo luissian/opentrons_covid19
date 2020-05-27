@@ -31,4 +31,4 @@ jobs:
             -o /tmp/tmp_test.py
       - name: Simulate script
         run: |
-          opentrons_simulate -L ${GITHUB_WORKSPACE}/labware /tmp/tmp_test.py
+          #opentrons_simulate -L ${GITHUB_WORKSPACE}/labware /tmp/tmp_test.py

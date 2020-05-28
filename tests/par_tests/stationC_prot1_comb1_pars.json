@@ -11,5 +11,6 @@
   "TRANSFER_SAMPLES" : "True",
   "LANGUAGE" : "esp",
   "RESET_TIPCOUNT" : "False",
-  "PROTOCOL_ID" : "0000-AA"
+  "PROTOCOL_ID" : "0000-AA",
+  "URL" : "localhost"
 }

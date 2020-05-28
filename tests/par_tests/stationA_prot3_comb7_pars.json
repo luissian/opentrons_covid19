@@ -6,5 +6,6 @@
   "BEADS" : "True",
   "LANGUAGE" : "eng",
   "RESET_TIPCOUNT" : "False",
-  "PROTOCOL_ID" : "0000-AA"
+  "PROTOCOL_ID" : "0000-AA",
+  "URL" : "localhost"
 }

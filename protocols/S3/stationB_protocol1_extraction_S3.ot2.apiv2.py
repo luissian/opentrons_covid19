@@ -44,7 +44,7 @@ DISPENSE_BEADS = False
 LANGUAGE = 'esp'
 RESET_TIPCOUNT = False
 PROTOCOL_ID = "0000-AA"
-
+URL = 'localhost'
 # End Parameters to adapt the protocol
 
 ## global vars

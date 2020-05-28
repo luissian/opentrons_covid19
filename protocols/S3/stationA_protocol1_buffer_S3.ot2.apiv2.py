@@ -30,7 +30,7 @@ VOLUME_BUFFER = 300
 LANGUAGE = 'esp'
 RESET_TIPCOUNT = False
 PROTOCOL_ID = "0000-AA"
-
+URL = 'localhost'
 # End Parameters to adapt the protocol
 ACTION = "StationA-protocol1-buffer"
 

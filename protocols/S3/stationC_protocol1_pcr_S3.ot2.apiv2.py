@@ -205,19 +205,19 @@ def run_info(start,end,parameters = dict()):
     info["FinishRunTime"] = end
     info["parameters"] = parameters
 
-        headers = {'Content-type': 'application/json'}
-        url_https = 'https://' + URL
-        url_http = 'http://' + URL
+    headers = {'Content-type': 'application/json'}
+    url_https = 'https://' + URL
+    url_http = 'http://' + URL
+    try:
+        r = requests.post(url_https, data=json.dumps(info), headers=headers)
+    except:
         try:
-            r = requests.post(url_https, data=json.dumps(info), headers=headers)
+            r = requests.post(url_http, data=json.dumps(info), headers=headers)
         except:
-            try:
-                r = requests.post(url_http, data=json.dumps(info), headers=headers)
-            except:
-                write_to_error_log(info, 'Server communication error')
-                return
-        if r.status_code > 201 :
-            write_to_error_log(info, str(r.status_code))
+            write_to_error_log(info, 'Server communication error')
+            return
+    if r.status_code > 201 :
+        write_to_error_log(info, str(r.status_code))
 
 
 def check_door():

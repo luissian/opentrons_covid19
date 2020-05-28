@@ -6,5 +6,6 @@
   "VOLUME_BUFFER" : 300,
   "LANGUAGE" : "eng",
   "RESET_TIPCOUNT" : "False",
-  "PROTOCOL_ID" : "0000-test"
+  "PROTOCOL_ID" : "0000-test",
+  "URL" : "localhost"
 }

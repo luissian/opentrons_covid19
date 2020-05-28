@@ -8,5 +8,6 @@
   "LANGUAGE" : "esp",
   "RESET_TIPCOUNT" : "False",
   "REUSE_TIPS" : "False",
-  "PROTOCOL_ID" : "0000-AA"
+  "PROTOCOL_ID" : "0000-AA",
+  "URL" : "localhost"
 }

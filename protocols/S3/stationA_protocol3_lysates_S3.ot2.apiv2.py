@@ -115,8 +115,10 @@ def write_to_error_log (info, reason):
         except:
             return
     try:
+        # Create a new file for dumping json data
         with open (folder_file_name , 'w') as fh:
             json.dump(info, fh, indent=4)
+        # Append status reason code to the log
         with open(folder_error_log, 'a') as fh:
             fh.write( time_now +  '  Unable to accept the requests get error : '+ reason + '\n')
     except:

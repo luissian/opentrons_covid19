@@ -1,0 +1,42 @@
+name: Station C prot1 tests
+# This workflow is triggered on pushes and PRs to the repository.
+# It runs the pipeline with several tests to check if everything works
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        parameters: [ "${GITHUB_WORKSPACE}/tests/par_tests/stationC_prot1_comb1_pars.json",
+                      "${GITHUB_WORKSPACE}/tests/par_tests/stationC_prot1_comb2_pars.json",
+                      "${GITHUB_WORKSPACE}/tests/par_tests/stationC_prot1_comb3_pars.json",
+                      "${GITHUB_WORKSPACE}/tests/par_tests/stationC_prot1_comb4_pars.json",
+                      "${GITHUB_WORKSPACE}/tests/par_tests/stationC_prot1_comb5_pars.json",
+                      "${GITHUB_WORKSPACE}/tests/par_tests/stationC_prot1_comb6_pars.json",
+                      "${GITHUB_WORKSPACE}/tests/par_tests/stationC_prot1_comb7_pars.json",
+                      "${GITHUB_WORKSPACE}/tests/par_tests/stationC_prot1_comb8_pars.json",
+                      "${GITHUB_WORKSPACE}/tests/par_tests/stationC_prot1_comb9_pars.json",
+                      "${GITHUB_WORKSPACE}/tests/par_tests/stationC_prot1_comb10_pars.json"
+                    ]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ${GITHUB_WORKSPACE}/requirements.txt
+          mkdir ~/.opentrons
+          cp ${GITHUB_WORKSPACE}/custom_defaults/* ~/.opentrons
+      - name: Create test script
+        run: |
+          echo "testing"
+          python ${GITHUB_WORKSPACE}/tests/run_tests.py \
+            -j ${{ matrix.parameters }} \
+            -t ${GITHUB_WORKSPACE}/protocols/S3/stationC_protocol1_pcr_S3.ot2.apiv2.py \
+            -o /tmp/tmp_test.py
+      - name: Simulate script
+        run: |
+          #opentrons_simulate -L ${GITHUB_WORKSPACE}/labware /tmp/tmp_test.py

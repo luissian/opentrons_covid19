@@ -1,0 +1,38 @@
+name: Station B prot1 tests
+# This workflow is triggered on pushes and PRs to the repository.
+# It runs the pipeline with several tests to check if everything works
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Removed comb1,3 and 5 due to a bug in the api, tall deep wells fail on simulation
+        parameters: [ "${GITHUB_WORKSPACE}/tests/par_tests/stationB_prot1_comb2_pars.json",
+                      "${GITHUB_WORKSPACE}/tests/par_tests/stationB_prot1_comb4_pars.json",
+                      "${GITHUB_WORKSPACE}/tests/par_tests/stationB_prot1_comb6_pars.json",
+                      "${GITHUB_WORKSPACE}/tests/par_tests/stationB_prot1_comb7_pars.json",
+                      "${GITHUB_WORKSPACE}/tests/par_tests/stationB_prot1_comb8_pars.json"
+                    ]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ${GITHUB_WORKSPACE}/requirements.txt
+          mkdir ~/.opentrons
+          cp ${GITHUB_WORKSPACE}/custom_defaults/* ~/.opentrons
+      - name: Create test script
+        run: |
+          echo "testing"
+          python ${GITHUB_WORKSPACE}/tests/run_tests.py \
+            -j ${{ matrix.parameters }} \
+            -t ${GITHUB_WORKSPACE}/protocols/S3/stationB_protocol1_extraction_S3.ot2.apiv2.py \
+            -o /tmp/tmp_test.py
+      - name: Simulate script
+        run: |
+          opentrons_simulate -L ${GITHUB_WORKSPACE}/labware /tmp/tmp_test.py

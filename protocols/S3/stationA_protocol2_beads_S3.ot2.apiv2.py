@@ -48,7 +48,7 @@ tip_log['max'] = {}
 NUM_SAMPLES is the number of samples, must be an integer number
 
 BEADS_LABWARE must be one of the following:
-    opentrons plastic 50 ml tubes
+    opentrons plastic 50ml tubes
     opentrons plastic 30ml tubes
 
 PLATE_LABWARE must be one of the following:
@@ -59,7 +59,7 @@ PLATE_LABWARE must be one of the following:
 """
 
 BD_LW_DICT = {
-    'opentrons plastic 50 ml tubes': 'opentrons_6_tuberack_falcon_50ml_conical',
+    'opentrons plastic 50ml tubes': 'opentrons_6_tuberack_falcon_50ml_conical',
     'opentrons plastic 30ml tubes': 'opentrons_6_tuberack_generic_30ml_conical'
 }
 
@@ -282,10 +282,10 @@ def transfer_beads(beads_tube, dests, pip,tiprack):
              for i in range(len(split_ind)-1)] + [dests[split_ind[-1]:]]
     # pick_up(pip,tiprack)
     # Mix bead tubes prior to dispensing
-    pip.flow_rate.aspirate = 800
-    pip.flow_rate.dispense = 8000
+    pip.flow_rate.aspirate = 1000
+    pip.flow_rate.dispense = 10000
     # pip.mix(12,800,beads_tube.bottom(15))
-    for i in range(12):
+    for i in range(15):
         pip.aspirate(800, beads_tube.bottom(30))
         pip.dispense(800, beads_tube.bottom(2))
     pip.flow_rate.aspirate = 100
@@ -325,8 +325,8 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # check source (elution) labware type
     if BEADS_LABWARE not in BD_LW_DICT:
-        raise Exception('Invalid BF_LABWARE. Must be one of the \
-following:\nopentrons plastic 50ml tubes')
+        raise Exception('Invalid BD_LABWARE. Must be one of the \
+following:\nopentrons plastic 50ml tubes\nopentrons plastic 30ml tubes')
 
     # load mastermix labware
     beads_rack = robot.load_labware(

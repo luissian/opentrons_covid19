@@ -348,7 +348,6 @@ def transfer_samples(sources, dests, pip,tiprack):
 # RUN PROTOCOL
 def run(ctx: protocol_api.ProtocolContext):
     global robot
-    global tip_log
 
     # Set robot as global var
     robot = ctx
@@ -384,7 +383,7 @@ def run(ctx: protocol_api.ProtocolContext):
 
     # define pipettes
     p20 = robot.load_instrument('p20_single_gen2', 'right', tip_racks=tips20)
-    m20 = robot.load_instrument('p20_multi_gen2', 'left', tip_racks=tips20)
+    m20 = robot.load_instrument('p20_multi_gen2', 'left', tip_racks=tipsm20)
 
     ## retrieve tip_log
     retrieve_tip_info(p20,tips20)
